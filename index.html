@@ -1,220 +1,1379 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>寫作</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>臺中驛・時の回廊</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;600&display=swap');
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#000000"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-  <meta name="apple-mobile-web-app-title" content="寫作"/>
-  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+:root {
+  --gold:#d4a830; --gold-dim:#7a5520;
+  --dialog-bg:rgba(5,3,1,0.97);
+  --dialog-border:#6a4418;
+  /* 可調整變數 */
+  --dialog-font-size:19px;
+  --speaker-font-size:18px;
+  --dialog-min-height:140px;
+  --dialog-padding:18px 22px 22px;
+  --dialog-bottom:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC',serif;background:#000;touch-action:manipulation;}
+#game{position:relative;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;}
+#bg{position:absolute;inset:0;background:#060402;overflow:hidden;}
 
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet"/>
+/* 電話亭 */
+#phonebooth-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.street-bg{position:absolute;inset:0;background:linear-gradient(180deg,#04030a 0%,#0a0818 35%,#12100a 70%,#1a1208 100%);}
+.city-silhouette{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(180deg,transparent 0%,#0d0c18 20%,#0d0c18 100%);}
+.city-silhouette::before{content:'';position:absolute;bottom:0;left:0;right:0;height:100%;background:
+  linear-gradient(#08071a,#08071a) 5% 60%/6% 40% no-repeat,linear-gradient(#08071a,#08071a) 14% 50%/4% 50% no-repeat,
+  linear-gradient(#08071a,#08071a) 20% 55%/8% 45% no-repeat,linear-gradient(#08071a,#08071a) 30% 45%/5% 55% no-repeat,
+  linear-gradient(#08071a,#08071a) 50% 48%/10% 52% no-repeat,linear-gradient(#08071a,#08071a) 70% 43%/8% 57% no-repeat,
+  linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
+.streetlight{position:absolute;bottom:30%;width:3px;height:35%;background:linear-gradient(to top,#3a3020,#2a2018);}
+.streetlight::before{content:'';position:absolute;top:-2px;left:-18px;width:40px;height:8px;background:#2a2010;border-radius:2px 2px 0 0;}
+.streetlight::after{content:'';position:absolute;top:-30px;left:-40px;width:80px;height:60px;background:radial-gradient(ellipse at 50% 10%,rgba(180,150,60,0.12) 0%,transparent 70%);border-radius:50%;}
+.streetlight.left{left:12%;}.streetlight.right{right:15%;}
+#phone-booth{position:relative;width:min(180px,38vw);height:min(340px,70vh);margin-bottom:10%;z-index:3;}
+.booth-roof{position:absolute;top:-14px;left:-8px;right:-8px;height:20px;background:linear-gradient(180deg,#2a1e0c,#1a1208);border:1px solid #3a2a10;border-radius:3px 3px 0 0;}
+.booth-roof::after{content:'電話';position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;color:#6a5020;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;}
+.booth-body{position:absolute;inset:0;background:linear-gradient(135deg,#1a1208 0%,#0e0c08 50%,#1a1208 100%);border:2px solid #3a2a10;border-radius:4px 4px 0 0;}
+.booth-glass{position:absolute;top:15%;left:10%;right:10%;bottom:5%;background:linear-gradient(135deg,rgba(100,120,160,0.08),rgba(80,100,140,0.04),rgba(100,120,160,0.08));border:1px solid rgba(100,120,160,0.15);}
+.booth-phone{position:absolute;top:25%;left:50%;transform:translateX(-50%);width:55%;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.phone-body{width:100%;height:0;padding-bottom:70%;background:linear-gradient(180deg,#2a2010,#1a1208);border:1px solid #4a3010;border-radius:3px;position:relative;}
+.phone-screen{position:absolute;top:15%;left:20%;right:20%;height:25%;background:rgba(0,180,80,0);border:1px solid rgba(0,180,80,0);transition:background 1.5s,border-color 1.5s;border-radius:2px;display:flex;align-items:center;justify-content:center;}
+.phone-screen.on{background:rgba(0,180,80,0.15);border-color:rgba(0,180,80,0.3);box-shadow:0 0 8px rgba(0,180,80,0.2);}
+.phone-screen-text{font-size:6px;color:rgba(60,220,120,0);transition:color 1.5s;}
+.phone-screen.on .phone-screen-text{color:rgba(60,220,120,0.8);}
+.phone-receiver{width:70%;height:6px;background:linear-gradient(90deg,#1a1008,#3a2810,#1a1008);border-radius:3px;position:relative;}
+.phone-receiver::before,.phone-receiver::after{content:'';position:absolute;top:-3px;width:12px;height:12px;background:#0e0c08;border:1px solid #3a2810;border-radius:50%;}
+.phone-receiver::before{left:0;}.phone-receiver::after{right:0;}
+.booth-sign{position:absolute;top:8%;left:50%;transform:translateX(-50%) rotate(-3deg);background:#f0e4c4;padding:2px 6px;font-size:8px;color:#3a1a08;border:1px solid #8a6030;white-space:nowrap;z-index:6;}
+#phone-glow-overlay{position:absolute;inset:-20px;background:radial-gradient(ellipse at 50% 50%,rgba(60,220,120,0),transparent 70%);pointer-events:none;transition:background 2s;z-index:5;}
+#phone-glow-overlay.glowing{background:radial-gradient(ellipse at 50% 50%,rgba(60,220,120,0.25),rgba(60,220,120,0.05) 50%,transparent 70%);animation:glow-pulse 2.5s ease-in-out infinite;}
+@keyframes glow-pulse{0%,100%{opacity:0.7}50%{opacity:1}}
 
-  <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+/* 郵便局 */
+#exchange-scene{position:absolute;inset:0;display:none;background:linear-gradient(180deg,#0a0806,#120e08);}
+.exchange-wall{position:absolute;inset:0;background:linear-gradient(180deg,#1e1a10 0%,#14100a 60%,transparent 100%);}
+.wall-clock{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:44px;height:44px;}
+.clock-face{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,#f0e0c0,#d4c090);border:2px solid #3a2810;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.6);position:relative;}
+.clock-face::after{content:'臺中郵便局';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:7px;color:#5a4020;letter-spacing:0.15em;white-space:nowrap;font-family:'Shippori Mincho',serif;}
+.clock-hour,.clock-min{position:absolute;bottom:50%;left:50%;transform-origin:bottom center;background:#1a0a05;border-radius:2px;}
+.clock-hour{width:2px;height:11px;margin-left:-1px;transform:rotate(90deg);}
+.clock-min{width:1px;height:15px;margin-left:0;transform:rotate(30deg);}
+.exchange-floor{position:absolute;bottom:0;left:0;right:0;height:25%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;}
+.exchange-floor::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 40px,rgba(60,40,10,0.3) 40px,rgba(60,40,10,0.3) 41px),repeating-linear-gradient(0deg,transparent 0px,transparent 20px,rgba(60,40,10,0.2) 20px,rgba(60,40,10,0.2) 21px);}
+.ex-window{position:absolute;top:12%;width:min(70px,15vw);height:min(90px,18vh);background:linear-gradient(135deg,rgba(120,140,180,0.06),rgba(80,100,150,0.03));border:1px solid rgba(120,140,180,0.15);}
+.ex-window.left{left:8%;}.ex-window.right{right:8%;}
+.wood-panel{position:absolute;bottom:22%;left:0;right:0;height:28%;background:linear-gradient(180deg,#1a1408,#0e0c08);}
+.wood-panel::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0px,transparent 18px,rgba(40,28,10,0.4) 18px,rgba(40,28,10,0.4) 19px);}
+#switchboard-deco{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:min(360px,92vw);background:linear-gradient(180deg,#2a1e0a,#1a1206);border:2px solid #4a3010;border-radius:4px 4px 0 0;padding:10px 12px;box-shadow:0 -4px 24px rgba(0,0,0,0.7);}
+.sb-deco-label{text-align:center;font-family:'Shippori Mincho',serif;font-size:10px;color:#7a6030;letter-spacing:0.4em;margin-bottom:8px;}
+.sb-deco-jacks{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:8px;}
+.sb-deco-jack{aspect-ratio:1;background:radial-gradient(circle,#0a0806 40%,#1a1208 100%);border:1px solid #3a2810;border-radius:50%;}
+.sb-deco-cords{display:flex;gap:8px;justify-content:center;}
+.sb-deco-cord{width:8px;height:20px;background:linear-gradient(180deg,#c8b060,#6a5020);border-radius:2px 2px 4px 4px;border:1px solid #3a2810;}
 
-    :root {
-      --white: #f0ece4;
-      --dim: rgba(240,236,228,0.18);
-    }
+/* 雨 */
+#rain-layer{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden;}
+.raindrop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(160,180,220,0.22));animation:fall linear infinite;}
+@keyframes fall{from{transform:translateY(-120px)}to{transform:translateY(110vh)}}
+#lightning{position:absolute;inset:0;background:rgba(200,220,255,0.15);pointer-events:none;z-index:4;opacity:0;}
+#lightning.flash{animation:lflash 0.4s ease;}
+@keyframes lflash{0%{opacity:0}15%{opacity:1}35%{opacity:0}55%{opacity:0.6}100%{opacity:0}}
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #000;
-      overflow: hidden;
-      /* Safe area for notch phones */
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    }
+/* 立繪 */
+#sprites{position:absolute;inset:0;display:flex;align-items:flex-end;pointer-events:none;z-index:5;}
+.sprite{position:absolute;bottom:0;width:52vw;max-width:300px;transition:opacity 0.6s ease;filter:drop-shadow(0 0 24px rgba(0,0,0,0.95));}
+.sprite.left{left:-1vw;}.sprite.hidden{opacity:0;}
 
-    body { cursor: none; }
+/* 對話框 */
+#dialog-area{
+  position:relative;z-index:10;
+  padding:0 8px var(--dialog-bottom);
+  display:flex;flex-direction:column;gap:0;
+}
+#speaker-box{display:inline-flex;align-items:center;background:var(--dialog-bg);border:1px solid var(--dialog-border);border-bottom:none;padding:7px 20px;width:fit-content;}
+#speaker-name{font-size:var(--speaker-font-size);color:#f5c830;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;font-weight:600;}
+#dialog-box{background:var(--dialog-bg);border:1px solid var(--dialog-border);padding:var(--dialog-padding);min-height:var(--dialog-min-height);position:relative;}
+#dialog-box::before{content:'◆';position:absolute;top:7px;left:9px;color:var(--gold);font-size:8px;opacity:0.55;}
+#dialog-box::after{content:'◆';position:absolute;bottom:7px;right:9px;color:var(--gold);font-size:8px;opacity:0.55;}
+#dialog-text{color:#f8eed5;font-size:var(--dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;}
+#next-hint{position:absolute;bottom:9px;right:15px;color:var(--gold);font-size:15px;animation:blink 1.3s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 
-    #cursor {
-      position: fixed;
-      width: 6px; height: 6px;
-      background: var(--white);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%,-50%);
-      transition: opacity 0.4s ease;
-      mix-blend-mode: difference;
-    }
-    #cursor.hidden { opacity: 0; }
+/* 行動按鈕（在對話框內） */
+#action-btns{
+  display:none;flex-direction:column;gap:8px;
+  padding:10px 0 4px;
+}
+.action-btn{
+  background:linear-gradient(90deg,rgba(10,8,4,0.9),rgba(20,14,6,0.9));
+  border:1px solid var(--gold-dim);
+  color:#e8c860;font-size:15px;letter-spacing:0.15em;
+  padding:12px 16px;cursor:pointer;
+  font-family:'Noto Serif TC',serif;
+  transition:all 0.2s ease;text-align:left;
+  border-radius:2px;
+}
+.action-btn:hover,.action-btn:active{background:rgba(212,168,48,0.1);border-color:var(--gold);}
+.action-btn::before{content:'▶ ';font-size:10px;opacity:0.7;}
 
-    #stage {
-      position: fixed; inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6vh 8vw;
-    }
+/* 道具欄 */
+#inventory{position:fixed;bottom:0;left:0;right:0;z-index:20;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);transform:translateY(calc(100% - 42px));}
+#inventory.open{transform:translateY(0);}
+#inv-handle{background:linear-gradient(90deg,#080604,#160e06,#080604);border:1px solid var(--gold-dim);border-bottom:none;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.inv-handle-text{font-size:13px;color:var(--gold);letter-spacing:0.3em;font-family:'Shippori Mincho',serif;}
+.inv-arrow{font-size:11px;color:var(--gold-dim);transition:transform 0.3s;}
+#inventory.open .inv-arrow{transform:rotate(180deg);}
+#inv-count{background:#8b2020;color:#f5e0c0;font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;}
+#inv-content{background:linear-gradient(180deg,#0e0a06,#080604);border:1px solid var(--gold-dim);border-top:none;padding:12px;min-height:90px;display:flex;gap:10px;flex-wrap:wrap;}
+.inv-item{width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
+.inv-item-icon{width:56px;height:72px;background:linear-gradient(135deg,#f0e4c4,#d4c898);border:1px solid #8a6030;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:2px 2px 8px rgba(0,0,0,0.5);}
+.inv-item-name{font-size:10px;color:#a08050;letter-spacing:0.1em;text-align:center;}
 
-    #editor {
-      width: 100%; max-width: 680px;
-      min-height: 2em;
-      background: transparent;
-      border: none; outline: none;
-      resize: none; overflow: hidden;
-      font-family: 'Noto Serif TC', 'IM Fell English', serif;
-      font-weight: 300;
-      font-size: clamp(1.1rem, 2.2vw, 1.45rem);
-      line-height: 2;
-      letter-spacing: 0.04em;
-      color: var(--white);
-      caret-color: var(--white);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-      opacity: 0;
-      animation: fadeIn 1.8s ease forwards 0.3s;
-    }
+/* 章節標題 */
+#chapter-title{position:absolute;inset:0;z-index:25;background:#000;opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.9s ease;}
+#chapter-title.show{opacity:1;pointer-events:all;}
+.ch-jp{font-family:'Shippori Mincho',serif;font-size:12px;color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;}
+.ch-main{font-size:22px;color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;}
+.ch-line{width:50px;height:1px;background:var(--gold);margin:18px auto;opacity:0.5;}
+.ch-sub{font-size:12px;color:#6a5a3a;letter-spacing:0.3em;}
 
-    #editor::placeholder {
-      color: var(--dim);
-      font-style: italic;
-      font-family: 'IM Fell English', serif;
-    }
+/* 紙條 */
+.note-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadein 0.4s ease;}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.note-paper{background:linear-gradient(135deg,#f5ecd4,#ecdfc0 50%,#f0e8cc);border:1px solid #8a6030;padding:24px 20px;max-width:320px;width:100%;box-shadow:0 0 50px rgba(0,0,0,0.7),3px 3px 0 #8a6030;position:relative;font-family:'Noto Serif TC',serif;}
+.note-paper::before{content:'';position:absolute;inset:8px;border:1px solid rgba(139,96,48,0.2);pointer-events:none;}
+.note-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(139,96,48,0.3);}
+.note-body{font-size:15px;line-height:2.2;color:#1e1008;white-space:pre-wrap;letter-spacing:0.05em;}
+.note-btn{display:block;margin:16px auto 0;background:none;border:1px solid #8a6030;color:#5a3a10;padding:9px 28px;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.3em;cursor:pointer;}
 
-    #wordcount {
-      position: fixed;
-      bottom: calc(2.4vh + env(safe-area-inset-bottom));
-      right: calc(3vw + env(safe-area-inset-right));
-      font-family: 'Noto Serif TC', serif;
-      font-size: 0.7rem;
-      font-weight: 300;
-      letter-spacing: 0.12em;
-      color: rgba(240,236,228,0.12);
-      transition: color 0.6s ease;
-      pointer-events: none;
-      opacity: 0;
-      animation: fadeIn 2.4s ease forwards 1.2s;
-    }
-    #wordcount.visible { color: rgba(240,236,228,0.22); }
+/* 關卡一：接線生 */
+#stage-switchboard{position:fixed;inset:0;z-index:40;background:#070503;display:none;flex-direction:column;align-items:stretch;overflow:hidden;}
+.sb-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho',serif;font-size:13px;color:var(--gold);letter-spacing:0.4em;}
+.call-banner{margin:10px 12px 0;background:linear-gradient(90deg,#160e04,#221608,#160e04);border:2px solid #c87020;border-radius:3px;padding:12px 16px;animation:ring-pulse 0.9s ease-in-out infinite;}
+.call-banner.connected{border-color:#30b080;animation:none;}
+.call-banner.done{border-color:#3a6040;animation:none;opacity:0.7;}
+@keyframes ring-pulse{0%,100%{border-color:#c87020}50%{border-color:#f0b040;box-shadow:0 0 10px rgba(240,176,64,0.25)}}
+.cb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.cb-from,.cb-to{display:flex;flex-direction:column;gap:3px;flex:1;}
+.cb-to{text-align:right;}
+.cb-label{font-size:11px;color:#8a6030;letter-spacing:0.15em;}
+.cb-number{font-size:22px;color:#ffd050;letter-spacing:0.15em;font-family:'Shippori Mincho',serif;font-weight:600;line-height:1.2;}
+.cb-arrow{font-size:26px;color:#6a4818;flex-shrink:0;}
+.call-banner.connected .cb-arrow{color:#30b080;}
+.sb-panel-wrap{margin:8px 12px 0;background:linear-gradient(180deg,#1e1608,#140e06);border:1px solid #3a2810;border-radius:3px;padding:8px 10px;}
+.sb-panel-label{font-size:10px;color:#6a5020;letter-spacing:0.4em;text-align:center;margin-bottom:6px;font-family:'Shippori Mincho',serif;}
+.sb-jacks{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
+.sb-jack{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 2px;border:1px solid transparent;border-radius:3px;transition:all 0.2s ease;user-select:none;}
+.sb-jack:active{transform:scale(0.94);}
+.sb-jack.ringing{border-color:#c87020;background:rgba(200,112,32,0.1);}
+.sb-jack.selected{border-color:var(--gold);background:rgba(212,168,48,0.12);}
+.sb-jack.plugged{border-color:#208060;background:rgba(32,128,96,0.08);}
+.sb-jack.correct{border-color:#30c090;background:rgba(48,192,144,0.1);}
+.sb-jack.wrong-flash{border-color:#c03030!important;background:rgba(192,48,48,0.12)!important;}
+.sb-jack-hole{width:24px;height:24px;background:radial-gradient(circle,#050402 40%,#1a1208 100%);border:1.5px solid #3a2810;border-radius:50%;transition:all 0.3s ease;}
+.sb-jack.ringing .sb-jack-hole{border-color:#c87020;box-shadow:0 0 7px rgba(200,112,32,0.6);animation:jack-blink 0.8s ease-in-out infinite;}
+.sb-jack.selected .sb-jack-hole{border-color:var(--gold);box-shadow:0 0 6px rgba(212,168,48,0.5);}
+.sb-jack.plugged .sb-jack-hole{background:radial-gradient(circle,#8a6020,#2a1808 100%);border-color:#c8a030;}
+.sb-jack.correct .sb-jack-hole{background:radial-gradient(circle,#104030 40%,#0a1a14 100%);border-color:#30c090;box-shadow:0 0 5px rgba(48,192,144,0.4);}
+@keyframes jack-blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.sb-jack-name{font-size:10px;color:#7a6040;text-align:center;line-height:1.3;}
+.sb-jack.ringing .sb-jack-name{color:#e0b050;}
+.sb-jack.correct .sb-jack-name{color:#50c090;}
+.sb-cords{display:flex;gap:10px;justify-content:center;padding:6px 0;border-top:1px solid #1e1406;border-bottom:1px solid #1e1406;margin-bottom:6px;}
+.sb-cord{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 14px;border:1px solid #3a2810;border-radius:3px;transition:all 0.2s ease;user-select:none;}
+.sb-cord.selected{border-color:var(--gold);background:rgba(212,168,48,0.1);}
+.sb-cord.used{opacity:0.45;cursor:default;border-color:#2a1a08;}
+.sb-cord-plug{width:11px;height:17px;background:linear-gradient(180deg,#d4c060,#8a7030);border-radius:2px 2px 4px 4px;border:1px solid #4a3010;}
+.sb-cord-wire{width:2px;height:18px;background:repeating-linear-gradient(180deg,#4a3010 0px,#4a3010 3px,#6a5020 3px,#6a5020 6px);}
+.sb-cord-name{font-size:10px;color:#7a6030;}
+.sb-cord.selected .sb-cord-name{color:var(--gold);}
+.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#9a8050;font-size:12px;letter-spacing:0.3em;font-family:'Shippori Mincho',serif;cursor:pointer;transition:all 0.2s ease;}
+.sb-talk-btn.active{background:linear-gradient(180deg,#4a3010,#2a1e0a);color:var(--gold);border-color:var(--gold-dim);}
+.sb-talk-btn:disabled{opacity:0.4;cursor:default;}
+.sb-bottom{flex:1;display:flex;flex-direction:column;padding:6px 12px 8px;overflow:hidden;min-height:0;}
+.sb-dialog-box{flex:1;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #1e1808;border-radius:2px;padding:8px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;}
+.sb-msg-who{font-size:11px;color:#8a7040;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;}
+.sb-msg-text{font-size:15px;color:#e8d8b0;line-height:1.85;letter-spacing:0.04em;}
+.sb-finish-btn{margin-top:8px;padding:11px 20px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;display:none;align-self:center;transition:all 0.2s ease;}
+.sb-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(--gold);}
 
-    /* 儲存提示 */
-    #saved {
-      position: fixed;
-      top: calc(2vh + env(safe-area-inset-top));
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'Noto Serif TC', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      color: rgba(240,236,228,0.3);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
-    }
-    #saved.show { opacity: 1; }
+/* 關卡二：找地圖 */
+#stage-map{position:fixed;inset:0;z-index:40;background:#070503;display:none;flex-direction:column;align-items:stretch;overflow:hidden;}
+.map-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;text-align:center;font-family:'Shippori Mincho',serif;font-size:13px;color:var(--gold);letter-spacing:0.4em;}
+.map-scene{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0a0806,#120e08);overflow:hidden;}
+/* 地圖桌 */
+.map-table{position:relative;width:min(320px,88vw);height:min(260px,55vw);background:linear-gradient(135deg,#2a1e0c,#1a1408);border:2px solid #5a3c10;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;}
+/* 散落物品 */
+.table-item{position:absolute;cursor:pointer;transition:all 0.2s ease;user-select:none;}
+.table-item:hover{filter:brightness(1.3);}
+.table-item:active{transform:scale(0.95);}
+/* 地圖捲軸 */
+.map-scroll{width:80px;height:60px;background:linear-gradient(135deg,#d4c090,#b8a060);border:1px solid #8a6030;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#5a3a10;letter-spacing:0.1em;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
+.map-scroll::before{content:'地\A圖';white-space:pre;text-align:center;font-size:12px;font-family:'Shippori Mincho',serif;color:#3a2010;}
+/* 電話帖 */
+.phone-book{width:50px;height:65px;background:linear-gradient(180deg,#8a2020,#6a1818);border:1px solid #4a1010;border-radius:2px;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
+.phone-book::before{content:'電\A話\A帖';white-space:pre;text-align:center;font-size:9px;color:#f0d0b0;letter-spacing:0.1em;font-family:'Shippori Mincho',serif;}
+/* 筆記本 */
+.notebook{width:55px;height:70px;background:linear-gradient(180deg,#2a3a5a,#1a2840);border:1px solid #3a4a6a;border-radius:2px;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
+.notebook::before{content:'筆\A記';white-space:pre;text-align:center;font-size:10px;color:#a0b8d8;letter-spacing:0.1em;font-family:'Shippori Mincho',serif;}
+/* 已找到光暈 */
+.table-item.found{filter:brightness(0.5);cursor:default;pointer-events:none;}
 
-    #vignette {
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
-      pointer-events: none; z-index: 1;
-    }
+.map-hint{padding:8px 14px;background:#0a0806;border-top:1px solid #1e1408;font-size:13px;color:#9a8050;letter-spacing:0.1em;text-align:center;min-height:36px;}
+.map-finish-btn{margin:8px auto;padding:11px 24px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;display:none;transition:all 0.2s ease;}
+.map-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(--gold);}
 
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(6px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
+/* 開始畫面 */
+#start-screen{position:absolute;inset:0;z-index:30;background:radial-gradient(ellipse at 50% 40%,#0e0a06,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.s-deco{font-family:'Shippori Mincho',serif;font-size:10px;color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
+.s-title-jp{font-family:'Shippori Mincho',serif;font-size:26px;color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
+.s-title-zh{font-size:12px;color:#5a4020;letter-spacing:0.5em;margin-bottom:36px;}
+.s-rule{width:1px;height:50px;background:linear-gradient(to bottom,transparent,#5a3c10,transparent);margin-bottom:36px;}
+#start-btn{background:none;border:1px solid #3a2a12;color:#c8b882;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.4em;padding:11px 32px;cursor:pointer;transition:all 0.3s ease;}
+#start-btn:hover{border-color:var(--gold);color:var(--gold);}
+#admin-btn{position:absolute;top:14px;left:14px;background:rgba(10,8,4,0.7);border:1px solid #3a2a10;color:#5a4020;font-size:10px;letter-spacing:0.25em;padding:5px 10px;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.3s;z-index:31;border-radius:2px;}
+#admin-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
 
-    ::selection { background: rgba(240,236,228,0.15); color: var(--white); }
-    #editor::-webkit-scrollbar { display: none; }
-    #editor { scrollbar-width: none; }
-  </style>
+/* ══ 後台 ══ */
+#admin-panel{position:fixed;inset:0;z-index:100;background:#0a0806;display:none;flex-direction:column;font-family:'Noto Serif TC',serif;color:#d4c090;}
+#admin-panel.open{display:flex;}
+.adm-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #3a2810;background:#0e0c08;flex-shrink:0;}
+.adm-title{font-size:14px;color:var(--gold);letter-spacing:0.3em;font-family:'Shippori Mincho',serif;}
+.adm-topbar-btns{display:flex;gap:8px;}
+.adm-tabs{display:flex;border-bottom:1px solid #2a1808;flex-shrink:0;overflow-x:auto;}
+.adm-tab{padding:10px 14px;font-size:12px;letter-spacing:0.15em;color:#6a5030;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s ease;flex-shrink:0;}
+.adm-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.adm-body{flex:1;overflow-y:auto;padding:14px 14px 20px;}
+.adm-section{margin-bottom:18px;}
+.adm-section-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #2a1808;}
+.adm-field{margin-bottom:10px;}
+.adm-label{font-size:11px;color:#7a6040;letter-spacing:0.15em;display:block;margin-bottom:4px;}
+.adm-input{width:100%;background:#0e0c08;border:1px solid #3a2810;color:#d4c090;font-size:14px;padding:8px 10px;font-family:'Noto Serif TC',serif;letter-spacing:0.05em;border-radius:2px;resize:vertical;}
+.adm-input:focus{outline:none;border-color:var(--gold-dim);}
+.adm-textarea{min-height:80px;}
+
+/* 腳本行卡 */
+.script-line-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:8px;position:relative;}
+.sc-type-badge{display:inline-block;font-size:9px;letter-spacing:0.2em;padding:2px 7px;border-radius:10px;margin-bottom:6px;}
+.sc-type-narr{background:#1a1408;color:#8a7040;}
+.sc-type-line{background:#0e1a10;color:#50a060;}
+.sc-type-chapter{background:#1a0e18;color:#a060c0;}
+.sc-type-note{background:#1a1008;color:#c08040;}
+.sc-type-action{background:#0e1a1a;color:#40a0a0;}
+.sc-del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:#4a2a20;font-size:16px;cursor:pointer;padding:2px 6px;}
+.sc-del-btn:hover{color:#c04030;}
+.sc-up-btn,.sc-dn-btn{position:absolute;background:none;border:none;color:#4a3a20;font-size:13px;cursor:pointer;padding:2px 5px;}
+.sc-up-btn{top:8px;right:42px;}.sc-dn-btn{top:8px;right:66px;}
+.sc-up-btn:hover,.sc-dn-btn:hover{color:var(--gold);}
+.sc-add-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.sc-add-btn{background:none;border:1px solid #2a1808;color:#6a5030;font-size:10px;letter-spacing:0.2em;padding:5px 10px;cursor:pointer;border-radius:2px;transition:all 0.2s;font-family:'Noto Serif TC',serif;}
+.sc-add-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+/* 通話卡 */
+.call-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:10px;}
+.call-card-title{font-size:12px;color:var(--gold);letter-spacing:0.2em;margin-bottom:8px;}
+.call-del-btn{float:right;background:none;border:none;color:#4a2a20;font-size:15px;cursor:pointer;}
+.call-del-btn:hover{color:#c04030;}
+.call-dlg-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;}
+.call-dlg-row input{flex:0 0 80px;font-size:12px;}
+.call-dlg-row textarea{flex:1;min-height:50px;font-size:12px;}
+.call-dlg-del{background:none;border:none;color:#4a2a20;font-size:16px;cursor:pointer;padding:4px;align-self:center;}
+
+/* 外觀設定 */
+.appearance-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.range-row{display:flex;align-items:center;gap:8px;}
+.range-row input[type=range]{flex:1;accent-color:var(--gold);}
+.range-val{font-size:12px;color:var(--gold);min-width:40px;}
+
+/* 通用按鈕 */
+.adm-btn{background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;letter-spacing:0.3em;padding:8px 16px;cursor:pointer;font-family:'Noto Serif TC',serif;border-radius:2px;transition:all 0.2s ease;}
+.adm-btn:hover{background:rgba(212,168,48,0.08);}
+.adm-btn.danger{border-color:#6a2020;color:#c06050;}
+.adm-btn.danger:hover{background:rgba(192,48,48,0.08);}
+.adm-btn.primary{border-color:#208060;color:#50c090;}
+.adm-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+/* 章節管理 */
+.chapter-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:8px;}
+.chapter-card-title{font-size:12px;color:var(--gold);letter-spacing:0.2em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+
+/* ══════════════════════════════════
+   關卡二：前往臺中車站
+══════════════════════════════════ */
+#stage-map{
+  position:fixed;inset:0;z-index:40;
+  background:linear-gradient(180deg,#08060a 0%,#100e08 100%);
+  display:none;flex-direction:column;
+  align-items:center;
+  overflow-y:auto;
+  padding:0 0 20px;
+}
+
+/* 標題列 */
+.s2-header{
+  width:100%;padding:12px 16px 10px;
+  border-bottom:1px solid #2a1808;
+  text-align:center;
+  font-family:'Shippori Mincho',serif;
+  font-size:13px;color:var(--gold);letter-spacing:0.4em;
+  flex-shrink:0;
+}
+
+/* 指示卡 */
+.s2-card{
+  width:calc(100% - 24px);max-width:400px;
+  margin:14px auto 0;
+  background:linear-gradient(135deg,#0e0c08,#080604);
+  border:1px solid #3a2810;border-radius:4px;
+  padding:16px 16px;
+}
+.s2-card-title{
+  font-size:11px;color:#8a6030;letter-spacing:0.4em;
+  margin-bottom:10px;padding-bottom:7px;
+  border-bottom:1px solid #2a1808;
+  font-family:'Shippori Mincho',serif;
+}
+
+/* 方向圖示區 */
+.s2-direction{
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;padding:12px 0;
+}
+.s2-from,.s2-to{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex:1;
+}
+.s2-place-icon{
+  width:52px;height:52px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  border:1px solid #4a3010;
+}
+.s2-from .s2-place-icon{background:radial-gradient(circle,#1a1408,#0e0c06);}
+.s2-to   .s2-place-icon{background:radial-gradient(circle,#1a1808,#0e0c06);border-color:#208060;}
+.s2-place-name{font-size:12px;color:#c8a050;letter-spacing:0.1em;text-align:center;}
+
+/* 箭頭動畫 */
+.s2-arrow-track{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.s2-arrow-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);opacity:0;
+  animation:dot-travel 1.8s ease-in-out infinite;
+}
+.s2-arrow-dot:nth-child(1){animation-delay:0s;}
+.s2-arrow-dot:nth-child(2){animation-delay:0.3s;}
+.s2-arrow-dot:nth-child(3){animation-delay:0.6s;}
+.s2-arrow-dot:nth-child(4){animation-delay:0.9s;}
+.s2-arrow-dot:nth-child(5){animation-delay:1.2s;}
+@keyframes dot-travel{
+  0%{opacity:0;transform:scale(0.5);}
+  30%{opacity:1;transform:scale(1);}
+  70%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(0.5);}
+}
+
+/* 路線說明 */
+.s2-route-text{
+  font-size:14px;color:#d4c090;line-height:2;
+  letter-spacing:0.05em;margin-top:8px;
+}
+.s2-route-step{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 0;border-bottom:1px solid #1a1408;
+}
+.s2-route-step:last-child{border-bottom:none;}
+.s2-step-num{
+  flex-shrink:0;width:22px;height:22px;
+  border-radius:50%;background:#2a1e0a;
+  border:1px solid #6a4818;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--gold);
+  margin-top:2px;
+}
+.s2-step-text{font-size:14px;color:#d4c090;line-height:1.8;letter-spacing:0.04em;}
+
+/* 羅盤輸入區 */
+.s2-compass-wrap{
+  width:calc(100% - 24px);max-width:400px;
+  margin:12px auto 0;
+  background:linear-gradient(135deg,#0e0c08,#080604);
+  border:1px solid #3a2810;border-radius:4px;
+  padding:16px;
+}
+.s2-compass-title{
+  font-size:11px;color:#8a6030;letter-spacing:0.4em;
+  margin-bottom:6px;font-family:'Shippori Mincho',serif;
+}
+.s2-compass-q{
+  font-size:15px;color:#f0e0b0;line-height:1.8;
+  letter-spacing:0.05em;margin-bottom:12px;
+}
+
+/* 羅盤八方位選擇 */
+.s2-compass-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;margin-bottom:12px;
+}
+.s2-dir-btn{
+  padding:10px 4px;
+  background:linear-gradient(135deg,#1a1408,#0e0c06);
+  border:1px solid #3a2810;border-radius:3px;
+  color:#8a7040;font-size:14px;letter-spacing:0.1em;
+  cursor:pointer;text-align:center;
+  transition:all 0.2s ease;
+  font-family:'Noto Serif TC',serif;
+  user-select:none;
+}
+.s2-dir-btn:hover,.s2-dir-btn:active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.08);}
+.s2-dir-btn.selected{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.12);}
+.s2-dir-btn.wrong{border-color:#c03030!important;color:#c05040!important;background:rgba(192,48,48,0.1)!important;animation:shake 0.4s ease;}
+.s2-dir-btn.correct{border-color:#30c090!important;color:#50d0a0!important;background:rgba(48,192,144,0.12)!important;}
+.s2-dir-btn.empty{visibility:hidden;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+.s2-compass-feedback{
+  min-height:2em;
+  font-size:13px;color:#8a7040;
+  text-align:center;letter-spacing:0.1em;
+  margin-bottom:8px;
+}
+.s2-compass-feedback.ok{color:#50c090;}
+.s2-compass-feedback.err{color:#c06050;}
+
+.s2-confirm-btn{
+  width:100%;padding:11px;
+  background:none;border:1px solid var(--gold-dim);
+  color:var(--gold);font-size:13px;letter-spacing:0.3em;
+  font-family:'Noto Serif TC',serif;cursor:pointer;
+  transition:all 0.2s ease;border-radius:2px;
+  display:none;
+}
+.s2-confirm-btn:hover{background:rgba(212,168,48,0.08);}
+
+/* 後台：關卡二設定 */
+.s2-admin-field{margin-bottom:12px;}
+.s2-answer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+.s2-answer-radio{
+  padding:10px 4px;
+  background:#0e0c08;border:1px solid #2a1808;border-radius:3px;
+  color:#6a5030;font-size:13px;text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  user-select:none;
+}
+.s2-answer-radio.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.08);}
+</style>
 </head>
 <body>
 
-<div id="vignette"></div>
-<div id="cursor"></div>
-<div id="saved">已儲存</div>
-
-<div id="stage">
-  <textarea
-    id="editor"
-    placeholder="在這裡，只有你和文字。"
-    spellcheck="false"
-    autocomplete="off"
-    autocorrect="off"
-    autocapitalize="off"
-  ></textarea>
+<!-- 開始畫面 -->
+<div id="start-screen">
+  <button id="admin-btn" onclick="openAdmin()">⚙ 後台</button>
+  <div class="s-deco">國定古蹟臺中車站・實境解謎</div>
+  <div class="s-title-jp">時の回廊</div>
+  <div class="s-title-zh">時光的走廊</div>
+  <div class="s-rule"></div>
+  <button id="start-btn" onclick="startGame()">開始遊戲</button>
 </div>
 
-<div id="wordcount">0 字</div>
+<!-- 主遊戲 -->
+<div id="game">
+  <div id="bg">
+    <div id="phonebooth-scene">
+      <div class="street-bg"></div><div class="city-silhouette"></div>
+      <div class="streetlight left"></div><div class="streetlight right"></div>
+      <div id="phone-booth">
+        <div class="booth-roof"></div>
+        <div class="booth-body">
+          <div class="booth-sign">停用中</div>
+          <div class="booth-glass"><div class="booth-phone"><div class="phone-body"><div class="phone-screen" id="phone-screen"><div class="phone-screen-text">投幣</div></div></div><div class="phone-receiver"></div></div></div>
+        </div>
+        <div id="phone-glow-overlay"></div>
+      </div>
+    </div>
+    <div id="exchange-scene">
+      <div class="exchange-wall"></div><div class="ex-window left"></div><div class="ex-window right"></div>
+      <div class="wall-clock"><div class="clock-face"><div class="clock-hour"></div><div class="clock-min"></div></div></div>
+      <div class="wood-panel"></div><div class="exchange-floor"></div>
+      <div id="switchboard-deco"><div class="sb-deco-label">臺中郵便局　電話交換室</div><div class="sb-deco-jacks" id="deco-jacks"></div><div class="sb-deco-cords" id="deco-cords"></div></div>
+    </div>
+  </div>
+  <div id="rain-layer"></div><div id="lightning"></div>
+  <div id="sprites">
+    <div id="sp-yuyan" class="sprite left hidden">
+      <svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="fg1" cx="50%" cy="35%"><stop offset="0%" stop-color="#f2d8b0"/><stop offset="100%" stop-color="#c8a070"/></radialGradient></defs>
+        <path d="M60 165 Q48 185 42 280 Q38 340 40 420 L80 420 L80 290 L100 285 L120 290 L120 420 L160 420 Q162 340 158 280 Q152 185 140 165Z" fill="#2a3a5a"/>
+        <path d="M80 165 Q100 158 120 165 L115 185 Q100 178 85 185Z" fill="#e8e0d0"/>
+        <rect x="91" y="155" width="18" height="18" rx="3" fill="#d4a870"/>
+        <ellipse cx="100" cy="120" rx="34" ry="40" fill="url(#fg1)"/>
+        <path d="M66 112 Q62 68 100 62 Q138 68 134 112 Q128 78 100 74 Q72 78 66 112Z" fill="#160a04"/>
+        <path d="M66 112 Q58 120 56 145 L68 140 Q64 125 70 115Z" fill="#160a04"/>
+        <path d="M134 112 Q142 120 144 145 L132 140 Q136 125 130 115Z" fill="#160a04"/>
+        <ellipse cx="87" cy="118" rx="6" ry="4.5" fill="#160a04"/><ellipse cx="113" cy="118" rx="6" ry="4.5" fill="#160a04"/>
+        <circle cx="89" cy="117" r="1.5" fill="white" opacity="0.9"/><circle cx="115" cy="117" r="1.5" fill="white" opacity="0.9"/>
+        <ellipse cx="100" cy="133" rx="5" ry="3" fill="#8a4a3a" opacity="0.8"/>
+        <line x1="75" y1="88" x2="73" y2="100" stroke="rgba(160,190,220,0.5)" stroke-width="1"/><line x1="118" y1="85" x2="116" y2="97" stroke="rgba(160,190,220,0.5)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div id="sp-yuyan-1908" class="sprite left hidden">
+      <svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="fg2" cx="50%" cy="35%"><stop offset="0%" stop-color="#f2d8b0"/><stop offset="100%" stop-color="#c8a070"/></radialGradient></defs>
+        <path d="M65 162 Q50 185 44 290 Q40 360 42 420 L80 420 L80 290 L100 285 L120 290 L120 420 L158 420 Q160 360 156 290 Q150 185 135 162Z" fill="#3a2a50"/>
+        <path d="M78 162 L100 155 L122 162 L116 182 Q100 172 84 182Z" fill="#e8ddd0"/>
+        <rect x="91" y="152" width="18" height="16" rx="2" fill="#d4a870"/>
+        <ellipse cx="100" cy="115" rx="32" ry="38" fill="url(#fg2)"/>
+        <ellipse cx="100" cy="72" rx="26" ry="16" fill="#120806"/>
+        <path d="M74 100 Q70 72 100 66 Q130 72 126 100 Q120 76 100 72 Q80 76 74 100Z" fill="#120806"/>
+        <path d="M74 100 Q66 118 68 148 L78 144 Q74 120 78 106Z" fill="#120806"/><path d="M126 100 Q134 118 132 148 L122 144 Q126 120 122 106Z" fill="#120806"/>
+        <line x1="82" y1="68" x2="90" y2="58" stroke="#c8a030" stroke-width="1.5"/><circle cx="90" cy="57" r="3" fill="#c8a030"/>
+        <rect x="55" y="106" width="12" height="18" rx="6" fill="#1a1206" stroke="#3a2810" stroke-width="1"/>
+        <rect x="133" y="106" width="12" height="18" rx="6" fill="#1a1206" stroke="#3a2810" stroke-width="1"/>
+        <path d="M61 106 Q61 85 100 82 Q139 85 139 106" stroke="#1a1206" stroke-width="3" fill="none"/>
+        <rect x="86" y="185" width="28" height="20" rx="4" fill="#2a1e08" stroke="#4a3010" stroke-width="1"/>
+        <ellipse cx="100" cy="195" rx="8" ry="6" fill="#1a1206" stroke="#3a2810" stroke-width="1"/>
+        <ellipse cx="87" cy="113" rx="5.5" ry="4" fill="#160a04"/><ellipse cx="113" cy="113" rx="5.5" ry="4" fill="#160a04"/>
+        <circle cx="89" cy="112" r="1.5" fill="white" opacity="0.85"/><circle cx="115" cy="112" r="1.5" fill="white" opacity="0.85"/>
+        <path d="M93 127 Q100 130 107 127" stroke="#8a5040" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+  </div>
+  <div id="chapter-title"><div class="ch-jp" id="ch-jp"></div><div class="ch-main" id="ch-main"></div><div class="ch-line"></div><div class="ch-sub" id="ch-sub"></div></div>
+  <div id="dialog-area">
+    <div id="speaker-box"><span id="speaker-name"></span></div>
+    <div id="dialog-box">
+      <div id="dialog-text"></div>
+      <div id="action-btns"></div>
+      <div id="next-hint">▶</div>
+    </div>
+  </div>
+</div>
+
+<!-- 道具欄 -->
+<div id="inventory">
+  <div id="inv-handle" onclick="toggleInventory()">
+    <span class="inv-handle-text">道具欄</span>
+    <div style="display:flex;align-items:center;gap:8px;"><div id="inv-count">0</div><span class="inv-arrow">▲</span></div>
+  </div>
+  <div id="inv-content"><div style="font-size:11px;color:#3a2a10;letter-spacing:0.2em;width:100%;text-align:center;padding:18px 0;">── 尚無道具 ──</div></div>
+</div>
+
+<!-- 關卡一 -->
+<div id="stage-switchboard">
+  <div class="sb-header">關卡一　接線生的考驗</div>
+  <div id="call-banner" class="call-banner">
+    <div class="cb-row">
+      <div class="cb-from"><div class="cb-label">發話方</div><div class="cb-number" id="cb-from-num">——</div></div>
+      <div class="cb-arrow">→</div>
+      <div class="cb-to"><div class="cb-label">接通至</div><div class="cb-number" id="cb-to-num">——</div></div>
+    </div>
+  </div>
+  <div class="sb-panel-wrap">
+    <div class="sb-panel-label">手動式電話交換機</div>
+    <div class="sb-jacks" id="sb-jacks"></div>
+    <div class="sb-cords" id="sb-cords"></div>
+    <button class="sb-talk-btn" id="sb-talk-btn" onclick="pressTalk()">説話鍵　通話開始</button>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-dialog-box" id="sb-dialog-box"></div>
+    <button class="sb-finish-btn" id="sb-finish-btn" onclick="nextCall()">下一通電話 ▶</button>
+  </div>
+</div>
+
+<!-- 關卡二：前往臺中車站 -->
+<div id="stage-map"></div>
+
+<!-- ══ 後台 ══ -->
+<div id="admin-panel">
+  <div class="adm-topbar">
+    <div class="adm-title">⚙ 後台編輯器</div>
+    <div class="adm-topbar-btns">
+      <button class="adm-btn primary" onclick="saveAndClose()">儲存並關閉</button>
+      <button class="adm-btn danger" onclick="closeAdmin()">取消</button>
+    </div>
+  </div>
+  <div class="adm-tabs">
+    <div class="adm-tab active" onclick="switchTab('ch1')">第一章</div>
+    <div class="adm-tab" onclick="switchTab('ch2')">第二章</div>
+    <div class="adm-tab" onclick="switchTab('calls')">接線關卡</div>
+    <div class="adm-tab" onclick="switchTab('stage2')">關卡二</div>
+    <div class="adm-tab" onclick="switchTab('appear')">外觀</div>
+    <div class="adm-tab" onclick="switchTab('io')">匯入匯出</div>
+  </div>
+  <div class="adm-body">
+    <!-- 第一章 -->
+    <div id="tab-ch1">
+      <div class="adm-section"><div class="adm-section-title">第一章　劇情腳本</div><div id="script-list-ch1"></div>
+        <div class="sc-add-row">
+          <button class="sc-add-btn" onclick="addLine('ch1','narr')">＋ 旁白</button>
+          <button class="sc-add-btn" onclick="addLine('ch1','line')">＋ 對話</button>
+          <button class="sc-add-btn" onclick="addLine('ch1','chapter')">＋ 章節標題</button>
+          <button class="sc-add-btn" onclick="addLine('ch1','note')">＋ 紙條</button>
+        </div>
+      </div>
+    </div>
+    <!-- 第二章 -->
+    <div id="tab-ch2" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">第二章　劇情腳本（關卡一結束後）</div><div id="script-list-ch2"></div>
+        <div class="sc-add-row">
+          <button class="sc-add-btn" onclick="addLine('ch2','narr')">＋ 旁白</button>
+          <button class="sc-add-btn" onclick="addLine('ch2','line')">＋ 對話</button>
+          <button class="sc-add-btn" onclick="addLine('ch2','chapter')">＋ 章節標題</button>
+          <button class="sc-add-btn" onclick="addLine('ch2','note')">＋ 紙條</button>
+          <button class="sc-add-btn" onclick="addLine('ch2','action')">＋ 行動按鈕</button>
+        </div>
+      </div>
+    </div>
+    <!-- 接線關卡 -->
+    <div id="tab-calls" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">插孔設定（最多16個）</div><div id="jack-list"></div><button class="adm-btn" onclick="addJack()" style="margin-top:6px;">＋ 新增插孔</button></div>
+      <div class="adm-section"><div class="adm-section-title">通話設定</div><div id="call-list"></div><button class="adm-btn" onclick="addCall()" style="margin-top:6px;">＋ 新增通話</button></div>
+    </div>
+    <!-- 關卡二 -->
+    <div id="tab-stage2" style="display:none;">
+      <div class="adm-section">
+        <div class="adm-section-title">關卡二　方位謎題設定</div>
+        <div id="tab-stage2-inner"></div>
+      </div>
+    </div>
+    <!-- 外觀設定 -->
+    <div id="tab-appear" style="display:none;">
+      <div class="adm-section">
+        <div class="adm-section-title">文字大小</div>
+        <div class="adm-field"><label class="adm-label">對話文字大小（目前：<span id="val-dialog-font">19</span>px）</label>
+          <div class="range-row"><input type="range" min="12" max="28" value="19" id="range-dialog-font" oninput="previewAppear()"><span class="range-val" id="show-dialog-font">19px</span></div></div>
+        <div class="adm-field"><label class="adm-label">說話者名字大小（目前：<span id="val-speaker-font">18</span>px）</label>
+          <div class="range-row"><input type="range" min="12" max="26" value="18" id="range-speaker-font" oninput="previewAppear()"><span class="range-val" id="show-speaker-font">18px</span></div></div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">對話框大小</div>
+        <div class="adm-field"><label class="adm-label">對話框最小高度（目前：<span id="val-dialog-height">140</span>px）</label>
+          <div class="range-row"><input type="range" min="80" max="300" value="140" id="range-dialog-height" oninput="previewAppear()"><span class="range-val" id="show-dialog-height">140px</span></div></div>
+        <div class="adm-field"><label class="adm-label">對話框內距（上下）</label>
+          <div class="range-row"><input type="range" min="8" max="36" value="18" id="range-dialog-pad" oninput="previewAppear()"><span class="range-val" id="show-dialog-pad">18px</span></div></div>
+        <div class="adm-field"><label class="adm-label">對話框距底部</label>
+          <div class="range-row"><input type="range" min="0" max="60" value="10" id="range-dialog-bottom" oninput="previewAppear()"><span class="range-val" id="show-dialog-bottom">10px</span></div></div>
+      </div>
+      <div class="adm-btn-row">
+        <button class="adm-btn primary" onclick="applyAppear()">套用外觀</button>
+        <button class="adm-btn" onclick="resetAppear()">還原預設</button>
+      </div>
+    </div>
+    <!-- 匯入匯出 -->
+    <div id="tab-io" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">匯出全部設定</div>
+        <button class="adm-btn primary" onclick="exportAll()">匯出</button>
+        <textarea id="export-area" class="adm-input adm-textarea" rows="7" readonly style="margin-top:8px;" placeholder="點擊上方匯出…"></textarea>
+        <button class="adm-btn" onclick="copyExport()" style="margin-top:6px;">複製到剪貼簿</button>
+      </div>
+      <div class="adm-section" style="margin-top:16px;"><div class="adm-section-title">匯入</div>
+        <textarea id="import-area" class="adm-input adm-textarea" rows="7" placeholder="在此貼上 JSON…"></textarea>
+        <button class="adm-btn primary" onclick="importAll()" style="margin-top:6px;">匯入並套用</button>
+      </div>
+      <div class="adm-section" style="margin-top:16px;"><div class="adm-section-title">重置</div>
+        <button class="adm-btn danger" onclick="resetAll()">還原所有預設內容</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-  // ── 自訂游標 ──────────────────────────────
-  const cursor = document.getElementById('cursor');
-  let cursorTimer;
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top  = e.clientY + 'px';
-    cursor.classList.remove('hidden');
-    clearTimeout(cursorTimer);
-    cursorTimer = setTimeout(() => cursor.classList.add('hidden'), 2200);
+// ══════════════════════════════════
+//  預設資料
+// ══════════════════════════════════
+const D_CH1=[
+  {t:'chapter',jp:'序章',main:'暴雨，路旁的電話亭',sub:'臺中市・某條街'},
+  {t:'narr',text:'風暴大雨的夜晚。\n街燈在雨幕後頭搖搖欲墜，映出濕透的柏油路面。'},
+  {t:'narr',text:'有個身影踉蹌地跑過——\n竄進了路旁一座老舊的電話亭。'},
+  {t:'show',id:'sp-yuyan'},
+  {t:'line',who:'語嫣',text:'……哈、哈——\n（大口喘氣，把門推上）\n先躲一下好了。'},
+  {t:'line',who:'語嫣',text:'（掏出手機，螢幕顯示「無訊號」）\n——沒訊號？！'},
+  {t:'narr',text:'她靠在門板上，看著玻璃外頭嘩嘩流下的雨水。'},
+  {t:'line',who:'語嫣',text:'（輕聲）他不知道在不在擔心……'},
+  {t:'narr',text:'四周靜得只剩雨聲。\n電話亭老舊，角落的鐵板生了鏽，\n一張貼得皺巴巴的告示寫著「停用中」。'},
+  {t:'narr',text:'語嫣無所事事地看著那台電話，\n那種笨重的老式樣子，深色話筒，金屬轉盤。'},
+  {t:'fx',fn:'phoneGlow'},
+  {t:'line',who:'語嫣',text:'（愣住）\n……咦？'},
+  {t:'narr',text:'螢幕上亮著螢綠色的光，閃著「投幣」兩個字。'},
+  {t:'line',who:'語嫣',text:'故障的電話……在亮燈？'},
+  {t:'narr',text:'她伸出手。就這樣，鬼使神差地。'},
+  {t:'fx',fn:'lightning2'},
+  {t:'fx',fn:'rainFade'},
+  {t:'narr',text:'話筒是冰涼的。\n那種老式的、沉甸甸的冰涼，帶著鐵的氣味。'},
+  {t:'narr',text:'一陣陰風驟來。雨聲——輕了。'},
+  {t:'narr',text:'再輕了一些。再輕。'},
+  {t:'narr',text:'直到，幾乎——停了。'},
+  {t:'narr',text:'玻璃外的世界，悄悄換了個樣子。\n露出原先隱藏在暴風雨中的……日式建築。'},
+  {t:'hide',id:'sp-yuyan'},
+  {t:'chapter',jp:'第一章　明治四十一年',main:'1908年\n臺中郵便局　電話交換室',sub:''},
+  {t:'bg',scene:'1908'},
+  {t:'show',id:'sp-yuyan-1908'},
+  {t:'narr',text:'意識模糊，像剛從深水裡浮起來。\n四肢沉重，視線凌亂。'},
+  {t:'line',who:'語嫣',text:'（盯著自己的手）\n……這是……什麼？'},
+  {t:'narr',text:'眼前是一面巨大的木製機台——\n密密麻麻的圓形插孔，懸掛的跳線，\n以及數個閃著昏黃光的信號掉牌。'},
+  {t:'narr',text:'她坐在一張高背椅上，\n胸前掛著笨重的金屬麥克風，雙耳被厚重的耳機覆住。'},
+  {t:'line',who:'語嫣',text:'（喃喃）我……是誰？'},
+  {t:'narr',text:'腦子裡有什麼東西破碎了。\n記憶散落成碎片，怎麼拼也拼不出完整的輪廓。\n\n只剩一件事是清楚的——\n有個人，在等她。\n\n她記得這個。只記得這個。'},
+  {t:'narr',text:'桌角壓著一張摺疊的紙條。'},
+  {t:'line',who:'語嫣',text:'（拾起紙條）'},
+  {t:'note',body:'妳醒了。\n\n別怕。\n\n妳需要做的事情，都在這座城市裡。\n就從這裡開始——\n\n    臺中驛，明治四十一年。\n    縱貫鐵路，即將全線通車。\n\n先完成眼前的工作。\n有人在等妳的消息。\n\n                ——一個妳認識的人'},
+  {t:'line',who:'語嫣',text:'（盯著紙條末尾那個未完成的名字。很久很久。)'},
+  {t:'line',who:'語嫣',text:'……好。\n（輕輕把紙條折好，收進衣袖）'},
+  {t:'narr',text:'就在這時，交換機的信號掉牌，「啪」的一聲落下。\n\n來電了。'},
+  {t:'stage',id:'switchboard'},
+];
+
+const D_CH2=[
+  {t:'line',who:'語嫣',text:'呼……\n終於結束這工作了。'},
+  {t:'line',who:'語嫣',text:'對了……\n是不是有張紙條啊？差點忘了。'},
+  {t:'action',buttons:[{label:'拿出紙條',fn:'takeOutNote'}]},
+  {t:'line',who:'語嫣',text:'……噢，那我得去臺中火車站對吧？'},
+  {t:'narr',text:'她四處望了望，走到窗邊往外看，\n街道還是陌生的。'},
+  {t:'line',who:'語嫣',text:'去對面書店買個地圖吧。\n……找到了，臺中驛就在附近。'},
+  {t:'narr',text:'語嫣把地圖摺進口袋，\n推開了郵便局的大門。'},
+  {t:'chapter',jp:'第二章',main:'前往臺中驛',sub:''},
+  {t:'stage',id:'map'},
+];
+
+const D_JACKS=[
+  {id:'j01',name:'三井物産',num:'二三番'},{id:'j02',name:'臺中驛',num:'四番'},
+  {id:'j03',name:'臺灣銀行',num:'五番'},{id:'j04',name:'醉月樓',num:'六番'},
+  {id:'j05',name:'郵便局',num:'七番'},{id:'j06',name:'彰化銀行',num:'八番'},
+  {id:'j07',name:'帝國製糖',num:'九番'},{id:'j08',name:'長谷川醫院',num:'十番'},
+  {id:'j09',name:'臺中廳',num:'十一番'},{id:'j10',name:'臺灣倉庫',num:'十二番'},
+  {id:'j11',name:'臺中座',num:'十三番'},{id:'j12',name:'大和料理店',num:'十四番'},
+  {id:'j13',name:'青果組合',num:'十五番'},{id:'j14',name:'臺中公園',num:'十六番'},
+  {id:'j15',name:'警察署',num:'十七番'},{id:'j16',name:'臺中學校',num:'十八番'},
+];
+
+const D_CALLS=[
+  {fromId:'j01',toId:'j02',fromNum:'二三番',fromName:'三井物産',toNum:'四番',toName:'臺中驛',
+   dialogs:[{who:'三井物産 用戶',text:'喂，是電話局嗎？請幫我接到臺中驛，謝謝。'},{who:'語嫣',text:'好的，請稍候。（接線中……）'},{who:'臺中驛 站長',text:'喂，臺中驛，請說。'}]},
+  {fromId:'j06',toId:'j03',fromNum:'八番',fromName:'彰化銀行',toNum:'五番',toName:'臺灣銀行',
+   dialogs:[{who:'彰化銀行 行員',text:'麻煩幫我接臺灣銀行臺中支店，有業務需要確認。'},{who:'語嫣',text:'好的，請稍候片刻。'},{who:'臺灣銀行 行員',text:'您好，這裡是臺灣銀行，請說。'}]},
+  {fromId:'j09',toId:'j05',fromNum:'十一番',fromName:'臺中廳',toNum:'七番',toName:'郵便局',
+   dialogs:[{who:'臺中廳 官員',text:'我是臺中廳，請接郵便局，有急件要確認送達情況。'},{who:'語嫣',text:'是，馬上為您接通。'},{who:'郵便局 局員',text:'您好，郵便局，請問有何貴幹？'}]},
+  {fromId:'j13',toId:'j08',fromNum:'十五番',fromName:'青果組合',toNum:'十番',toName:'長谷川醫院',
+   dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有工人受傷了，情況緊急！'},{who:'語嫣',text:'（立刻）馬上接通！'},{who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]},
+];
+
+const D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10};
+
+// 關卡二預設
+const D_STAGE2={
+  question:'車站大門內，朝著門外方向，\n門框上方的方位指針指向哪個方位？',
+  answer:'北',   // 後台可改
+  hint:'仔細抬頭看車站門口上方。',
+  successText:'正確！\n你已站在臺中驛門口。\n接下來，進入車站尋找更多線索。',
+};
+
+// ══════════════════════════════════
+//  執行資料
+// ══════════════════════════════════
+let CH1=JSON.parse(JSON.stringify(D_CH1));
+let CH2=JSON.parse(JSON.stringify(D_CH2));
+let JACKS=JSON.parse(JSON.stringify(D_JACKS));
+let CALLS=JSON.parse(JSON.stringify(D_CALLS));
+let APPEAR=JSON.parse(JSON.stringify(D_APPEAR));
+let STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
+
+// 合并腳本：ch1 的 stage 後接 ch2
+function buildFullScript(){
+  // ch1 保留到 stage:switchboard（含），ch2 接在後面
+  return [...CH1, ...CH2];
+}
+
+// ══════════════════════════════════
+//  外觀
+// ══════════════════════════════════
+function applyAppearVars(a){
+  const r=document.documentElement.style;
+  r.setProperty('--dialog-font-size',a.dialogFont+'px');
+  r.setProperty('--speaker-font-size',a.speakerFont+'px');
+  r.setProperty('--dialog-min-height',a.dialogHeight+'px');
+  r.setProperty('--dialog-padding',a.dialogPad+'px 22px '+(a.dialogPad+4)+'px');
+  r.setProperty('--dialog-bottom',a.dialogBottom+'px');
+}
+function previewAppear(){
+  const a={
+    dialogFont:+document.getElementById('range-dialog-font').value,
+    speakerFont:+document.getElementById('range-speaker-font').value,
+    dialogHeight:+document.getElementById('range-dialog-height').value,
+    dialogPad:+document.getElementById('range-dialog-pad').value,
+    dialogBottom:+document.getElementById('range-dialog-bottom').value,
+  };
+  ['dialog-font','speaker-font','dialog-height','dialog-pad','dialog-bottom'].forEach(k=>{
+    const key=k.replace(/-([a-z])/g,(_,c)=>c.toUpperCase());
+    const val=a[key];
+    document.getElementById('show-'+k).textContent=val+'px';
+    document.getElementById('val-'+k)&&(document.getElementById('val-'+k).textContent=val);
   });
-
-  // ── 編輯器 ────────────────────────────────
-  const editor   = document.getElementById('editor');
-  const wc       = document.getElementById('wordcount');
-  const savedMsg = document.getElementById('saved');
-
-  // 讀取本地儲存
-  const STORAGE_KEY = 'focus-writer-content';
-  editor.value = localStorage.getItem(STORAGE_KEY) || '';
-
-  function resize() {
-    editor.style.height = 'auto';
-    editor.style.height = editor.scrollHeight + 'px';
-  }
-
-  function countWords(text) {
-    if (!text.trim()) return 0;
-    const cjk     = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g) || []).length;
-    const western  = (text.trim().match(/[a-zA-Z]+/g) || []).length;
-    return cjk + western;
-  }
-
-  let saveTimer, savedTimer;
-  function saveContent() {
-    localStorage.setItem(STORAGE_KEY, editor.value);
-    savedMsg.classList.add('show');
-    clearTimeout(savedTimer);
-    savedTimer = setTimeout(() => savedMsg.classList.remove('show'), 1500);
-  }
-
-  editor.addEventListener('input', () => {
-    resize();
-    const n = countWords(editor.value);
-    wc.textContent = n + ' 字';
-    wc.classList.toggle('visible', n > 0);
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveContent, 1000);
+  applyAppearVars(a);
+}
+function applyAppear(){
+  APPEAR={
+    dialogFont:+document.getElementById('range-dialog-font').value,
+    speakerFont:+document.getElementById('range-speaker-font').value,
+    dialogHeight:+document.getElementById('range-dialog-height').value,
+    dialogPad:+document.getElementById('range-dialog-pad').value,
+    dialogBottom:+document.getElementById('range-dialog-bottom').value,
+  };
+  applyAppearVars(APPEAR);
+}
+function resetAppear(){APPEAR=JSON.parse(JSON.stringify(D_APPEAR));syncAppearSliders();applyAppearVars(APPEAR);}
+function syncAppearSliders(){
+  document.getElementById('range-dialog-font').value=APPEAR.dialogFont;
+  document.getElementById('range-speaker-font').value=APPEAR.speakerFont;
+  document.getElementById('range-dialog-height').value=APPEAR.dialogHeight;
+  document.getElementById('range-dialog-pad').value=APPEAR.dialogPad;
+  document.getElementById('range-dialog-bottom').value=APPEAR.dialogBottom;
+  ['dialog-font','speaker-font','dialog-height','dialog-pad','dialog-bottom'].forEach(k=>{
+    const key=k.replace(/-([a-z])/g,(_,c)=>c.toUpperCase());
+    const val=APPEAR[key];
+    if(document.getElementById('show-'+k)) document.getElementById('show-'+k).textContent=val+'px';
+    if(document.getElementById('val-'+k)) document.getElementById('val-'+k).textContent=val;
   });
+}
 
-  window.addEventListener('load', () => {
-    setTimeout(() => { editor.focus(); resize(); }, 400);
-    const n = countWords(editor.value);
-    wc.textContent = n + ' 字';
-    wc.classList.toggle('visible', n > 0);
+// ══════════════════════════════════
+//  雨
+// ══════════════════════════════════
+let rainDrops=[],rainIntensity=1.0;
+function createRain(){
+  const layer=document.getElementById('rain-layer');layer.innerHTML='';rainDrops=[];
+  for(let i=0;i<70;i++){
+    const d=document.createElement('div');d.className='raindrop';
+    const left=Math.random()*110-5,h=50+Math.random()*80,dur=0.5+Math.random()*0.7,delay=-Math.random()*2;
+    d.style.cssText=`left:${left}%;height:${h}px;top:-${h}px;animation-duration:${dur}s;animation-delay:${delay}s;opacity:1;`;
+    layer.appendChild(d);rainDrops.push(d);
+  }
+}
+function fadeRain(target,ms){
+  const t0=Date.now(),from=rainIntensity;
+  (function step(){const p=Math.min((Date.now()-t0)/ms,1);rainIntensity=from+(target-from)*p;rainDrops.forEach(d=>d.style.opacity=rainIntensity);if(p<1)requestAnimationFrame(step);})();
+}
+function lightning(){const el=document.getElementById('lightning');el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}
+
+const FX_MAP={
+  phoneGlow:()=>{document.getElementById('phone-screen').classList.add('on');setTimeout(()=>document.getElementById('phone-glow-overlay').classList.add('glowing'),600);},
+  lightning2:()=>{setTimeout(()=>lightning(),200);setTimeout(()=>lightning(),900);},
+  rainFade:()=>fadeRain(0,6000),
+};
+
+// ══════════════════════════════════
+//  引擎
+// ══════════════════════════════════
+let SCRIPT=[],cursor=0,isTyping=false,typeTimer=null,waitChapter=false;
+const inventory=[];
+
+function $id(id){return document.getElementById(id);}
+
+function processLine(){
+  if(cursor>=SCRIPT.length)return;
+  const s=SCRIPT[cursor++];
+  if(s.t==='chapter')    showChapter(s);
+  else if(s.t==='narr')  showDialog({who:'——',text:s.text});
+  else if(s.t==='line')  showDialog(s);
+  else if(s.t==='show')  {$id(s.id).classList.remove('hidden');processLine();}
+  else if(s.t==='hide')  {$id(s.id).classList.add('hidden');processLine();}
+  else if(s.t==='bg')    {switchBg(s.scene);processLine();}
+  else if(s.t==='fx')    {const fn=typeof s.fn==='function'?s.fn:FX_MAP[s.fn];if(fn)fn();processLine();}
+  else if(s.t==='note')  showNote(s);
+  else if(s.t==='action')showActionBtns(s.buttons);
+  else if(s.t==='stage') launchStage(s.id);
+}
+
+function showDialog(s){
+  hideActionBtns();
+  $id('speaker-name').textContent=s.who;
+  $id('speaker-box').style.display=s.who==='——'?'none':'flex';
+  $id('next-hint').style.display='block';
+  typeText($id('dialog-text'),s.text);
+}
+
+function typeText(el,txt){
+  isTyping=true;if(typeTimer){clearInterval(typeTimer);typeTimer=null;}
+  el.innerHTML='';let i=0;
+  typeTimer=setInterval(()=>{
+    if(i<txt.length){el.innerHTML=txt.substring(0,++i).replace(/\n/g,'<br>');}
+    else{clearInterval(typeTimer);typeTimer=null;isTyping=false;}
+  },36);
+}
+function skipType(){
+  if(typeTimer){clearInterval(typeTimer);typeTimer=null;}isTyping=false;
+  const s=SCRIPT[cursor-1];if(!s)return;
+  $id('dialog-text').innerHTML=(s.text||'').replace(/\n/g,'<br>');
+}
+
+function showChapter(s){
+  waitChapter=true;
+  $id('ch-jp').textContent=s.jp;
+  $id('ch-main').innerHTML=s.main.replace(/\n/g,'<br>');
+  $id('ch-sub').textContent=s.sub||'';
+  const ct=$id('chapter-title');ct.classList.add('show');
+  setTimeout(()=>{ct.classList.remove('show');setTimeout(()=>{waitChapter=false;processLine();},900);},3200);
+}
+
+function switchBg(scene){
+  $id('phonebooth-scene').style.display=scene==='phonebooth'?'flex':'none';
+  $id('exchange-scene').style.display=scene==='1908'?'block':'none';
+}
+
+function showNote(s){
+  const ov=document.createElement('div');ov.className='note-overlay';
+  ov.innerHTML=`<div class="note-paper"><div class="note-title">── 紙條 ──</div><div class="note-body">${s.body.replace(/\n/g,'<br>')}</div><button class="note-btn" onclick="collectNote(this.closest('.note-overlay'))">收下紙條</button></div>`;
+  document.body.appendChild(ov);
+}
+function collectNote(ov){ov.remove();addItem('note','📜','神秘紙條');processLine();}
+
+// 行動按鈕
+function showActionBtns(buttons){
+  hideActionBtns();
+  $id('next-hint').style.display='none';
+  const area=$id('action-btns');area.style.display='flex';
+  area.innerHTML=buttons.map(b=>`<button class="action-btn" onclick="triggerAction('${b.fn}')">${b.label}</button>`).join('');
+}
+function hideActionBtns(){
+  const area=$id('action-btns');area.style.display='none';area.innerHTML='';
+  $id('next-hint').style.display='block';
+}
+
+// 行動函式映射
+const ACTION_MAP={
+  takeOutNote:()=>{
+    const noteS=SCRIPT.find(s=>s.t==='note');
+    if(noteS){
+      const ov=document.createElement('div');ov.className='note-overlay';
+      ov.innerHTML=`<div class="note-paper"><div class="note-title">── 紙條 ──</div><div class="note-body">${noteS.body.replace(/\n/g,'<br>')}</div><button class="note-btn" onclick="this.closest('.note-overlay').remove();processLine()">收起</button></div>`;
+      document.body.appendChild(ov);
+    } else {processLine();}
+  },
+};
+function triggerAction(fn){
+  hideActionBtns();
+  const f=ACTION_MAP[fn];if(f)f();else processLine();
+}
+
+function addItem(id,icon,name){
+  if(inventory.find(i=>i.id===id))return;
+  inventory.push({id,icon,name});renderInventory();
+}
+function renderInventory(){
+  $id('inv-count').textContent=inventory.length;
+  const c=$id('inv-content');
+  if(!inventory.length){c.innerHTML='<div style="font-size:11px;color:#3a2a10;letter-spacing:0.2em;width:100%;text-align:center;padding:18px 0;">── 尚無道具 ──</div>';return;}
+  c.innerHTML=inventory.map(i=>`<div class="inv-item"><div class="inv-item-icon">${i.icon}</div><div class="inv-item-name">${i.name}</div></div>`).join('');
+}
+function toggleInventory(){$id('inventory').classList.toggle('open');}
+
+// ══════════════════════════════════
+//  關卡一：接線生
+// ══════════════════════════════════
+let sbState={callIdx:0,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
+
+function launchStage(id){
+  if(id==='switchboard'){$id('stage-switchboard').style.display='flex';loadCall(0);}
+  else if(id==='map'){launchMap();}
+}
+
+function loadCall(idx){
+  sbState={callIdx:idx,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
+  const call=CALLS[idx];
+  $id('call-banner').className='call-banner';
+  $id('cb-from-num').textContent=call.fromNum+' '+call.fromName;
+  $id('cb-to-num').textContent=call.toNum+' '+call.toName;
+  buildJacks(call);buildCords();
+  const tb=$id('sb-talk-btn');tb.disabled=false;tb.classList.remove('active');
+  $id('sb-dialog-box').innerHTML='';$id('sb-finish-btn').style.display='none';
+}
+function buildJacks(call){
+  const grid=$id('sb-jacks');grid.innerHTML='';
+  JACKS.forEach(j=>{
+    const div=document.createElement('div');
+    div.className='sb-jack'+(j.id===call.fromId?' ringing':'');
+    div.id='sbj-'+j.id;
+    div.innerHTML=`<div class="sb-jack-hole"></div><div class="sb-jack-name">${j.name}<br>${j.num}</div>`;
+    div.onclick=()=>jackClicked(j.id);grid.appendChild(div);
   });
+}
+function buildCords(){
+  $id('sb-cords').innerHTML=['A','B'].map(l=>`<div class="sb-cord" id="cord-${l}" onclick="cordClicked('${l}')"><div class="sb-cord-plug"></div><div class="sb-cord-wire"></div><div class="sb-cord-name">跳線 ${l}</div></div>`).join('');
+}
+function cordClicked(id){
+  if(sbState.step!==0&&sbState.step!==2){addSbMsg('系統','請先完成目前步驟。');return;}
+  if($id('cord-'+id).classList.contains('used'))return;
+  sbState.selectedCord=id;
+  document.querySelectorAll('.sb-cord').forEach(c=>c.classList.remove('selected'));
+  $id('cord-'+id).classList.add('selected');
+  sbState.step=sbState.step===0?1:3;
+}
+function jackClicked(jid){
+  const call=CALLS[sbState.callIdx];
+  if(sbState.step===1){
+    if(jid===call.fromId){
+      sbState.pluggedFrom=true;$id('sbj-'+jid).className='sb-jack plugged';
+      $id('cord-'+sbState.selectedCord).classList.add('used');$id('cord-'+sbState.selectedCord).classList.remove('selected');
+      sbState.selectedCord=null;sbState.step=2;addSbMsg('系統','已接入發話方。請再選一條跳線，接通受話方。');
+    } else flashWrong(jid);
+  } else if(sbState.step===3){
+    if(jid===call.toId){
+      sbState.pluggedTo=true;$id('sbj-'+jid).className='sb-jack plugged';
+      $id('cord-'+sbState.selectedCord).classList.add('used');$id('cord-'+sbState.selectedCord).classList.remove('selected');
+      sbState.step=4;$id('call-banner').className='call-banner connected';addSbMsg('系統','兩端已接線。請按說話鍵開始通話。');
+    } else if(jid===call.fromId){addSbMsg('系統','此插孔已接線，請選受話方插孔。');}
+    else flashWrong(jid);
+  } else addSbMsg('系統','請先選擇跳線。');
+}
+function flashWrong(jid){const el=$id('sbj-'+jid);el.classList.add('wrong-flash');setTimeout(()=>el.classList.remove('wrong-flash'),600);addSbMsg('系統','號碼有誤，請重新確認。');}
+function pressTalk(){
+  if(sbState.step!==4){addSbMsg('系統','請先完成接線。');return;}
+  sbState.step=5;$id('sb-talk-btn').classList.add('active');$id('sb-talk-btn').disabled=true;
+  const call=CALLS[sbState.callIdx];let di=0;
+  function next(){if(di>=call.dialogs.length){callDone();return;}const d=call.dialogs[di++];addSbMsg(d.who,d.text);setTimeout(next,2400);}
+  next();
+}
+function callDone(){
+  const call=CALLS[sbState.callIdx];
+  $id('sbj-'+call.fromId).className='sb-jack correct';$id('sbj-'+call.toId).className='sb-jack correct';
+  $id('call-banner').className='call-banner done';addSbMsg('系統','── 通話結束 ──');
+  const btn=$id('sb-finish-btn');btn.style.display='block';
+  btn.textContent=sbState.callIdx===CALLS.length-1?'關卡完成 ✓':'下一通電話 ▶';
+}
+function nextCall(){
+  const next=sbState.callIdx+1;
+  if(next>=CALLS.length){$id('stage-switchboard').style.display='none';processLine();}
+  else loadCall(next);
+}
+function addSbMsg(who,text){
+  const box=$id('sb-dialog-box');const div=document.createElement('div');
+  div.innerHTML=`<div class="sb-msg-who">【${who}】</div><div class="sb-msg-text">${(text||'').replace(/\n/g,'<br>')}</div>`;
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
 
-  window.addEventListener('beforeunload', e => {
-    if (editor.value.trim().length > 0) {
-      saveContent();
-      e.preventDefault();
-      e.returnValue = '';
+// ══════════════════════════════════
+//  關卡二：前往臺中車站
+// ══════════════════════════════════
+const DIRECTIONS=['北','東北','東','東南','南','西南','西','西北'];
+
+function launchMap(){
+  const el=$id('stage-map');
+  el.innerHTML=''; // 清空重建
+  el.style.display='flex';
+
+  // 八方位佈局：北在正上，順時針
+  // grid 3×3：[空,北,空 / 西北,  ,東北 / 西,  ,東 / 西南,  ,東南 / 空,南,空]
+  // 實際用 3×3 排列，中間留空
+  const dirLayout=[
+    ['','北',''],
+    ['西北','','東北'],
+    ['西','','東'],
+    ['西南','','東南'],
+    ['','南',''],
+  ];
+
+  el.innerHTML=`
+  <div class="s2-header">關卡二　前往臺中驛</div>
+
+  <!-- 路線指示卡 -->
+  <div class="s2-card">
+    <div class="s2-card-title">路線指示　現在出發</div>
+    <div class="s2-direction">
+      <div class="s2-from">
+        <div class="s2-place-icon">📮</div>
+        <div class="s2-place-name">臺中郵便局</div>
+      </div>
+      <div class="s2-arrow-track">
+        <div class="s2-arrow-dot"></div>
+        <div class="s2-arrow-dot"></div>
+        <div class="s2-arrow-dot"></div>
+        <div class="s2-arrow-dot"></div>
+        <div class="s2-arrow-dot"></div>
+      </div>
+      <div class="s2-to">
+        <div class="s2-place-icon">🚉</div>
+        <div class="s2-place-name">臺中驛</div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #1e1408;padding-top:10px;">
+      <div class="s2-route-step">
+        <div class="s2-step-num">1</div>
+        <div class="s2-step-text">出郵便局大門，沿著大馬路（今臺灣大道）向東直走。</div>
+      </div>
+      <div class="s2-route-step">
+        <div class="s2-step-num">2</div>
+        <div class="s2-step-text">步行約五分鐘，可見右手邊出現紅磚白飾帶的日式建築——那就是臺中驛。</div>
+      </div>
+      <div class="s2-route-step">
+        <div class="s2-step-num">3</div>
+        <div class="s2-step-text">走到車站正面大門口，到達後解開下方謎題。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 方位謎題卡 -->
+  <div class="s2-compass-wrap">
+    <div class="s2-compass-title">到達確認　抵達後作答</div>
+    <div class="s2-compass-q" id="s2-question">${STAGE2.question.replace(/\n/g,'<br>')}</div>
+    <div style="font-size:11px;color:#6a5030;letter-spacing:0.15em;margin-bottom:10px;">${STAGE2.hint}</div>
+
+    <div class="s2-compass-grid" id="s2-dir-grid"></div>
+    <div class="s2-compass-feedback" id="s2-feedback">請選擇一個方位</div>
+    <button class="s2-confirm-btn" id="s2-confirm-btn" onclick="s2Confirm()">確認答案</button>
+  </div>`;
+
+  // 建立方位按鈕（3×3，中間空）
+  const grid=$id('s2-dir-grid');
+  const flat=['','北','','西北','西北'.length?'':'','東北','西','','東','西南','','東南','','南',''];
+  // 用正確的 3×3 順序
+  const cells=[
+    '','北','',
+    '西北','','東北',
+    '西','','東',
+    '西南','','東南',
+    '','南',''
+  ];
+  // 改用 5×3 grid
+  grid.style.gridTemplateColumns='repeat(3,1fr)';
+  cells.forEach(dir=>{
+    const btn=document.createElement('button');
+    if(!dir){
+      btn.className='s2-dir-btn empty';
+      btn.disabled=true;
+    } else {
+      btn.className='s2-dir-btn';
+      btn.textContent=dir;
+      btn.onclick=()=>s2SelectDir(dir,btn);
     }
+    grid.appendChild(btn);
   });
+}
 
-  // ── Service Worker 註冊 ───────────────────
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+let s2Selected=null;
+function s2SelectDir(dir,btn){
+  s2Selected=dir;
+  document.querySelectorAll('.s2-dir-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  $id('s2-feedback').textContent='已選擇：'+dir;
+  $id('s2-feedback').className='s2-compass-feedback';
+  $id('s2-confirm-btn').style.display='block';
+}
+
+function s2Confirm(){
+  if(!s2Selected) return;
+  const correct=STAGE2.answer.trim();
+  if(s2Selected===correct){
+    // 正確
+    document.querySelectorAll('.s2-dir-btn.selected').forEach(b=>b.classList.add('correct'));
+    $id('s2-feedback').textContent=STAGE2.successText.replace(/\n/g,' ');
+    $id('s2-feedback').className='s2-compass-feedback ok';
+    $id('s2-confirm-btn').textContent='進入車站 ▶';
+    $id('s2-confirm-btn').onclick=()=>{
+      $id('stage-map').style.display='none';
+      addItem('map','🗺️','臺中市街地圖');
+      processLine();
+    };
+  } else {
+    // 錯誤
+    document.querySelectorAll('.s2-dir-btn.selected').forEach(b=>{
+      b.classList.add('wrong');
+      setTimeout(()=>{b.classList.remove('wrong','selected');},500);
+    });
+    s2Selected=null;
+    $id('s2-feedback').textContent='方位有誤，請親自到現場確認。';
+    $id('s2-feedback').className='s2-compass-feedback err';
+    $id('s2-confirm-btn').style.display='none';
   }
+}
+
+// ══════════════════════════════════
+//  裝飾面板
+// ══════════════════════════════════
+function buildDecoSwitchboard(){
+  const jg=$id('deco-jacks');for(let i=0;i<16;i++){const d=document.createElement('div');d.className='sb-deco-jack';jg.appendChild(d);}
+  const ca=$id('deco-cords');for(let i=0;i<4;i++){const d=document.createElement('div');d.className='sb-deco-cord';ca.appendChild(d);}
+}
+
+// ══════════════════════════════════
+//  點擊推進
+// ══════════════════════════════════
+function onTap(){
+  if(waitChapter)return;
+  if($id('stage-switchboard').style.display==='flex')return;
+  if($id('stage-map').style.display==='flex')return;
+  if(document.querySelector('.note-overlay'))return;
+  if($id('action-btns').style.display==='flex')return;
+  if(isTyping){skipType();return;}
+  processLine();
+}
+$id('game').addEventListener('click',onTap);
+$id('game').addEventListener('touchend',e=>{e.preventDefault();onTap();},{passive:false});
+
+// ══════════════════════════════════
+//  開始
+// ══════════════════════════════════
+function startGame(){
+  SCRIPT=buildFullScript();cursor=0;
+  const ss=$id('start-screen');ss.style.transition='opacity 0.9s ease';ss.style.opacity='0';
+  setTimeout(()=>{ss.style.display='none';createRain();buildDecoSwitchboard();switchBg('phonebooth');applyAppearVars(APPEAR);setInterval(()=>{if(Math.random()<0.25)lightning();},4500);processLine();},900);
+}
+
+// ══════════════════════════════════
+//  後台
+// ══════════════════════════════════
+let edt={ch1:[],ch2:[],jacks:[],calls:[],stage2:{}};
+
+function openAdmin(){
+  edt.ch1=JSON.parse(JSON.stringify(CH1));
+  edt.ch2=JSON.parse(JSON.stringify(CH2));
+  edt.jacks=JSON.parse(JSON.stringify(JACKS));
+  edt.calls=JSON.parse(JSON.stringify(CALLS));
+  edt.stage2=JSON.parse(JSON.stringify(STAGE2));
+  syncAppearSliders();
+  renderList('ch1');renderList('ch2');renderJackList();renderCallList();renderStage2Admin();
+  $id('admin-panel').classList.add('open');
+}
+function closeAdmin(){$id('admin-panel').classList.remove('open');}
+function saveAndClose(){
+  CH1=JSON.parse(JSON.stringify(edt.ch1));
+  CH2=JSON.parse(JSON.stringify(edt.ch2));
+  JACKS=JSON.parse(JSON.stringify(edt.jacks));
+  CALLS=JSON.parse(JSON.stringify(edt.calls));
+  STAGE2=JSON.parse(JSON.stringify(edt.stage2));
+  closeAdmin();alert('已儲存。重新開始遊戲後生效。');
+}
+
+function switchTab(tab){
+  ['ch1','ch2','calls','stage2','appear','io'].forEach(t=>{$id('tab-'+t).style.display=t===tab?'block':'none';});
+  document.querySelectorAll('.adm-tab').forEach((el,i)=>el.classList.toggle('active',['ch1','ch2','calls','stage2','appear','io'][i]===tab));
+}
+
+// 渲染腳本列表
+function renderList(ch){
+  const list=$id('script-list-'+ch);list.innerHTML='';
+  edt[ch].forEach((s,i)=>{
+    if(['show','hide','bg','fx','stage'].includes(s.t))return;
+    const card=document.createElement('div');card.className='script-line-card';
+    const labels={narr:'旁白',line:'對話',chapter:'章節標題',note:'紙條',action:'行動按鈕'};
+    const badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
+    let fields='';
+    if(s.t==='narr') fields=`<div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.${ch}[${i}].text=this.value">${esc(s.text)}</textarea></div>`;
+    else if(s.t==='line') fields=`
+      <div class="adm-field"><label class="adm-label">說話者</label><input class="adm-input" value="${esc(s.who)}" oninput="edt.${ch}[${i}].who=this.value"></div>
+      <div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.${ch}[${i}].text=this.value">${esc(s.text)}</textarea></div>`;
+    else if(s.t==='chapter') fields=`
+      <div class="adm-field"><label class="adm-label">章節副標</label><input class="adm-input" value="${esc(s.jp)}" oninput="edt.${ch}[${i}].jp=this.value"></div>
+      <div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.${ch}[${i}].main=this.value">${esc(s.main)}</textarea></div>
+      <div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="${esc(s.sub||'')}" oninput="edt.${ch}[${i}].sub=this.value"></div>`;
+    else if(s.t==='note') fields=`<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.${ch}[${i}].body=this.value">${esc(s.body)}</textarea></div>`;
+    else if(s.t==='action') fields=`<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="${esc(s.buttons[0]?.label||'')}" oninput="edt.${ch}[${i}].buttons[0].label=this.value"></div><div class="adm-field"><label class="adm-label">觸發函式名稱</label><input class="adm-input" value="${esc(s.buttons[0]?.fn||'')}" oninput="edt.${ch}[${i}].buttons[0].fn=this.value"></div>`;
+    card.innerHTML=`<span class="sc-type-badge ${badges[s.t]||'sc-type-narr'}">${labels[s.t]||s.t}</span>
+      <button class="sc-del-btn" onclick="edt.${ch}.splice(${i},1);renderList('${ch}')">✕</button>
+      <button class="sc-up-btn" onclick="if(${i}>0){const a=edt.${ch};[a[${i}],a[${i}-1]]=[a[${i}-1],a[${i}]];renderList('${ch}')}">↑</button>
+      <button class="sc-dn-btn" onclick="if(${i}<edt.${ch}.length-1){const a=edt.${ch};[a[${i}],a[${i}+1]]=[a[${i}+1],a[${i}]];renderList('${ch}')}">↓</button>
+      ${fields}`;
+    list.appendChild(card);
+  });
+}
+
+function addLine(ch,type){
+  const defaults={narr:{t:'narr',text:'（在此輸入旁白）'},line:{t:'line',who:'語嫣',text:'（在此輸入對話）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（在此輸入紙條內容）'},action:{t:'action',buttons:[{label:'行動按鈕',fn:'takeOutNote'}]}};
+  const stageIdx=edt[ch].findIndex(s=>s.t==='stage');
+  if(stageIdx>=0)edt[ch].splice(stageIdx,0,defaults[type]);else edt[ch].push(defaults[type]);
+  renderList(ch);
+}
+
+// 插孔
+function renderJackList(){
+  $id('jack-list').innerHTML=edt.jacks.map((j,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+    <input class="adm-input" style="flex:1" value="${esc(j.name)}" placeholder="名稱" oninput="edt.jacks[${i}].name=this.value">
+    <input class="adm-input" style="width:80px" value="${esc(j.num)}" placeholder="番號" oninput="edt.jacks[${i}].num=this.value">
+    <button class="adm-btn danger" style="padding:6px 10px;" onclick="edt.jacks.splice(${i},1);renderJackList()">✕</button>
+  </div>`).join('');
+}
+function addJack(){if(edt.jacks.length>=16){alert('最多16個');return;}edt.jacks.push({id:'j'+String(edt.jacks.length+1).padStart(2,'0'),name:'新插孔',num:'番'});renderJackList();}
+
+// 通話
+function renderCallList(){
+  $id('call-list').innerHTML=edt.calls.map((c,ci)=>{
+    const opts=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.fromId?'selected':''}>${j.name} ${j.num}</option>`).join('');
+    const optsTo=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.toId?'selected':''}>${j.name} ${j.num}</option>`).join('');
+    const dlgs=c.dialogs.map((d,di)=>`<div class="call-dlg-row">
+      <input class="adm-input" placeholder="說話者" value="${esc(d.who)}" oninput="edt.calls[${ci}].dialogs[${di}].who=this.value">
+      <textarea class="adm-input" oninput="edt.calls[${ci}].dialogs[${di}].text=this.value">${esc(d.text)}</textarea>
+      <button class="call-dlg-del" onclick="edt.calls[${ci}].dialogs.splice(${di},1);renderCallList()">✕</button>
+    </div>`).join('');
+    return `<div class="call-card">
+      <div class="call-card-title">通話 ${ci+1} <button class="call-del-btn" onclick="edt.calls.splice(${ci},1);renderCallList()">✕</button></div>
+      <div class="adm-field"><label class="adm-label">發話方</label><select class="adm-input" onchange="edt.calls[${ci}].fromId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].fromNum=j.num;edt.calls[${ci}].fromName=j.name;}">${opts}</select></div>
+      <div class="adm-field"><label class="adm-label">受話方</label><select class="adm-input" onchange="edt.calls[${ci}].toId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].toNum=j.num;edt.calls[${ci}].toName=j.name;}">${optsTo}</select></div>
+      <div class="adm-label" style="margin-top:8px;">對話內容</div>
+      ${dlgs}
+      <button class="sc-add-btn" style="margin-top:6px;" onclick="edt.calls[${ci}].dialogs.push({who:'',text:''});renderCallList()">＋ 新增對話行</button>
+    </div>`;
+  }).join('');
+}
+function addCall(){edt.calls.push({fromId:edt.jacks[0]?.id||'j01',toId:edt.jacks[1]?.id||'j02',fromNum:'',fromName:'',toNum:'',toName:'',dialogs:[{who:'用戶',text:''}]});renderCallList();}
+
+// 工具
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// 後台：關卡二設定渲染
+function renderStage2Admin(){
+  const s=edt.stage2;
+  const dirs=['北','東北','東','東南','南','西南','西','西北'];
+  const radioHtml=dirs.map(d=>`<div class="s2-answer-radio ${d===s.answer?'active':''}" onclick="setS2Answer('${d}',this)">${d}</div>`).join('');
+  const el=$id('tab-stage2-inner');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="adm-field"><label class="adm-label">題目文字</label>
+      <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.question=this.value">${esc(s.question)}</textarea></div>
+    <div class="adm-field"><label class="adm-label">提示文字</label>
+      <input class="adm-input" value="${esc(s.hint)}" oninput="edt.stage2.hint=this.value"></div>
+    <div class="adm-field"><label class="adm-label">正確答案（選一個方位）</label>
+      <div class="s2-answer-grid">${radioHtml}</div></div>
+    <div class="adm-field"><label class="adm-label">答對後顯示文字</label>
+      <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.successText=this.value">${esc(s.successText)}</textarea></div>`;
+}
+function setS2Answer(dir,el){
+  edt.stage2.answer=dir;
+  document.querySelectorAll('.s2-answer-radio').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// 匯入匯出
+function exportAll(){
+  const data={ch1:edt.ch1,ch2:edt.ch2,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
+  $id('export-area').value=JSON.stringify(data,null,2);
+}
+function copyExport(){const el=$id('export-area');el.select();document.execCommand('copy');alert('已複製');}
+function importAll(){
+  try{
+    const d=JSON.parse($id('import-area').value);
+    if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
+    if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
+    if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
+    if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
+    renderList('ch1');renderList('ch2');renderJackList();renderCallList();
+    alert('匯入成功！請點「儲存並關閉」。');
+  }catch(e){alert('格式錯誤：'+e.message);}
+}
+function resetAll(){
+  if(!confirm('確定還原所有預設？'))return;
+  edt.ch1=JSON.parse(JSON.stringify(D_CH1));edt.ch2=JSON.parse(JSON.stringify(D_CH2));
+  edt.jacks=JSON.parse(JSON.stringify(D_JACKS));edt.calls=JSON.parse(JSON.stringify(D_CALLS));
+  edt.stage2=JSON.parse(JSON.stringify(D_STAGE2));
+  APPEAR=JSON.parse(JSON.stringify(D_APPEAR));syncAppearSliders();applyAppearVars(APPEAR);
+  renderList('ch1');renderList('ch2');renderJackList();renderCallList();renderStage2Admin();
+}
 </script>
 </body>
 </html>
