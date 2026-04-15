@@ -64,8 +64,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 #lightning.flash{animation:lflash 0.4s ease;}
 @keyframes lflash{0%{opacity:0}15%{opacity:1}35%{opacity:0}55%{opacity:0.6}100%{opacity:0}}
 #sprites{position:absolute;inset:0;display:flex;align-items:flex-end;pointer-events:none;z-index:5;}
-.sprite{position:absolute;bottom:0;width:52vw;max-width:300px;transition:opacity 0.6s;filter:drop-shadow(0 0 24px rgba(0,0,0,0.95));}
-.sprite.left{left:-1vw;}.sprite.hidden{opacity:0;}
+.sprite{position:absolute;bottom:0;width:72vw;max-width:400px;transition:opacity 0.6s;}
+.sprite.left{left:-4vw;}.sprite.hidden{opacity:0;}
+.sprite img{width:100%;display:block;mix-blend-mode:multiply;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.9));}
 #dialog-area{position:relative;z-index:10;padding:0 8px var(--dialog-bottom);display:flex;flex-direction:column;gap:0;}
 #speaker-box{display:inline-flex;align-items:center;background:var(--dialog-bg);border:1px solid var(--dialog-border);border-bottom:none;padding:7px 20px;width:fit-content;}
 #speaker-name{font-size:var(--speaker-font-size);color:#f5c830;letter-spacing:0.2em;font-weight:600;}
@@ -261,39 +262,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
   <div id="rain-layer"></div><div id="lightning"></div>
   <div id="sprites">
     <div id="sp-yuyan" class="sprite left hidden">
-      <svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="fg1" cx="50%" cy="35%"><stop offset="0%" stop-color="#f2d8b0"/><stop offset="100%" stop-color="#c8a070"/></radialGradient></defs>
-        <path d="M60 165 Q48 185 42 280 Q38 340 40 420 L80 420 L80 290 L100 285 L120 290 L120 420 L160 420 Q162 340 158 280 Q152 185 140 165Z" fill="#2a3a5a"/>
-        <path d="M80 165 Q100 158 120 165 L115 185 Q100 178 85 185Z" fill="#e8e0d0"/>
-        <rect x="91" y="155" width="18" height="18" rx="3" fill="#d4a870"/>
-        <ellipse cx="100" cy="120" rx="34" ry="40" fill="url(#fg1)"/>
-        <path d="M66 112 Q62 68 100 62 Q138 68 134 112 Q128 78 100 74 Q72 78 66 112Z" fill="#160a04"/>
-        <path d="M66 112 Q58 120 56 145 L68 140 Q64 125 70 115Z" fill="#160a04"/>
-        <path d="M134 112 Q142 120 144 145 L132 140 Q136 125 130 115Z" fill="#160a04"/>
-        <ellipse cx="87" cy="118" rx="6" ry="4.5" fill="#160a04"/><ellipse cx="113" cy="118" rx="6" ry="4.5" fill="#160a04"/>
-        <circle cx="89" cy="117" r="1.5" fill="white" opacity="0.9"/><circle cx="115" cy="117" r="1.5" fill="white" opacity="0.9"/>
-        <ellipse cx="100" cy="133" rx="5" ry="3" fill="#8a4a3a" opacity="0.8"/>
-      </svg>
+      <img src="IMG_0661.jpeg" alt="語嫣" style="width:100%;display:block;mix-blend-mode:multiply;filter:drop-shadow(0 0 20px rgba(0,0,0,0.8));">
     </div>
     <div id="sp-yuyan-1908" class="sprite left hidden">
-      <svg viewBox="0 0 200 420" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="fg2" cx="50%" cy="35%"><stop offset="0%" stop-color="#f2d8b0"/><stop offset="100%" stop-color="#c8a070"/></radialGradient></defs>
-        <path d="M65 162 Q50 185 44 290 Q40 360 42 420 L80 420 L80 290 L100 285 L120 290 L120 420 L158 420 Q160 360 156 290 Q150 185 135 162Z" fill="#3a2a50"/>
-        <path d="M78 162 L100 155 L122 162 L116 182 Q100 172 84 182Z" fill="#e8ddd0"/>
-        <rect x="91" y="152" width="18" height="16" rx="2" fill="#d4a870"/>
-        <ellipse cx="100" cy="115" rx="32" ry="38" fill="url(#fg2)"/>
-        <ellipse cx="100" cy="72" rx="26" ry="16" fill="#120806"/>
-        <path d="M74 100 Q70 72 100 66 Q130 72 126 100 Q120 76 100 72 Q80 76 74 100Z" fill="#120806"/>
-        <path d="M74 100 Q66 118 68 148 L78 144 Q74 120 78 106Z" fill="#120806"/><path d="M126 100 Q134 118 132 148 L122 144 Q126 120 122 106Z" fill="#120806"/>
-        <line x1="82" y1="68" x2="90" y2="58" stroke="#c8a030" stroke-width="1.5"/><circle cx="90" cy="57" r="3" fill="#c8a030"/>
-        <rect x="55" y="106" width="12" height="18" rx="6" fill="#1a1206" stroke="#3a2810" stroke-width="1"/>
-        <rect x="133" y="106" width="12" height="18" rx="6" fill="#1a1206" stroke="#3a2810" stroke-width="1"/>
-        <path d="M61 106 Q61 85 100 82 Q139 85 139 106" stroke="#1a1206" stroke-width="3" fill="none"/>
-        <rect x="86" y="185" width="28" height="20" rx="4" fill="#2a1e08" stroke="#4a3010" stroke-width="1"/>
-        <ellipse cx="87" cy="113" rx="5.5" ry="4" fill="#160a04"/><ellipse cx="113" cy="113" rx="5.5" ry="4" fill="#160a04"/>
-        <circle cx="89" cy="112" r="1.5" fill="white" opacity="0.85"/><circle cx="115" cy="112" r="1.5" fill="white" opacity="0.85"/>
-        <path d="M93 127 Q100 130 107 127" stroke="#8a5040" stroke-width="1.5" fill="none"/>
-      </svg>
+      <img src="IMG_0661.jpeg" alt="語嫣" style="width:100%;display:block;mix-blend-mode:multiply;filter:drop-shadow(0 0 20px rgba(0,0,0,0.8));">
     </div>
   </div>
   <div id="chapter-title"><div class="ch-jp" id="ch-jp"></div><div class="ch-main" id="ch-main"></div><div class="ch-line"></div><div class="ch-sub" id="ch-sub"></div></div>
