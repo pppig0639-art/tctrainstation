@@ -319,6 +319,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     <div class="adm-tab" onclick="switchTab('ch2')">第二章</div>
     <div class="adm-tab" onclick="switchTab('calls')">接線關卡</div>
     <div class="adm-tab" onclick="switchTab('stage2')">關卡二</div>
+    <div class="adm-tab" onclick="switchTab('sprite')">立繪</div>
     <div class="adm-tab" onclick="switchTab('appear')">外觀</div>
     <div class="adm-tab" onclick="switchTab('io')">匯入匯出</div>
   </div>
@@ -350,6 +351,49 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     </div>
     <div id="tab-stage2" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">關卡二　方位謎題設定</div><div id="tab-stage2-inner"></div></div>
+    </div>
+    <div id="tab-sprite" style="display:none;">
+      <div class="adm-section">
+        <div class="adm-section-title">語嫣立繪設定</div>
+        <div class="adm-field">
+          <label class="adm-label">更換圖片（建議去背PNG，或灰底JPG）</label>
+          <input type="file" accept="image/*" id="sprite-upload" style="color:#d4c090;font-size:12px;width:100%;" onchange="onSpriteUpload(this)">
+        </div>
+        <div class="adm-field">
+          <label class="adm-label">預覽</label>
+          <div id="sprite-preview" style="width:140px;height:140px;background:#1a1408;border:1px solid #3a2810;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <img id="sprite-preview-img" style="max-width:100%;max-height:100%;object-fit:contain;" src="" alt="">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label class="adm-label">位置與大小（可直接在遊戲畫面拖拽移動）</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <label class="adm-label">寬度 vw（<span id="val-sprite-w">72</span>）</label>
+              <div class="range-row"><input type="range" min="20" max="100" value="72" id="range-sprite-w" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-w">72vw</span></div>
+            </div>
+            <div>
+              <label class="adm-label">最大寬 px（<span id="val-sprite-maxw">400</span>）</label>
+              <div class="range-row"><input type="range" min="100" max="700" value="400" id="range-sprite-maxw" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-maxw">400px</span></div>
+            </div>
+            <div>
+              <label class="adm-label">水平位置 vw（<span id="val-sprite-x">-4</span>）</label>
+              <div class="range-row"><input type="range" min="-20" max="80" value="-4" id="range-sprite-x" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-x">-4vw</span></div>
+            </div>
+            <div>
+              <label class="adm-label">垂直偏移 px（<span id="val-sprite-y">0</span>）</label>
+              <div class="range-row"><input type="range" min="-300" max="100" value="0" id="range-sprite-y" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-y">0px</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="adm-btn-row">
+          <button class="adm-btn primary" onclick="saveSpriteSettings()">套用立繪設定</button>
+          <button class="adm-btn" onclick="resetSpriteSettings()">還原預設</button>
+        </div>
+        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">
+          ※ 關閉後台後，可直接用手指拖拽立繪移動位置
+        </div>
+      </div>
     </div>
     <div id="tab-appear" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">文字大小</div>
@@ -421,8 +465,8 @@ var D_CH1=[
 ];
 var D_CH2=[
   {t:'line',who:'語嫣',text:'呼……終於結束這工作了。'},
-  {t:'line',who:'語嫣',text:'對了……是不是有張紙條啊？差點忘了。'},
-  {t:'action',buttons:[{label:'拿出紙條',fn:'takeOutNote'}]},
+  {t:'line',who:'語嫣',text:'對了……衣袖裡好像有什麼東西。'},
+  {t:'inv_note'},
   {t:'line',who:'語嫣',text:'……噢，那我得去臺中火車站對吧？'},
   {t:'narr',text:'她四處望了望，走到窗邊往外看，街道還是陌生的。'},
   {t:'line',who:'語嫣',text:'去對面書店買個地圖吧。\n……找到了，臺中驛就在附近。'},
@@ -541,6 +585,7 @@ function processLine(){
   else if(s.t==='bg'){switchBg(s.scene);processLine();}
   else if(s.t==='fx'){var fn=typeof s.fn==='function'?s.fn:FX_MAP[s.fn];if(fn)fn();processLine();}
   else if(s.t==='note')showNote(s);
+  else if(s.t==='inv_note')putNoteInInventory();
   else if(s.t==='action')showActionBtns(s.buttons);
   else if(s.t==='stage')launchStage(s.id);
 }
@@ -600,8 +645,48 @@ var ACTION_MAP={
   }
 };
 function triggerAction(fn){hideActionBtns();var f=ACTION_MAP[fn];if(f)f();else processLine();}
+// 把紙條放進道具欄，等玩家點開才繼續
+var noteWaitingContinue=false;
+function putNoteInInventory(){
+  var noteS=SCRIPT.find(function(s){return s.t==='note';});
+  if(!noteS)return processLine();
+  noteWaitingContinue=true;
+  addItem('note','📜','神秘紙條');
+  // 提示文字
+  gel('dialog-text').innerHTML='（道具欄出現了一張紙條。\n點開「道具欄」查看。）'.replace(/\n/g,'<br>');
+  gel('speaker-box').style.display='none';
+  gel('next-hint').style.display='none';
+  // 自動彈出道具欄
+  setTimeout(function(){gel('inventory').classList.add('open');},400);
+}
+function renderInventory(){
+  gel('inv-count').textContent=inventory.length;
+  var c=gel('inv-content');
+  if(!inventory.length){c.innerHTML='<div style="font-size:11px;color:#3a2a10;letter-spacing:0.2em;width:100%;text-align:center;padding:18px 0;">── 尚無道具 ──</div>';return;}
+  c.innerHTML=inventory.map(function(i){
+    return '<div class="inv-item" onclick="onInvItemClick(\''+i.id+'\')"><div class="inv-item-icon">'+i.icon+'</div><div class="inv-item-name">'+i.name+'</div></div>';
+  }).join('');
+}
+function onInvItemClick(id){
+  if(id==='note'){
+    var noteS=SCRIPT.find(function(s){return s.t==='note';});
+    if(!noteS)return;
+    var ov=document.createElement('div');ov.className='note-overlay';
+    var btnLabel=noteWaitingContinue?'收好，繼續':'關閉';
+    ov.innerHTML='<div class="note-paper"><div class="note-title">── 紙條 ──</div><div class="note-body">'+noteS.body.replace(/\n/g,'<br>')+'</div><button class="note-btn" onclick="onNoteClosed(this.closest(\'.note-overlay\'))">'+btnLabel+'</button></div>';
+    document.body.appendChild(ov);
+    gel('inventory').classList.remove('open');
+  }
+}
+function onNoteClosed(ov){
+  ov.remove();
+  if(noteWaitingContinue){
+    noteWaitingContinue=false;
+    gel('next-hint').style.display='block';
+    processLine();
+  }
+}
 function addItem(id,icon,name){
-  if(inventory.find(function(i){return i.id===id;}))return;
   inventory.push({id:id,icon:icon,name:name});renderInventory();
 }
 function renderInventory(){
@@ -768,6 +853,7 @@ function startGame(){
   setTimeout(function(){
     ss.style.display='none';
     createRain();buildDecoSwitchboard();switchBg('phonebooth');applyAppearVars(APPEAR);
+    initSpriteDrag();
     setInterval(function(){if(Math.random()<0.25)lightning();},4500);
     processLine();
   },900);
@@ -788,9 +874,106 @@ function saveAndClose(){
   closeAdmin();alert('已儲存。重新開始遊戲後生效。');
 }
 function switchTab(tab){
-  var tabs=['ch1','ch2','calls','stage2','appear','io'];
+  var tabs=['ch1','ch2','calls','stage2','sprite','appear','io'];
   tabs.forEach(function(t){gel('tab-'+t).style.display=t===tab?'block':'none';});
   document.querySelectorAll('.adm-tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===tab);});
+  if(tab==='sprite')syncSpriteSliders();
+}
+
+// ══ 立繪管理 ══
+var SPRITE_SETTINGS={w:72,maxW:400,x:-4,y:0,src:null};
+
+function applySpriteStyle(){
+  var w=+gel('range-sprite-w').value;
+  var maxW=+gel('range-sprite-maxw').value;
+  var x=+gel('range-sprite-x').value;
+  var y=+gel('range-sprite-y').value;
+  gel('show-sprite-w').textContent=w+'vw';gel('val-sprite-w').textContent=w;
+  gel('show-sprite-maxw').textContent=maxW+'px';gel('val-sprite-maxw').textContent=maxW;
+  gel('show-sprite-x').textContent=x+'vw';gel('val-sprite-x').textContent=x;
+  gel('show-sprite-y').textContent=y+'px';gel('val-sprite-y').textContent=y;
+  var sprites=document.querySelectorAll('.sprite');
+  sprites.forEach(function(s){
+    s.style.width=w+'vw';
+    s.style.maxWidth=maxW+'px';
+    s.style.left=x+'vw';
+    s.style.bottom=(-y)+'px';
+  });
+}
+function syncSpriteSliders(){
+  gel('range-sprite-w').value=SPRITE_SETTINGS.w;
+  gel('range-sprite-maxw').value=SPRITE_SETTINGS.maxW;
+  gel('range-sprite-x').value=SPRITE_SETTINGS.x;
+  gel('range-sprite-y').value=SPRITE_SETTINGS.y;
+  applySpriteStyle();
+  if(SPRITE_SETTINGS.src){
+    gel('sprite-preview-img').src=SPRITE_SETTINGS.src;
+  }
+}
+function saveSpriteSettings(){
+  SPRITE_SETTINGS.w=+gel('range-sprite-w').value;
+  SPRITE_SETTINGS.maxW=+gel('range-sprite-maxw').value;
+  SPRITE_SETTINGS.x=+gel('range-sprite-x').value;
+  SPRITE_SETTINGS.y=+gel('range-sprite-y').value;
+  applySpriteStyle();
+  alert('立繪設定已套用。');
+}
+function resetSpriteSettings(){
+  SPRITE_SETTINGS={w:72,maxW:400,x:-4,y:0,src:SPRITE_SETTINGS.src};
+  syncSpriteSliders();
+}
+function onSpriteUpload(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var src=e.target.result;
+    SPRITE_SETTINGS.src=src;
+    gel('sprite-preview-img').src=src;
+    // 更新所有立繪圖片
+    document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══ 立繪拖拽（遊戲畫面） ══
+function initSpriteDrag(){
+  var sprites=document.querySelectorAll('.sprite');
+  sprites.forEach(function(sp){
+    var startX,startY,origLeft,origBottom,dragging=false;
+    function onStart(e){
+      // 只在後台關閉時可以拖
+      if(gel('admin-panel').classList.contains('open'))return;
+      dragging=true;
+      var touch=e.touches?e.touches[0]:e;
+      startX=touch.clientX;startY=touch.clientY;
+      var rect=sp.getBoundingClientRect();
+      origLeft=sp.offsetLeft;
+      origBottom=parseInt(sp.style.bottom)||0;
+      e.preventDefault();
+    }
+    function onMove(e){
+      if(!dragging)return;
+      var touch=e.touches?e.touches[0]:e;
+      var dx=touch.clientX-startX;
+      var dy=touch.clientY-startY;
+      var newLeft=origLeft+dx;
+      var newBottom=origBottom-dy;
+      // 同步移動所有立繪
+      document.querySelectorAll('.sprite').forEach(function(s){
+        s.style.left=newLeft+'px';
+        s.style.bottom=newBottom+'px';
+      });
+      e.preventDefault();
+    }
+    function onEnd(){dragging=false;}
+    sp.addEventListener('touchstart',onStart,{passive:false});
+    sp.addEventListener('touchmove',onMove,{passive:false});
+    sp.addEventListener('touchend',onEnd);
+    sp.addEventListener('mousedown',onStart);
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onEnd);
+  });
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function renderList(ch){
