@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>臺中驛・時の回廊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;600&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;600&display=swap');
 
 :root {
-–gold:#d4a830; –gold-dim:#7a5520;
-–dialog-bg:rgba(5,3,1,0.97);
-–dialog-border:#6a4418;
-/* 可調整變數 */
-–dialog-font-size:19px;
-–speaker-font-size:18px;
-–dialog-min-height:140px;
-–dialog-padding:18px 22px 22px;
-–dialog-bottom:10px;
+  --gold:#d4a830; --gold-dim:#7a5520;
+  --dialog-bg:rgba(5,3,1,0.97);
+  --dialog-border:#6a4418;
+  /* 可調整變數 */
+  --dialog-font-size:19px;
+  --speaker-font-size:18px;
+  --dialog-min-height:140px;
+  --dialog-padding:18px 22px 22px;
+  --dialog-bottom:10px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;font-family:‘Noto Serif TC’,serif;background:#000;touch-action:manipulation;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','Heiti TC','Microsoft JhengHei',serif;background:#000;touch-action:manipulation;}
 #game{position:relative;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;}
 #bg{position:absolute;inset:0;background:#060402;overflow:hidden;}
 
@@ -28,18 +29,18 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:‘Noto Serif TC’
 #phonebooth-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 .street-bg{position:absolute;inset:0;background:linear-gradient(180deg,#04030a 0%,#0a0818 35%,#12100a 70%,#1a1208 100%);}
 .city-silhouette{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(180deg,transparent 0%,#0d0c18 20%,#0d0c18 100%);}
-.city-silhouette::before{content:’’;position:absolute;bottom:0;left:0;right:0;height:100%;background:
-linear-gradient(#08071a,#08071a) 5% 60%/6% 40% no-repeat,linear-gradient(#08071a,#08071a) 14% 50%/4% 50% no-repeat,
-linear-gradient(#08071a,#08071a) 20% 55%/8% 45% no-repeat,linear-gradient(#08071a,#08071a) 30% 45%/5% 55% no-repeat,
-linear-gradient(#08071a,#08071a) 50% 48%/10% 52% no-repeat,linear-gradient(#08071a,#08071a) 70% 43%/8% 57% no-repeat,
-linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
+.city-silhouette::before{content:'';position:absolute;bottom:0;left:0;right:0;height:100%;background:
+  linear-gradient(#08071a,#08071a) 5% 60%/6% 40% no-repeat,linear-gradient(#08071a,#08071a) 14% 50%/4% 50% no-repeat,
+  linear-gradient(#08071a,#08071a) 20% 55%/8% 45% no-repeat,linear-gradient(#08071a,#08071a) 30% 45%/5% 55% no-repeat,
+  linear-gradient(#08071a,#08071a) 50% 48%/10% 52% no-repeat,linear-gradient(#08071a,#08071a) 70% 43%/8% 57% no-repeat,
+  linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
 .streetlight{position:absolute;bottom:30%;width:3px;height:35%;background:linear-gradient(to top,#3a3020,#2a2018);}
-.streetlight::before{content:’’;position:absolute;top:-2px;left:-18px;width:40px;height:8px;background:#2a2010;border-radius:2px 2px 0 0;}
-.streetlight::after{content:’’;position:absolute;top:-30px;left:-40px;width:80px;height:60px;background:radial-gradient(ellipse at 50% 10%,rgba(180,150,60,0.12) 0%,transparent 70%);border-radius:50%;}
+.streetlight::before{content:'';position:absolute;top:-2px;left:-18px;width:40px;height:8px;background:#2a2010;border-radius:2px 2px 0 0;}
+.streetlight::after{content:'';position:absolute;top:-30px;left:-40px;width:80px;height:60px;background:radial-gradient(ellipse at 50% 10%,rgba(180,150,60,0.12) 0%,transparent 70%);border-radius:50%;}
 .streetlight.left{left:12%;}.streetlight.right{right:15%;}
 #phone-booth{position:relative;width:min(180px,38vw);height:min(340px,70vh);margin-bottom:10%;z-index:3;}
 .booth-roof{position:absolute;top:-14px;left:-8px;right:-8px;height:20px;background:linear-gradient(180deg,#2a1e0c,#1a1208);border:1px solid #3a2a10;border-radius:3px 3px 0 0;}
-.booth-roof::after{content:‘電話’;position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;color:#6a5020;letter-spacing:0.2em;font-family:‘Shippori Mincho’,serif;}
+.booth-roof::after{content:'電話';position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;color:#6a5020;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;}
 .booth-body{position:absolute;inset:0;background:linear-gradient(135deg,#1a1208 0%,#0e0c08 50%,#1a1208 100%);border:2px solid #3a2a10;border-radius:4px 4px 0 0;}
 .booth-glass{position:absolute;top:15%;left:10%;right:10%;bottom:5%;background:linear-gradient(135deg,rgba(100,120,160,0.08),rgba(80,100,140,0.04),rgba(100,120,160,0.08));border:1px solid rgba(100,120,160,0.15);}
 .booth-phone{position:absolute;top:25%;left:50%;transform:translateX(-50%);width:55%;display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -49,7 +50,7 @@ linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
 .phone-screen-text{font-size:6px;color:rgba(60,220,120,0);transition:color 1.5s;}
 .phone-screen.on .phone-screen-text{color:rgba(60,220,120,0.8);}
 .phone-receiver{width:70%;height:6px;background:linear-gradient(90deg,#1a1008,#3a2810,#1a1008);border-radius:3px;position:relative;}
-.phone-receiver::before,.phone-receiver::after{content:’’;position:absolute;top:-3px;width:12px;height:12px;background:#0e0c08;border:1px solid #3a2810;border-radius:50%;}
+.phone-receiver::before,.phone-receiver::after{content:'';position:absolute;top:-3px;width:12px;height:12px;background:#0e0c08;border:1px solid #3a2810;border-radius:50%;}
 .phone-receiver::before{left:0;}.phone-receiver::after{right:0;}
 .booth-sign{position:absolute;top:8%;left:50%;transform:translateX(-50%) rotate(-3deg);background:#f0e4c4;padding:2px 6px;font-size:8px;color:#3a1a08;border:1px solid #8a6030;white-space:nowrap;z-index:6;}
 #phone-glow-overlay{position:absolute;inset:-20px;background:radial-gradient(ellipse at 50% 50%,rgba(60,220,120,0),transparent 70%);pointer-events:none;transition:background 2s;z-index:5;}
@@ -61,18 +62,18 @@ linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
 .exchange-wall{position:absolute;inset:0;background:linear-gradient(180deg,#1e1a10 0%,#14100a 60%,transparent 100%);}
 .wall-clock{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:44px;height:44px;}
 .clock-face{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,#f0e0c0,#d4c090);border:2px solid #3a2810;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.6);position:relative;}
-.clock-face::after{content:‘臺中郵便局’;position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:7px;color:#5a4020;letter-spacing:0.15em;white-space:nowrap;font-family:‘Shippori Mincho’,serif;}
+.clock-face::after{content:'臺中郵便局';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:7px;color:#5a4020;letter-spacing:0.15em;white-space:nowrap;font-family:'Shippori Mincho',serif;}
 .clock-hour,.clock-min{position:absolute;bottom:50%;left:50%;transform-origin:bottom center;background:#1a0a05;border-radius:2px;}
 .clock-hour{width:2px;height:11px;margin-left:-1px;transform:rotate(90deg);}
 .clock-min{width:1px;height:15px;margin-left:0;transform:rotate(30deg);}
 .exchange-floor{position:absolute;bottom:0;left:0;right:0;height:25%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;}
-.exchange-floor::before{content:’’;position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 40px,rgba(60,40,10,0.3) 40px,rgba(60,40,10,0.3) 41px),repeating-linear-gradient(0deg,transparent 0px,transparent 20px,rgba(60,40,10,0.2) 20px,rgba(60,40,10,0.2) 21px);}
+.exchange-floor::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent 40px,rgba(60,40,10,0.3) 40px,rgba(60,40,10,0.3) 41px),repeating-linear-gradient(0deg,transparent 0px,transparent 20px,rgba(60,40,10,0.2) 20px,rgba(60,40,10,0.2) 21px);}
 .ex-window{position:absolute;top:12%;width:min(70px,15vw);height:min(90px,18vh);background:linear-gradient(135deg,rgba(120,140,180,0.06),rgba(80,100,150,0.03));border:1px solid rgba(120,140,180,0.15);}
 .ex-window.left{left:8%;}.ex-window.right{right:8%;}
 .wood-panel{position:absolute;bottom:22%;left:0;right:0;height:28%;background:linear-gradient(180deg,#1a1408,#0e0c08);}
-.wood-panel::before{content:’’;position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0px,transparent 18px,rgba(40,28,10,0.4) 18px,rgba(40,28,10,0.4) 19px);}
+.wood-panel::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0px,transparent 18px,rgba(40,28,10,0.4) 18px,rgba(40,28,10,0.4) 19px);}
 #switchboard-deco{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:min(360px,92vw);background:linear-gradient(180deg,#2a1e0a,#1a1206);border:2px solid #4a3010;border-radius:4px 4px 0 0;padding:10px 12px;box-shadow:0 -4px 24px rgba(0,0,0,0.7);}
-.sb-deco-label{text-align:center;font-family:‘Shippori Mincho’,serif;font-size:10px;color:#7a6030;letter-spacing:0.4em;margin-bottom:8px;}
+.sb-deco-label{text-align:center;font-family:'Shippori Mincho',serif;font-size:10px;color:#7a6030;letter-spacing:0.4em;margin-bottom:8px;}
 .sb-deco-jacks{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:8px;}
 .sb-deco-jack{aspect-ratio:1;background:radial-gradient(circle,#0a0806 40%,#1a1208 100%);border:1px solid #3a2810;border-radius:50%;}
 .sb-deco-cords{display:flex;gap:8px;justify-content:center;}
@@ -93,45 +94,45 @@ linear-gradient(#08071a,#08071a) 88% 50%/7% 50% no-repeat;}
 
 /* 對話框 */
 #dialog-area{
-position:relative;z-index:10;
-padding:0 8px var(–dialog-bottom);
-display:flex;flex-direction:column;gap:0;
+  position:relative;z-index:10;
+  padding:0 8px var(--dialog-bottom);
+  display:flex;flex-direction:column;gap:0;
 }
-#speaker-box{display:inline-flex;align-items:center;background:var(–dialog-bg);border:1px solid var(–dialog-border);border-bottom:none;padding:7px 20px;width:fit-content;}
-#speaker-name{font-size:var(–speaker-font-size);color:#f5c830;letter-spacing:0.2em;font-family:‘Shippori Mincho’,serif;font-weight:600;}
-#dialog-box{background:var(–dialog-bg);border:1px solid var(–dialog-border);padding:var(–dialog-padding);min-height:var(–dialog-min-height);position:relative;}
-#dialog-box::before{content:‘◆’;position:absolute;top:7px;left:9px;color:var(–gold);font-size:8px;opacity:0.55;}
-#dialog-box::after{content:‘◆’;position:absolute;bottom:7px;right:9px;color:var(–gold);font-size:8px;opacity:0.55;}
-#dialog-text{color:#f8eed5;font-size:var(–dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;}
-#next-hint{position:absolute;bottom:9px;right:15px;color:var(–gold);font-size:15px;animation:blink 1.3s ease-in-out infinite;}
+#speaker-box{display:inline-flex;align-items:center;background:var(--dialog-bg);border:1px solid var(--dialog-border);border-bottom:none;padding:7px 20px;width:fit-content;}
+#speaker-name{font-size:var(--speaker-font-size);color:#f5c830;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;font-weight:600;}
+#dialog-box{background:var(--dialog-bg);border:1px solid var(--dialog-border);padding:var(--dialog-padding);min-height:var(--dialog-min-height);position:relative;}
+#dialog-box::before{content:'◆';position:absolute;top:7px;left:9px;color:var(--gold);font-size:8px;opacity:0.55;}
+#dialog-box::after{content:'◆';position:absolute;bottom:7px;right:9px;color:var(--gold);font-size:8px;opacity:0.55;}
+#dialog-text{color:#f8eed5;font-size:var(--dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;}
+#next-hint{position:absolute;bottom:9px;right:15px;color:var(--gold);font-size:15px;animation:blink 1.3s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 
 /* 行動按鈕（在對話框內） */
 #action-btns{
-display:none;flex-direction:column;gap:8px;
-padding:10px 0 4px;
+  display:none;flex-direction:column;gap:8px;
+  padding:10px 0 4px;
 }
 .action-btn{
-background:linear-gradient(90deg,rgba(10,8,4,0.9),rgba(20,14,6,0.9));
-border:1px solid var(–gold-dim);
-color:#e8c860;font-size:15px;letter-spacing:0.15em;
-padding:12px 16px;cursor:pointer;
-font-family:‘Noto Serif TC’,serif;
-transition:all 0.2s ease;text-align:left;
-border-radius:2px;
+  background:linear-gradient(90deg,rgba(10,8,4,0.9),rgba(20,14,6,0.9));
+  border:1px solid var(--gold-dim);
+  color:#e8c860;font-size:15px;letter-spacing:0.15em;
+  padding:12px 16px;cursor:pointer;
+  font-family:'Noto Serif TC',serif;
+  transition:all 0.2s ease;text-align:left;
+  border-radius:2px;
 }
-.action-btn:hover,.action-btn:active{background:rgba(212,168,48,0.1);border-color:var(–gold);}
-.action-btn::before{content:’▶ ’;font-size:10px;opacity:0.7;}
+.action-btn:hover,.action-btn:active{background:rgba(212,168,48,0.1);border-color:var(--gold);}
+.action-btn::before{content:'▶ ';font-size:10px;opacity:0.7;}
 
 /* 道具欄 */
 #inventory{position:fixed;bottom:0;left:0;right:0;z-index:20;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);transform:translateY(calc(100% - 42px));}
 #inventory.open{transform:translateY(0);}
-#inv-handle{background:linear-gradient(90deg,#080604,#160e06,#080604);border:1px solid var(–gold-dim);border-bottom:none;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
-.inv-handle-text{font-size:13px;color:var(–gold);letter-spacing:0.3em;font-family:‘Shippori Mincho’,serif;}
-.inv-arrow{font-size:11px;color:var(–gold-dim);transition:transform 0.3s;}
+#inv-handle{background:linear-gradient(90deg,#080604,#160e06,#080604);border:1px solid var(--gold-dim);border-bottom:none;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.inv-handle-text{font-size:13px;color:var(--gold);letter-spacing:0.3em;font-family:'Shippori Mincho',serif;}
+.inv-arrow{font-size:11px;color:var(--gold-dim);transition:transform 0.3s;}
 #inventory.open .inv-arrow{transform:rotate(180deg);}
 #inv-count{background:#8b2020;color:#f5e0c0;font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;}
-#inv-content{background:linear-gradient(180deg,#0e0a06,#080604);border:1px solid var(–gold-dim);border-top:none;padding:12px;min-height:90px;display:flex;gap:10px;flex-wrap:wrap;}
+#inv-content{background:linear-gradient(180deg,#0e0a06,#080604);border:1px solid var(--gold-dim);border-top:none;padding:12px;min-height:90px;display:flex;gap:10px;flex-wrap:wrap;}
 .inv-item{width:64px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
 .inv-item-icon{width:56px;height:72px;background:linear-gradient(135deg,#f0e4c4,#d4c898);border:1px solid #8a6030;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:2px 2px 8px rgba(0,0,0,0.5);}
 .inv-item-name{font-size:10px;color:#a08050;letter-spacing:0.1em;text-align:center;}
@@ -139,23 +140,23 @@ border-radius:2px;
 /* 章節標題 */
 #chapter-title{position:absolute;inset:0;z-index:25;background:#000;opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.9s ease;}
 #chapter-title.show{opacity:1;pointer-events:all;}
-.ch-jp{font-family:‘Shippori Mincho’,serif;font-size:12px;color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;}
+.ch-jp{font-family:'Shippori Mincho',serif;font-size:12px;color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;}
 .ch-main{font-size:22px;color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;}
-.ch-line{width:50px;height:1px;background:var(–gold);margin:18px auto;opacity:0.5;}
+.ch-line{width:50px;height:1px;background:var(--gold);margin:18px auto;opacity:0.5;}
 .ch-sub{font-size:12px;color:#6a5a3a;letter-spacing:0.3em;}
 
 /* 紙條 */
 .note-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadein 0.4s ease;}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
-.note-paper{background:linear-gradient(135deg,#f5ecd4,#ecdfc0 50%,#f0e8cc);border:1px solid #8a6030;padding:24px 20px;max-width:320px;width:100%;box-shadow:0 0 50px rgba(0,0,0,0.7),3px 3px 0 #8a6030;position:relative;font-family:‘Noto Serif TC’,serif;}
-.note-paper::before{content:’’;position:absolute;inset:8px;border:1px solid rgba(139,96,48,0.2);pointer-events:none;}
+.note-paper{background:linear-gradient(135deg,#f5ecd4,#ecdfc0 50%,#f0e8cc);border:1px solid #8a6030;padding:24px 20px;max-width:320px;width:100%;box-shadow:0 0 50px rgba(0,0,0,0.7),3px 3px 0 #8a6030;position:relative;font-family:'Noto Serif TC',serif;}
+.note-paper::before{content:'';position:absolute;inset:8px;border:1px solid rgba(139,96,48,0.2);pointer-events:none;}
 .note-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(139,96,48,0.3);}
 .note-body{font-size:15px;line-height:2.2;color:#1e1008;white-space:pre-wrap;letter-spacing:0.05em;}
-.note-btn{display:block;margin:16px auto 0;background:none;border:1px solid #8a6030;color:#5a3a10;padding:9px 28px;font-family:‘Noto Serif TC’,serif;font-size:12px;letter-spacing:0.3em;cursor:pointer;}
+.note-btn{display:block;margin:16px auto 0;background:none;border:1px solid #8a6030;color:#5a3a10;padding:9px 28px;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.3em;cursor:pointer;}
 
 /* 關卡一：接線生 */
 #stage-switchboard{position:fixed;inset:0;z-index:40;background:#070503;display:none;flex-direction:column;align-items:stretch;overflow:hidden;}
-.sb-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;display:flex;align-items:center;justify-content:center;font-family:‘Shippori Mincho’,serif;font-size:13px;color:var(–gold);letter-spacing:0.4em;}
+.sb-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho',serif;font-size:13px;color:var(--gold);letter-spacing:0.4em;}
 .call-banner{margin:10px 12px 0;background:linear-gradient(90deg,#160e04,#221608,#160e04);border:2px solid #c87020;border-radius:3px;padding:12px 16px;animation:ring-pulse 0.9s ease-in-out infinite;}
 .call-banner.connected{border-color:#30b080;animation:none;}
 .call-banner.done{border-color:#3a6040;animation:none;opacity:0.7;}
@@ -164,22 +165,22 @@ border-radius:2px;
 .cb-from,.cb-to{display:flex;flex-direction:column;gap:3px;flex:1;}
 .cb-to{text-align:right;}
 .cb-label{font-size:11px;color:#8a6030;letter-spacing:0.15em;}
-.cb-number{font-size:22px;color:#ffd050;letter-spacing:0.15em;font-family:‘Shippori Mincho’,serif;font-weight:600;line-height:1.2;}
+.cb-number{font-size:22px;color:#ffd050;letter-spacing:0.15em;font-family:'Shippori Mincho',serif;font-weight:600;line-height:1.2;}
 .cb-arrow{font-size:26px;color:#6a4818;flex-shrink:0;}
 .call-banner.connected .cb-arrow{color:#30b080;}
 .sb-panel-wrap{margin:8px 12px 0;background:linear-gradient(180deg,#1e1608,#140e06);border:1px solid #3a2810;border-radius:3px;padding:8px 10px;}
-.sb-panel-label{font-size:10px;color:#6a5020;letter-spacing:0.4em;text-align:center;margin-bottom:6px;font-family:‘Shippori Mincho’,serif;}
+.sb-panel-label{font-size:10px;color:#6a5020;letter-spacing:0.4em;text-align:center;margin-bottom:6px;font-family:'Shippori Mincho',serif;}
 .sb-jacks{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
 .sb-jack{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 2px;border:1px solid transparent;border-radius:3px;transition:all 0.2s ease;user-select:none;}
 .sb-jack:active{transform:scale(0.94);}
 .sb-jack.ringing{border-color:#c87020;background:rgba(200,112,32,0.1);}
-.sb-jack.selected{border-color:var(–gold);background:rgba(212,168,48,0.12);}
+.sb-jack.selected{border-color:var(--gold);background:rgba(212,168,48,0.12);}
 .sb-jack.plugged{border-color:#208060;background:rgba(32,128,96,0.08);}
 .sb-jack.correct{border-color:#30c090;background:rgba(48,192,144,0.1);}
 .sb-jack.wrong-flash{border-color:#c03030!important;background:rgba(192,48,48,0.12)!important;}
 .sb-jack-hole{width:24px;height:24px;background:radial-gradient(circle,#050402 40%,#1a1208 100%);border:1.5px solid #3a2810;border-radius:50%;transition:all 0.3s ease;}
 .sb-jack.ringing .sb-jack-hole{border-color:#c87020;box-shadow:0 0 7px rgba(200,112,32,0.6);animation:jack-blink 0.8s ease-in-out infinite;}
-.sb-jack.selected .sb-jack-hole{border-color:var(–gold);box-shadow:0 0 6px rgba(212,168,48,0.5);}
+.sb-jack.selected .sb-jack-hole{border-color:var(--gold);box-shadow:0 0 6px rgba(212,168,48,0.5);}
 .sb-jack.plugged .sb-jack-hole{background:radial-gradient(circle,#8a6020,#2a1808 100%);border-color:#c8a030;}
 .sb-jack.correct .sb-jack-hole{background:radial-gradient(circle,#104030 40%,#0a1a14 100%);border-color:#30c090;box-shadow:0 0 5px rgba(48,192,144,0.4);}
 @keyframes jack-blink{0%,100%{opacity:1}50%{opacity:0.4}}
@@ -188,25 +189,25 @@ border-radius:2px;
 .sb-jack.correct .sb-jack-name{color:#50c090;}
 .sb-cords{display:flex;gap:10px;justify-content:center;padding:6px 0;border-top:1px solid #1e1406;border-bottom:1px solid #1e1406;margin-bottom:6px;}
 .sb-cord{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 14px;border:1px solid #3a2810;border-radius:3px;transition:all 0.2s ease;user-select:none;}
-.sb-cord.selected{border-color:var(–gold);background:rgba(212,168,48,0.1);}
+.sb-cord.selected{border-color:var(--gold);background:rgba(212,168,48,0.1);}
 .sb-cord.used{opacity:0.45;cursor:default;border-color:#2a1a08;}
 .sb-cord-plug{width:11px;height:17px;background:linear-gradient(180deg,#d4c060,#8a7030);border-radius:2px 2px 4px 4px;border:1px solid #4a3010;}
 .sb-cord-wire{width:2px;height:18px;background:repeating-linear-gradient(180deg,#4a3010 0px,#4a3010 3px,#6a5020 3px,#6a5020 6px);}
 .sb-cord-name{font-size:10px;color:#7a6030;}
-.sb-cord.selected .sb-cord-name{color:var(–gold);}
-.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#9a8050;font-size:12px;letter-spacing:0.3em;font-family:‘Shippori Mincho’,serif;cursor:pointer;transition:all 0.2s ease;}
-.sb-talk-btn.active{background:linear-gradient(180deg,#4a3010,#2a1e0a);color:var(–gold);border-color:var(–gold-dim);}
+.sb-cord.selected .sb-cord-name{color:var(--gold);}
+.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#9a8050;font-size:12px;letter-spacing:0.3em;font-family:'Shippori Mincho',serif;cursor:pointer;transition:all 0.2s ease;}
+.sb-talk-btn.active{background:linear-gradient(180deg,#4a3010,#2a1e0a);color:var(--gold);border-color:var(--gold-dim);}
 .sb-talk-btn:disabled{opacity:0.4;cursor:default;}
 .sb-bottom{flex:1;display:flex;flex-direction:column;padding:6px 12px 8px;overflow:hidden;min-height:0;}
 .sb-dialog-box{flex:1;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #1e1808;border-radius:2px;padding:8px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;}
-.sb-msg-who{font-size:11px;color:#8a7040;letter-spacing:0.2em;font-family:‘Shippori Mincho’,serif;}
+.sb-msg-who{font-size:11px;color:#8a7040;letter-spacing:0.2em;font-family:'Shippori Mincho',serif;}
 .sb-msg-text{font-size:15px;color:#e8d8b0;line-height:1.85;letter-spacing:0.04em;}
-.sb-finish-btn{margin-top:8px;padding:11px 20px;background:none;border:1px solid var(–gold-dim);color:var(–gold);font-size:13px;letter-spacing:0.3em;font-family:‘Noto Serif TC’,serif;cursor:pointer;display:none;align-self:center;transition:all 0.2s ease;}
-.sb-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(–gold);}
+.sb-finish-btn{margin-top:8px;padding:11px 20px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;display:none;align-self:center;transition:all 0.2s ease;}
+.sb-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(--gold);}
 
 /* 關卡二：找地圖 */
 #stage-map{position:fixed;inset:0;z-index:40;background:#070503;display:none;flex-direction:column;align-items:stretch;overflow:hidden;}
-.map-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;text-align:center;font-family:‘Shippori Mincho’,serif;font-size:13px;color:var(–gold);letter-spacing:0.4em;}
+.map-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;text-align:center;font-family:'Shippori Mincho',serif;font-size:13px;color:var(--gold);letter-spacing:0.4em;}
 .map-scene{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0a0806,#120e08);overflow:hidden;}
 /* 地圖桌 */
 .map-table{position:relative;width:min(320px,88vw);height:min(260px,55vw);background:linear-gradient(135deg,#2a1e0c,#1a1408);border:2px solid #5a3c10;border-radius:4px;box-shadow:0 4px 20px rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;}
@@ -216,47 +217,47 @@ border-radius:2px;
 .table-item:active{transform:scale(0.95);}
 /* 地圖捲軸 */
 .map-scroll{width:80px;height:60px;background:linear-gradient(135deg,#d4c090,#b8a060);border:1px solid #8a6030;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#5a3a10;letter-spacing:0.1em;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
-.map-scroll::before{content:‘地\A圖’;white-space:pre;text-align:center;font-size:12px;font-family:‘Shippori Mincho’,serif;color:#3a2010;}
+.map-scroll::before{content:'地\A圖';white-space:pre;text-align:center;font-size:12px;font-family:'Shippori Mincho',serif;color:#3a2010;}
 /* 電話帖 */
 .phone-book{width:50px;height:65px;background:linear-gradient(180deg,#8a2020,#6a1818);border:1px solid #4a1010;border-radius:2px;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
-.phone-book::before{content:‘電\A話\A帖’;white-space:pre;text-align:center;font-size:9px;color:#f0d0b0;letter-spacing:0.1em;font-family:‘Shippori Mincho’,serif;}
+.phone-book::before{content:'電\A話\A帖';white-space:pre;text-align:center;font-size:9px;color:#f0d0b0;letter-spacing:0.1em;font-family:'Shippori Mincho',serif;}
 /* 筆記本 */
 .notebook{width:55px;height:70px;background:linear-gradient(180deg,#2a3a5a,#1a2840);border:1px solid #3a4a6a;border-radius:2px;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 6px rgba(0,0,0,0.5);}
-.notebook::before{content:‘筆\A記’;white-space:pre;text-align:center;font-size:10px;color:#a0b8d8;letter-spacing:0.1em;font-family:‘Shippori Mincho’,serif;}
+.notebook::before{content:'筆\A記';white-space:pre;text-align:center;font-size:10px;color:#a0b8d8;letter-spacing:0.1em;font-family:'Shippori Mincho',serif;}
 /* 已找到光暈 */
 .table-item.found{filter:brightness(0.5);cursor:default;pointer-events:none;}
 
 .map-hint{padding:8px 14px;background:#0a0806;border-top:1px solid #1e1408;font-size:13px;color:#9a8050;letter-spacing:0.1em;text-align:center;min-height:36px;}
-.map-finish-btn{margin:8px auto;padding:11px 24px;background:none;border:1px solid var(–gold-dim);color:var(–gold);font-size:13px;letter-spacing:0.3em;font-family:‘Noto Serif TC’,serif;cursor:pointer;display:none;transition:all 0.2s ease;}
-.map-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(–gold);}
+.map-finish-btn{margin:8px auto;padding:11px 24px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;display:none;transition:all 0.2s ease;}
+.map-finish-btn:hover{background:rgba(212,168,48,0.08);border-color:var(--gold);}
 
 /* 開始畫面 */
 #start-screen{position:absolute;inset:0;z-index:30;background:radial-gradient(ellipse at 50% 40%,#0e0a06,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.s-deco{font-family:‘Shippori Mincho’,serif;font-size:10px;color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
-.s-title-jp{font-family:‘Shippori Mincho’,serif;font-size:26px;color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
+.s-deco{font-family:'Shippori Mincho',serif;font-size:10px;color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
+.s-title-jp{font-family:'Shippori Mincho',serif;font-size:26px;color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
 .s-title-zh{font-size:12px;color:#5a4020;letter-spacing:0.5em;margin-bottom:36px;}
 .s-rule{width:1px;height:50px;background:linear-gradient(to bottom,transparent,#5a3c10,transparent);margin-bottom:36px;}
-#start-btn{background:none;border:1px solid #3a2a12;color:#c8b882;font-family:‘Noto Serif TC’,serif;font-size:12px;letter-spacing:0.4em;padding:11px 32px;cursor:pointer;transition:all 0.3s ease;}
-#start-btn:hover{border-color:var(–gold);color:var(–gold);}
-#admin-btn{position:absolute;top:14px;left:14px;background:rgba(10,8,4,0.7);border:1px solid #3a2a10;color:#5a4020;font-size:10px;letter-spacing:0.25em;padding:5px 10px;cursor:pointer;font-family:‘Noto Serif TC’,serif;transition:all 0.3s;z-index:31;border-radius:2px;}
-#admin-btn:hover{border-color:var(–gold-dim);color:var(–gold);}
+#start-btn{background:none;border:1px solid #3a2a12;color:#c8b882;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.4em;padding:11px 32px;cursor:pointer;transition:all 0.3s ease;}
+#start-btn:hover{border-color:var(--gold);color:var(--gold);}
+#admin-btn{position:absolute;top:14px;left:14px;background:rgba(10,8,4,0.7);border:1px solid #3a2a10;color:#5a4020;font-size:10px;letter-spacing:0.25em;padding:5px 10px;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.3s;z-index:31;border-radius:2px;}
+#admin-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
 
 /* ══ 後台 ══ */
-#admin-panel{position:fixed;inset:0;z-index:100;background:#0a0806;display:none;flex-direction:column;font-family:‘Noto Serif TC’,serif;color:#d4c090;}
+#admin-panel{position:fixed;inset:0;z-index:100;background:#0a0806;display:none;flex-direction:column;font-family:'Noto Serif TC',serif;color:#d4c090;}
 #admin-panel.open{display:flex;}
 .adm-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #3a2810;background:#0e0c08;flex-shrink:0;}
-.adm-title{font-size:14px;color:var(–gold);letter-spacing:0.3em;font-family:‘Shippori Mincho’,serif;}
+.adm-title{font-size:14px;color:var(--gold);letter-spacing:0.3em;font-family:'Shippori Mincho',serif;}
 .adm-topbar-btns{display:flex;gap:8px;}
 .adm-tabs{display:flex;border-bottom:1px solid #2a1808;flex-shrink:0;overflow-x:auto;}
 .adm-tab{padding:10px 14px;font-size:12px;letter-spacing:0.15em;color:#6a5030;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s ease;flex-shrink:0;}
-.adm-tab.active{color:var(–gold);border-bottom-color:var(–gold);}
+.adm-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
 .adm-body{flex:1;overflow-y:auto;padding:14px 14px 20px;}
 .adm-section{margin-bottom:18px;}
 .adm-section-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #2a1808;}
 .adm-field{margin-bottom:10px;}
 .adm-label{font-size:11px;color:#7a6040;letter-spacing:0.15em;display:block;margin-bottom:4px;}
-.adm-input{width:100%;background:#0e0c08;border:1px solid #3a2810;color:#d4c090;font-size:14px;padding:8px 10px;font-family:‘Noto Serif TC’,serif;letter-spacing:0.05em;border-radius:2px;resize:vertical;}
-.adm-input:focus{outline:none;border-color:var(–gold-dim);}
+.adm-input{width:100%;background:#0e0c08;border:1px solid #3a2810;color:#d4c090;font-size:14px;padding:8px 10px;font-family:'Noto Serif TC',serif;letter-spacing:0.05em;border-radius:2px;resize:vertical;}
+.adm-input:focus{outline:none;border-color:var(--gold-dim);}
 .adm-textarea{min-height:80px;}
 
 /* 腳本行卡 */
@@ -271,14 +272,14 @@ border-radius:2px;
 .sc-del-btn:hover{color:#c04030;}
 .sc-up-btn,.sc-dn-btn{position:absolute;background:none;border:none;color:#4a3a20;font-size:13px;cursor:pointer;padding:2px 5px;}
 .sc-up-btn{top:8px;right:42px;}.sc-dn-btn{top:8px;right:66px;}
-.sc-up-btn:hover,.sc-dn-btn:hover{color:var(–gold);}
+.sc-up-btn:hover,.sc-dn-btn:hover{color:var(--gold);}
 .sc-add-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-.sc-add-btn{background:none;border:1px solid #2a1808;color:#6a5030;font-size:10px;letter-spacing:0.2em;padding:5px 10px;cursor:pointer;border-radius:2px;transition:all 0.2s;font-family:‘Noto Serif TC’,serif;}
-.sc-add-btn:hover{border-color:var(–gold-dim);color:var(–gold);}
+.sc-add-btn{background:none;border:1px solid #2a1808;color:#6a5030;font-size:10px;letter-spacing:0.2em;padding:5px 10px;cursor:pointer;border-radius:2px;transition:all 0.2s;font-family:'Noto Serif TC',serif;}
+.sc-add-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
 
 /* 通話卡 */
 .call-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:10px;}
-.call-card-title{font-size:12px;color:var(–gold);letter-spacing:0.2em;margin-bottom:8px;}
+.call-card-title{font-size:12px;color:var(--gold);letter-spacing:0.2em;margin-bottom:8px;}
 .call-del-btn{float:right;background:none;border:none;color:#4a2a20;font-size:15px;cursor:pointer;}
 .call-del-btn:hover{color:#c04030;}
 .call-dlg-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;}
@@ -289,11 +290,11 @@ border-radius:2px;
 /* 外觀設定 */
 .appearance-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .range-row{display:flex;align-items:center;gap:8px;}
-.range-row input[type=range]{flex:1;accent-color:var(–gold);}
-.range-val{font-size:12px;color:var(–gold);min-width:40px;}
+.range-row input[type=range]{flex:1;accent-color:var(--gold);}
+.range-val{font-size:12px;color:var(--gold);min-width:40px;}
 
 /* 通用按鈕 */
-.adm-btn{background:none;border:1px solid var(–gold-dim);color:var(–gold);font-size:11px;letter-spacing:0.3em;padding:8px 16px;cursor:pointer;font-family:‘Noto Serif TC’,serif;border-radius:2px;transition:all 0.2s ease;}
+.adm-btn{background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:11px;letter-spacing:0.3em;padding:8px 16px;cursor:pointer;font-family:'Noto Serif TC',serif;border-radius:2px;transition:all 0.2s ease;}
 .adm-btn:hover{background:rgba(212,168,48,0.08);}
 .adm-btn.danger{border-color:#6a2020;color:#c06050;}
 .adm-btn.danger:hover{background:rgba(192,48,48,0.08);}
@@ -302,60 +303,60 @@ border-radius:2px;
 
 /* 章節管理 */
 .chapter-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:8px;}
-.chapter-card-title{font-size:12px;color:var(–gold);letter-spacing:0.2em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.chapter-card-title{font-size:12px;color:var(--gold);letter-spacing:0.2em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
 
 /* ══════════════════════════════════
-關卡二：前往臺中車站
+   關卡二：前往臺中車站
 ══════════════════════════════════ */
 #stage-map{
-position:fixed;inset:0;z-index:40;
-background:linear-gradient(180deg,#08060a 0%,#100e08 100%);
-display:none;flex-direction:column;
-align-items:center;
-overflow-y:auto;
-padding:0 0 20px;
+  position:fixed;inset:0;z-index:40;
+  background:linear-gradient(180deg,#08060a 0%,#100e08 100%);
+  display:none;flex-direction:column;
+  align-items:center;
+  overflow-y:auto;
+  padding:0 0 20px;
 }
 
 /* 標題列 */
 .s2-header{
-width:100%;padding:12px 16px 10px;
-border-bottom:1px solid #2a1808;
-text-align:center;
-font-family:‘Shippori Mincho’,serif;
-font-size:13px;color:var(–gold);letter-spacing:0.4em;
-flex-shrink:0;
+  width:100%;padding:12px 16px 10px;
+  border-bottom:1px solid #2a1808;
+  text-align:center;
+  font-family:'Shippori Mincho',serif;
+  font-size:13px;color:var(--gold);letter-spacing:0.4em;
+  flex-shrink:0;
 }
 
 /* 指示卡 */
 .s2-card{
-width:calc(100% - 24px);max-width:400px;
-margin:14px auto 0;
-background:linear-gradient(135deg,#0e0c08,#080604);
-border:1px solid #3a2810;border-radius:4px;
-padding:16px 16px;
+  width:calc(100% - 24px);max-width:400px;
+  margin:14px auto 0;
+  background:linear-gradient(135deg,#0e0c08,#080604);
+  border:1px solid #3a2810;border-radius:4px;
+  padding:16px 16px;
 }
 .s2-card-title{
-font-size:11px;color:#8a6030;letter-spacing:0.4em;
-margin-bottom:10px;padding-bottom:7px;
-border-bottom:1px solid #2a1808;
-font-family:‘Shippori Mincho’,serif;
+  font-size:11px;color:#8a6030;letter-spacing:0.4em;
+  margin-bottom:10px;padding-bottom:7px;
+  border-bottom:1px solid #2a1808;
+  font-family:'Shippori Mincho',serif;
 }
 
 /* 方向圖示區 */
 .s2-direction{
-display:flex;align-items:center;justify-content:center;
-gap:16px;padding:12px 0;
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;padding:12px 0;
 }
 .s2-from,.s2-to{
-display:flex;flex-direction:column;align-items:center;gap:6px;
-flex:1;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex:1;
 }
 .s2-place-icon{
-width:52px;height:52px;
-border-radius:50%;
-display:flex;align-items:center;justify-content:center;
-font-size:24px;
-border:1px solid #4a3010;
+  width:52px;height:52px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  border:1px solid #4a3010;
 }
 .s2-from .s2-place-icon{background:radial-gradient(circle,#1a1408,#0e0c06);}
 .s2-to   .s2-place-icon{background:radial-gradient(circle,#1a1808,#0e0c06);border-color:#208060;}
@@ -363,12 +364,12 @@ border:1px solid #4a3010;
 
 /* 箭頭動畫 */
 .s2-arrow-track{
-display:flex;flex-direction:column;align-items:center;gap:3px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
 }
 .s2-arrow-dot{
-width:6px;height:6px;border-radius:50%;
-background:var(–gold);opacity:0;
-animation:dot-travel 1.8s ease-in-out infinite;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);opacity:0;
+  animation:dot-travel 1.8s ease-in-out infinite;
 }
 .s2-arrow-dot:nth-child(1){animation-delay:0s;}
 .s2-arrow-dot:nth-child(2){animation-delay:0.3s;}
@@ -376,88 +377,88 @@ animation:dot-travel 1.8s ease-in-out infinite;
 .s2-arrow-dot:nth-child(4){animation-delay:0.9s;}
 .s2-arrow-dot:nth-child(5){animation-delay:1.2s;}
 @keyframes dot-travel{
-0%{opacity:0;transform:scale(0.5);}
-30%{opacity:1;transform:scale(1);}
-70%{opacity:1;transform:scale(1);}
-100%{opacity:0;transform:scale(0.5);}
+  0%{opacity:0;transform:scale(0.5);}
+  30%{opacity:1;transform:scale(1);}
+  70%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(0.5);}
 }
 
 /* 路線說明 */
 .s2-route-text{
-font-size:14px;color:#d4c090;line-height:2;
-letter-spacing:0.05em;margin-top:8px;
+  font-size:14px;color:#d4c090;line-height:2;
+  letter-spacing:0.05em;margin-top:8px;
 }
 .s2-route-step{
-display:flex;align-items:flex-start;gap:10px;
-padding:8px 0;border-bottom:1px solid #1a1408;
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 0;border-bottom:1px solid #1a1408;
 }
 .s2-route-step:last-child{border-bottom:none;}
 .s2-step-num{
-flex-shrink:0;width:22px;height:22px;
-border-radius:50%;background:#2a1e0a;
-border:1px solid #6a4818;
-display:flex;align-items:center;justify-content:center;
-font-size:11px;color:var(–gold);
-margin-top:2px;
+  flex-shrink:0;width:22px;height:22px;
+  border-radius:50%;background:#2a1e0a;
+  border:1px solid #6a4818;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--gold);
+  margin-top:2px;
 }
 .s2-step-text{font-size:14px;color:#d4c090;line-height:1.8;letter-spacing:0.04em;}
 
 /* 羅盤輸入區 */
 .s2-compass-wrap{
-width:calc(100% - 24px);max-width:400px;
-margin:12px auto 0;
-background:linear-gradient(135deg,#0e0c08,#080604);
-border:1px solid #3a2810;border-radius:4px;
-padding:16px;
+  width:calc(100% - 24px);max-width:400px;
+  margin:12px auto 0;
+  background:linear-gradient(135deg,#0e0c08,#080604);
+  border:1px solid #3a2810;border-radius:4px;
+  padding:16px;
 }
 .s2-compass-title{
-font-size:11px;color:#8a6030;letter-spacing:0.4em;
-margin-bottom:6px;font-family:‘Shippori Mincho’,serif;
+  font-size:11px;color:#8a6030;letter-spacing:0.4em;
+  margin-bottom:6px;font-family:'Shippori Mincho',serif;
 }
 .s2-compass-q{
-font-size:15px;color:#f0e0b0;line-height:1.8;
-letter-spacing:0.05em;margin-bottom:12px;
+  font-size:15px;color:#f0e0b0;line-height:1.8;
+  letter-spacing:0.05em;margin-bottom:12px;
 }
 
 /* 羅盤八方位選擇 */
 .s2-compass-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:6px;margin-bottom:12px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;margin-bottom:12px;
 }
 .s2-dir-btn{
-padding:10px 4px;
-background:linear-gradient(135deg,#1a1408,#0e0c06);
-border:1px solid #3a2810;border-radius:3px;
-color:#8a7040;font-size:14px;letter-spacing:0.1em;
-cursor:pointer;text-align:center;
-transition:all 0.2s ease;
-font-family:‘Noto Serif TC’,serif;
-user-select:none;
+  padding:10px 4px;
+  background:linear-gradient(135deg,#1a1408,#0e0c06);
+  border:1px solid #3a2810;border-radius:3px;
+  color:#8a7040;font-size:14px;letter-spacing:0.1em;
+  cursor:pointer;text-align:center;
+  transition:all 0.2s ease;
+  font-family:'Noto Serif TC',serif;
+  user-select:none;
 }
-.s2-dir-btn:hover,.s2-dir-btn:active{border-color:var(–gold);color:var(–gold);background:rgba(212,168,48,0.08);}
-.s2-dir-btn.selected{border-color:var(–gold);color:var(–gold);background:rgba(212,168,48,0.12);}
+.s2-dir-btn:hover,.s2-dir-btn:active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.08);}
+.s2-dir-btn.selected{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.12);}
 .s2-dir-btn.wrong{border-color:#c03030!important;color:#c05040!important;background:rgba(192,48,48,0.1)!important;animation:shake 0.4s ease;}
 .s2-dir-btn.correct{border-color:#30c090!important;color:#50d0a0!important;background:rgba(48,192,144,0.12)!important;}
 .s2-dir-btn.empty{visibility:hidden;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
 .s2-compass-feedback{
-min-height:2em;
-font-size:13px;color:#8a7040;
-text-align:center;letter-spacing:0.1em;
-margin-bottom:8px;
+  min-height:2em;
+  font-size:13px;color:#8a7040;
+  text-align:center;letter-spacing:0.1em;
+  margin-bottom:8px;
 }
 .s2-compass-feedback.ok{color:#50c090;}
 .s2-compass-feedback.err{color:#c06050;}
 
 .s2-confirm-btn{
-width:100%;padding:11px;
-background:none;border:1px solid var(–gold-dim);
-color:var(–gold);font-size:13px;letter-spacing:0.3em;
-font-family:‘Noto Serif TC’,serif;cursor:pointer;
-transition:all 0.2s ease;border-radius:2px;
-display:none;
+  width:100%;padding:11px;
+  background:none;border:1px solid var(--gold-dim);
+  color:var(--gold);font-size:13px;letter-spacing:0.3em;
+  font-family:'Noto Serif TC',serif;cursor:pointer;
+  transition:all 0.2s ease;border-radius:2px;
+  display:none;
 }
 .s2-confirm-btn:hover{background:rgba(212,168,48,0.08);}
 
@@ -465,20 +466,18 @@ display:none;
 .s2-admin-field{margin-bottom:12px;}
 .s2-answer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
 .s2-answer-radio{
-padding:10px 4px;
-background:#0e0c08;border:1px solid #2a1808;border-radius:3px;
-color:#6a5030;font-size:13px;text-align:center;
-cursor:pointer;transition:all 0.2s;
-user-select:none;
+  padding:10px 4px;
+  background:#0e0c08;border:1px solid #2a1808;border-radius:3px;
+  color:#6a5030;font-size:13px;text-align:center;
+  cursor:pointer;transition:all 0.2s;
+  user-select:none;
 }
-.s2-answer-radio.active{border-color:var(–gold);color:var(–gold);background:rgba(212,168,48,0.08);}
+.s2-answer-radio.active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.08);}
 </style>
-
 </head>
 <body>
 
 <!-- 開始畫面 -->
-
 <div id="start-screen">
   <button id="admin-btn" onclick="openAdmin()">⚙ 後台</button>
   <div class="s-deco">國定古蹟臺中車站・實境解謎</div>
@@ -489,7 +488,6 @@ user-select:none;
 </div>
 
 <!-- 主遊戲 -->
-
 <div id="game">
   <div id="bg">
     <div id="phonebooth-scene">
@@ -563,7 +561,6 @@ user-select:none;
 </div>
 
 <!-- 道具欄 -->
-
 <div id="inventory">
   <div id="inv-handle" onclick="toggleInventory()">
     <span class="inv-handle-text">道具欄</span>
@@ -573,7 +570,6 @@ user-select:none;
 </div>
 
 <!-- 關卡一 -->
-
 <div id="stage-switchboard">
   <div class="sb-header">關卡一　接線生的考驗</div>
   <div id="call-banner" class="call-banner">
@@ -596,11 +592,9 @@ user-select:none;
 </div>
 
 <!-- 關卡二：前往臺中車站 -->
-
 <div id="stage-map"></div>
 
 <!-- ══ 後台 ══ -->
-
 <div id="admin-panel">
   <div class="adm-topbar">
     <div class="adm-title">⚙ 後台編輯器</div>
@@ -1222,8 +1216,10 @@ function onTap(){
   if(isTyping){skipType();return;}
   processLine();
 }
-$id('game').addEventListener('click',onTap);
-$id('game').addEventListener('touchend',e=>{e.preventDefault();onTap();},{passive:false});
+document.addEventListener('DOMContentLoaded',()=>{
+  $id('game').addEventListener('click',onTap);
+  $id('game').addEventListener('touchend',e=>{e.preventDefault();onTap();},{passive:false});
+});
 
 // ══════════════════════════════════
 //  開始
@@ -1274,101 +1270,114 @@ function renderList(ch){
     const badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
     let fields='';
     if(s.t==='narr') fields=`<div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.${ch}[${i}].text=this.value">${esc(s.text)}</textarea></div>`;
-
-```
-else if(s.t==='line') fields=`
-  <div class="adm-field"><label class="adm-label">說話者</label><input class="adm-input" value="${esc(s.who)}" oninput="edt.${ch}[${i}].who=this.value"></div>
-  <div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.${ch}[${i}].text=this.value">${esc(s.text)}</textarea></div>`;
-else if(s.t==='chapter') fields=`
-  <div class="adm-field"><label class="adm-label">章節副標</label><input class="adm-input" value="${esc(s.jp)}" oninput="edt.${ch}[${i}].jp=this.value"></div>
-  <div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.${ch}[${i}].main=this.value">${esc(s.main)}</textarea></div>
-  <div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="${esc(s.sub||'')}" oninput="edt.${ch}[${i}].sub=this.value"></div>`;
-else if(s.t==='note') fields=`<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.${ch}[${i}].body=this.value">${esc(s.body)}</textarea></div>`;
-else if(s.t==='action') fields=`<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="${esc(s.buttons[0]?.label||'')}" oninput="edt.${ch}[${i}].buttons[0].label=this.value"></div><div class="adm-field"><label class="adm-label">觸發函式名稱</label><input class="adm-input" value="${esc(s.buttons[0]?.fn||'')}" oninput="edt.${ch}[${i}].buttons[0].fn=this.value"></div>`;
-card.innerHTML=`<span class="sc-type-badge ${badges[s.t]||'sc-type-narr'}">${labels[s.t]||s.t}</span>
-  <button class="sc-del-btn" onclick="edt.${ch}.splice(${i},1);renderList('${ch}')">✕</button>
-  <button class="sc-up-btn" onclick="if(${i}>0){const a=edt.${ch};[a[${i}],a[${i}-1]]=[a[${i}-1],a[${i}]];renderList('${ch}')}">↑</button>
-  <button class="sc-dn-btn" onclick="if(${i}<edt.${ch}.length-1){const a=edt.${ch};[a[${i}],a[${i}+1]]=[a[${i}+1],a[${i}]];renderList('${ch}')}">↓</button>
-  ${fields}`;
-list.appendChild(card);
-```
-
-});
+    else if(s.t==='line') fields=`
+      <div class="adm-field"><label class="adm-label">說話者</label><input class="adm-input" value="${esc(s.who)}" oninput="edt.${ch}[${i}].who=this.value"></div>
+      <div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.${ch}[${i}].text=this.value">${esc(s.text)}</textarea></div>`;
+    else if(s.t==='chapter') fields=`
+      <div class="adm-field"><label class="adm-label">章節副標</label><input class="adm-input" value="${esc(s.jp)}" oninput="edt.${ch}[${i}].jp=this.value"></div>
+      <div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.${ch}[${i}].main=this.value">${esc(s.main)}</textarea></div>
+      <div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="${esc(s.sub||'')}" oninput="edt.${ch}[${i}].sub=this.value"></div>`;
+    else if(s.t==='note') fields=`<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.${ch}[${i}].body=this.value">${esc(s.body)}</textarea></div>`;
+    else if(s.t==='action') fields=`<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="${esc(s.buttons[0]?.label||'')}" oninput="edt.${ch}[${i}].buttons[0].label=this.value"></div><div class="adm-field"><label class="adm-label">觸發函式名稱</label><input class="adm-input" value="${esc(s.buttons[0]?.fn||'')}" oninput="edt.${ch}[${i}].buttons[0].fn=this.value"></div>`;
+    card.innerHTML=`<span class="sc-type-badge ${badges[s.t]||'sc-type-narr'}">${labels[s.t]||s.t}</span>
+      <button class="sc-del-btn" onclick="edt.${ch}.splice(${i},1);renderList('${ch}')">✕</button>
+      <button class="sc-up-btn" onclick="if(${i}>0){const a=edt.${ch};[a[${i}],a[${i}-1]]=[a[${i}-1],a[${i}]];renderList('${ch}')}">↑</button>
+      <button class="sc-dn-btn" onclick="if(${i}<edt.${ch}.length-1){const a=edt.${ch};[a[${i}],a[${i}+1]]=[a[${i}+1],a[${i}]];renderList('${ch}')}">↓</button>
+      ${fields}`;
+    list.appendChild(card);
+  });
 }
 
 function addLine(ch,type){
-const defaults={narr:{t:‘narr’,text:’（在此輸入旁白）’},line:{t:‘line’,who:‘語嫣’,text:’（在此輸入對話）’},chapter:{t:‘chapter’,jp:’’,main:‘章節標題’,sub:’’},note:{t:‘note’,body:’（在此輸入紙條內容）’},action:{t:‘action’,buttons:[{label:‘行動按鈕’,fn:‘takeOutNote’}]}};
-const stageIdx=edt[ch].findIndex(s=>s.t===‘stage’);
-if(stageIdx>=0)edt[ch].splice(stageIdx,0,defaults[type]);else edt[ch].push(defaults[type]);
-renderList(ch);
+  const defaults={narr:{t:'narr',text:'（在此輸入旁白）'},line:{t:'line',who:'語嫣',text:'（在此輸入對話）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（在此輸入紙條內容）'},action:{t:'action',buttons:[{label:'行動按鈕',fn:'takeOutNote'}]}};
+  const stageIdx=edt[ch].findIndex(s=>s.t==='stage');
+  if(stageIdx>=0)edt[ch].splice(stageIdx,0,defaults[type]);else edt[ch].push(defaults[type]);
+  renderList(ch);
 }
 
 // 插孔
 function renderJackList(){
-$id(‘jack-list’).innerHTML=edt.jacks.map((j,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
-<input class="adm-input" style="flex:1" value="${esc(j.name)}" placeholder="名稱" oninput="edt.jacks[${i}].name=this.value">
-<input class="adm-input" style="width:80px" value="${esc(j.num)}" placeholder="番號" oninput="edt.jacks[${i}].num=this.value">
-<button class="adm-btn danger" style="padding:6px 10px;" onclick="edt.jacks.splice(${i},1);renderJackList()">✕</button>
-
+  $id('jack-list').innerHTML=edt.jacks.map((j,i)=>`<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+    <input class="adm-input" style="flex:1" value="${esc(j.name)}" placeholder="名稱" oninput="edt.jacks[${i}].name=this.value">
+    <input class="adm-input" style="width:80px" value="${esc(j.num)}" placeholder="番號" oninput="edt.jacks[${i}].num=this.value">
+    <button class="adm-btn danger" style="padding:6px 10px;" onclick="edt.jacks.splice(${i},1);renderJackList()">✕</button>
   </div>`).join('');
 }
 function addJack(){if(edt.jacks.length>=16){alert('最多16個');return;}edt.jacks.push({id:'j'+String(edt.jacks.length+1).padStart(2,'0'),name:'新插孔',num:'番'});renderJackList();}
 
 // 通話
 function renderCallList(){
-$id(‘call-list’).innerHTML=edt.calls.map((c,ci)=>{
-const opts=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.fromId?'selected':''}>${j.name} ${j.num}</option>`).join(’’);
-const optsTo=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.toId?'selected':''}>${j.name} ${j.num}</option>`).join(’’);
-const dlgs=c.dialogs.map((d,di)=>`<div class="call-dlg-row"> <input class="adm-input" placeholder="說話者" value="${esc(d.who)}" oninput="edt.calls[${ci}].dialogs[${di}].who=this.value"> <textarea class="adm-input" oninput="edt.calls[${ci}].dialogs[${di}].text=this.value">${esc(d.text)}</textarea> <button class="call-dlg-del" onclick="edt.calls[${ci}].dialogs.splice(${di},1);renderCallList()">✕</button> </div>`).join(’’);
-return `<div class="call-card"> <div class="call-card-title">通話 ${ci+1} <button class="call-del-btn" onclick="edt.calls.splice(${ci},1);renderCallList()">✕</button></div> <div class="adm-field"><label class="adm-label">發話方</label><select class="adm-input" onchange="edt.calls[${ci}].fromId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].fromNum=j.num;edt.calls[${ci}].fromName=j.name;}">${opts}</select></div> <div class="adm-field"><label class="adm-label">受話方</label><select class="adm-input" onchange="edt.calls[${ci}].toId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].toNum=j.num;edt.calls[${ci}].toName=j.name;}">${optsTo}</select></div> <div class="adm-label" style="margin-top:8px;">對話內容</div> ${dlgs} <button class="sc-add-btn" style="margin-top:6px;" onclick="edt.calls[${ci}].dialogs.push({who:'',text:''});renderCallList()">＋ 新增對話行</button> </div>`;
-}).join(’’);
+  $id('call-list').innerHTML=edt.calls.map((c,ci)=>{
+    const opts=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.fromId?'selected':''}>${j.name} ${j.num}</option>`).join('');
+    const optsTo=edt.jacks.map(j=>`<option value="${j.id}" ${j.id===c.toId?'selected':''}>${j.name} ${j.num}</option>`).join('');
+    const dlgs=c.dialogs.map((d,di)=>`<div class="call-dlg-row">
+      <input class="adm-input" placeholder="說話者" value="${esc(d.who)}" oninput="edt.calls[${ci}].dialogs[${di}].who=this.value">
+      <textarea class="adm-input" oninput="edt.calls[${ci}].dialogs[${di}].text=this.value">${esc(d.text)}</textarea>
+      <button class="call-dlg-del" onclick="edt.calls[${ci}].dialogs.splice(${di},1);renderCallList()">✕</button>
+    </div>`).join('');
+    return `<div class="call-card">
+      <div class="call-card-title">通話 ${ci+1} <button class="call-del-btn" onclick="edt.calls.splice(${ci},1);renderCallList()">✕</button></div>
+      <div class="adm-field"><label class="adm-label">發話方</label><select class="adm-input" onchange="edt.calls[${ci}].fromId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].fromNum=j.num;edt.calls[${ci}].fromName=j.name;}">${opts}</select></div>
+      <div class="adm-field"><label class="adm-label">受話方</label><select class="adm-input" onchange="edt.calls[${ci}].toId=this.value;const j=edt.jacks.find(j=>j.id===this.value);if(j){edt.calls[${ci}].toNum=j.num;edt.calls[${ci}].toName=j.name;}">${optsTo}</select></div>
+      <div class="adm-label" style="margin-top:8px;">對話內容</div>
+      ${dlgs}
+      <button class="sc-add-btn" style="margin-top:6px;" onclick="edt.calls[${ci}].dialogs.push({who:'',text:''});renderCallList()">＋ 新增對話行</button>
+    </div>`;
+  }).join('');
 }
-function addCall(){edt.calls.push({fromId:edt.jacks[0]?.id||‘j01’,toId:edt.jacks[1]?.id||‘j02’,fromNum:’’,fromName:’’,toNum:’’,toName:’’,dialogs:[{who:‘用戶’,text:’’}]});renderCallList();}
+function addCall(){edt.calls.push({fromId:edt.jacks[0]?.id||'j01',toId:edt.jacks[1]?.id||'j02',fromNum:'',fromName:'',toNum:'',toName:'',dialogs:[{who:'用戶',text:''}]});renderCallList();}
 
 // 工具
-function esc(s){return String(s||’’).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // 後台：關卡二設定渲染
 function renderStage2Admin(){
-const s=edt.stage2;
-const dirs=[‘北’,‘東北’,‘東’,‘東南’,‘南’,‘西南’,‘西’,‘西北’];
-const radioHtml=dirs.map(d=>`<div class="s2-answer-radio ${d===s.answer?'active':''}" onclick="setS2Answer('${d}',this)">${d}</div>`).join(’’);
-const el=$id(‘tab-stage2-inner’);
-if(!el)return;
-el.innerHTML=` <div class="adm-field"><label class="adm-label">題目文字</label> <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.question=this.value">${esc(s.question)}</textarea></div> <div class="adm-field"><label class="adm-label">提示文字</label> <input class="adm-input" value="${esc(s.hint)}" oninput="edt.stage2.hint=this.value"></div> <div class="adm-field"><label class="adm-label">正確答案（選一個方位）</label> <div class="s2-answer-grid">${radioHtml}</div></div> <div class="adm-field"><label class="adm-label">答對後顯示文字</label> <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.successText=this.value">${esc(s.successText)}</textarea></div>`;
+  const s=edt.stage2;
+  const dirs=['北','東北','東','東南','南','西南','西','西北'];
+  const radioHtml=dirs.map(d=>`<div class="s2-answer-radio ${d===s.answer?'active':''}" onclick="setS2Answer('${d}',this)">${d}</div>`).join('');
+  const el=$id('tab-stage2-inner');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="adm-field"><label class="adm-label">題目文字</label>
+      <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.question=this.value">${esc(s.question)}</textarea></div>
+    <div class="adm-field"><label class="adm-label">提示文字</label>
+      <input class="adm-input" value="${esc(s.hint)}" oninput="edt.stage2.hint=this.value"></div>
+    <div class="adm-field"><label class="adm-label">正確答案（選一個方位）</label>
+      <div class="s2-answer-grid">${radioHtml}</div></div>
+    <div class="adm-field"><label class="adm-label">答對後顯示文字</label>
+      <textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.successText=this.value">${esc(s.successText)}</textarea></div>`;
 }
 function setS2Answer(dir,el){
-edt.stage2.answer=dir;
-document.querySelectorAll(’.s2-answer-radio’).forEach(b=>b.classList.remove(‘active’));
-el.classList.add(‘active’);
+  edt.stage2.answer=dir;
+  document.querySelectorAll('.s2-answer-radio').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
 }
 
 // 匯入匯出
 function exportAll(){
-const data={ch1:edt.ch1,ch2:edt.ch2,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
-$id(‘export-area’).value=JSON.stringify(data,null,2);
+  const data={ch1:edt.ch1,ch2:edt.ch2,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
+  $id('export-area').value=JSON.stringify(data,null,2);
 }
-function copyExport(){const el=$id(‘export-area’);el.select();document.execCommand(‘copy’);alert(‘已複製’);}
+function copyExport(){const el=$id('export-area');el.select();document.execCommand('copy');alert('已複製');}
 function importAll(){
-try{
-const d=JSON.parse($id(‘import-area’).value);
-if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
-if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
-if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
-if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
-renderList(‘ch1’);renderList(‘ch2’);renderJackList();renderCallList();
-alert(‘匯入成功！請點「儲存並關閉」。’);
-}catch(e){alert(‘格式錯誤：’+e.message);}
+  try{
+    const d=JSON.parse($id('import-area').value);
+    if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
+    if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
+    if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
+    if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
+    renderList('ch1');renderList('ch2');renderJackList();renderCallList();
+    alert('匯入成功！請點「儲存並關閉」。');
+  }catch(e){alert('格式錯誤：'+e.message);}
 }
 function resetAll(){
-if(!confirm(‘確定還原所有預設？’))return;
-edt.ch1=JSON.parse(JSON.stringify(D_CH1));edt.ch2=JSON.parse(JSON.stringify(D_CH2));
-edt.jacks=JSON.parse(JSON.stringify(D_JACKS));edt.calls=JSON.parse(JSON.stringify(D_CALLS));
-edt.stage2=JSON.parse(JSON.stringify(D_STAGE2));
-APPEAR=JSON.parse(JSON.stringify(D_APPEAR));syncAppearSliders();applyAppearVars(APPEAR);
-renderList(‘ch1’);renderList(‘ch2’);renderJackList();renderCallList();renderStage2Admin();
+  if(!confirm('確定還原所有預設？'))return;
+  edt.ch1=JSON.parse(JSON.stringify(D_CH1));edt.ch2=JSON.parse(JSON.stringify(D_CH2));
+  edt.jacks=JSON.parse(JSON.stringify(D_JACKS));edt.calls=JSON.parse(JSON.stringify(D_CALLS));
+  edt.stage2=JSON.parse(JSON.stringify(D_STAGE2));
+  APPEAR=JSON.parse(JSON.stringify(D_APPEAR));syncAppearSliders();applyAppearVars(APPEAR);
+  renderList('ch1');renderList('ch2');renderJackList();renderCallList();renderStage2Admin();
 }
 </script>
-
 </body>
 </html>
