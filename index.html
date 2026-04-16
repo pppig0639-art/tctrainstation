@@ -665,19 +665,62 @@ precomputeRefHash();
 
 // ══ 本地自動儲存 ══
 var LS_KEY='tctrainstation_v1';
+var IDB_NAME='tctrainstation';
+var IDB_STORE='assets';
+var idb=null;
+
+// 開啟 IndexedDB
+function openIDB(cb){
+  if(idb){cb(idb);return;}
+  var req=indexedDB.open(IDB_NAME,1);
+  req.onupgradeneeded=function(e){
+    e.target.result.createObjectStore(IDB_STORE);
+  };
+  req.onsuccess=function(e){idb=e.target.result;cb(idb);};
+  req.onerror=function(){cb(null);};
+}
+
+// 存圖片到 IndexedDB
+function saveSpriteSrc(src){
+  openIDB(function(db){
+    if(!db)return;
+    var tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(src,'spriteSrc');
+  });
+}
+
+// 讀圖片從 IndexedDB，cb(src或null)
+function loadSpriteSrc(cb){
+  openIDB(function(db){
+    if(!db){cb(null);return;}
+    var tx=db.transaction(IDB_STORE,'readonly');
+    var req=tx.objectStore(IDB_STORE).get('spriteSrc');
+    req.onsuccess=function(){cb(req.result||null);};
+    req.onerror=function(){cb(null);};
+  });
+}
+
+// localStorage 只存文字設定（不含圖片）
 function saveToLocal(){
   try{
+    var settings=JSON.parse(JSON.stringify(SPRITE_SETTINGS));
+    settings.src=null; // 圖片另外存 IndexedDB
     var data={
       ch1:CH1,ch2:CH2,ch3:CH3,ch4:CH4,ch5:CH5,
       jacks:JACKS,calls:CALLS,appear:APPEAR,
       stage2:STAGE2,phoneRing:PHONE_RING,
       extraChapters:extraChapters,
       extraChapterCount:extraChapterCount,
-      spriteSettings:SPRITE_SETTINGS
+      spriteSettings:settings
     };
     localStorage.setItem(LS_KEY,JSON.stringify(data));
+    // 圖片單獨存 IndexedDB
+    if(SPRITE_SETTINGS&&SPRITE_SETTINGS.src){
+      saveSpriteSrc(SPRITE_SETTINGS.src);
+    }
   }catch(e){console.warn('儲存失敗',e);}
 }
+
 function loadFromLocal(){
   try{
     var raw=localStorage.getItem(LS_KEY);
@@ -697,9 +740,9 @@ function loadFromLocal(){
     return true;
   }catch(e){console.warn('讀取失敗',e);return false;}
 }
+
 // 頁面載入時自動讀取
 document.addEventListener('DOMContentLoaded',function(){
-  // 讀取本地儲存
   loadFromLocal();
   applyAppearVars(APPEAR);
   precomputeRefHash();
@@ -707,10 +750,13 @@ document.addEventListener('DOMContentLoaded',function(){
   for(var k in extraChapters){
     if(extraChapters.hasOwnProperty(k))_restoreExtraChapterUI(k);
   }
-  // 套用立繪圖片
-  if(SPRITE_SETTINGS&&SPRITE_SETTINGS.src){
-    document.querySelectorAll('.sprite img').forEach(function(img){img.src=SPRITE_SETTINGS.src;});
-  }
+  // 從 IndexedDB 讀立繪圖片
+  loadSpriteSrc(function(src){
+    if(src){
+      SPRITE_SETTINGS.src=src;
+      document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
+    }
+  });
   // 綁定點擊事件
   gel('game').addEventListener('click',onTap);
   gel('game').addEventListener('touchend',function(e){e.preventDefault();onTap();},{passive:false});
@@ -1403,6 +1449,8 @@ function onSpriteUpload(input){
     var pi=gel('sprite-stage-img');
     if(pi){pi.src=src;pi.style.display='';}
     document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
+    // 立即存到 IndexedDB（圖片太大不能放 localStorage）
+    saveSpriteSrc(src);
   };
   reader.readAsDataURL(file);
 }
@@ -1792,6 +1840,14 @@ function importAll(){}
 function resetAll(){
   if(!confirm('確定還原所有預設？這會清除本機儲存的設定。'))return;
   try{localStorage.removeItem(LS_KEY);}catch(e){}
+  // 清立繪圖片
+  openIDB(function(db){
+    if(!db)return;
+    var tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).delete('spriteSrc');
+  });
+  SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:null};
+  document.querySelectorAll('.sprite img').forEach(function(img){img.src='';});
   init();extraChapters={};extraChapterCount=0;
   syncAppearSliders();applyAppearVars(APPEAR);
   renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
