@@ -643,6 +643,11 @@ var D_STAGE2={
   refImage:null   // 參考圖 base64，後台上傳
 };
 var CH1,CH2,CH3,CH4,CH5,JACKS,CALLS,APPEAR,STAGE2,PHONE_RING,SCRIPT;
+// 這兩個必須在 saveToLocal/loadFromLocal 之前宣告
+var extraChapters={};
+var extraChapterCount=0;
+var SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:null};
+
 function init(){
   CH1=JSON.parse(JSON.stringify(D_CH1));
   CH2=JSON.parse(JSON.stringify(D_CH2));
@@ -655,7 +660,7 @@ function init(){
   PHONE_RING=JSON.parse(JSON.stringify(D_PHONE_RING));
   STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
 }
-init();
+init(); // 先用預設值，DOMContentLoaded 時再用 localStorage 覆蓋
 precomputeRefHash();
 
 // ══ 本地自動儲存 ══
@@ -1332,7 +1337,6 @@ function switchTab(tab){
 }
 
 // ══ 立繪管理 ══
-var SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:null};
 // 預覽框拖拽
 var spDragState={active:false,startX:0,startY:0,origL:0,origB:0};
 function initSpriteDragAdmin(){
@@ -1684,8 +1688,6 @@ function updateDevInfo(){
 }
 
 // ══ 動態新增章節 ══
-var extraChapters={};  // {ch6:[...], ch7:[...], ...}
-var extraChapterCount=0;
 
 function addChapter(){
   extraChapterCount++;
