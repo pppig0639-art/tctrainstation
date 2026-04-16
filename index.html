@@ -96,6 +96,16 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .ch-main{font-size:22px;color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;}
 .ch-line{width:50px;height:1px;background:var(--gold);margin:18px auto;opacity:0.5;}
 .ch-sub{font-size:12px;color:#6a5a3a;letter-spacing:0.3em;}
+
+/* 黑屏白字 */
+#blackout-screen{position:absolute;inset:0;z-index:26;background:#000;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s;}
+#blackout-screen.show{opacity:1;pointer-events:all;}
+.blackout-text{font-size:clamp(28px,8vw,52px);color:#ffffff;letter-spacing:0.35em;text-align:center;font-family:'Shippori Mincho','Noto Serif TC',serif;font-weight:300;line-height:1.6;}
+
+/* 接電話關卡 */
+#stage-phone-ring{position:fixed;inset:0;z-index:45;background:transparent;display:none;pointer-events:none;}
+#ring-flash-overlay{position:absolute;inset:0;background:rgba(60,220,120,0.04);pointer-events:none;opacity:0;animation:ring-flash 1.2s ease-in-out infinite;}
+@keyframes ring-flash{0%,100%{opacity:0}50%{opacity:1}}
 .note-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadein 0.4s;}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 .note-paper{background:linear-gradient(135deg,#f5ecd4,#ecdfc0 50%,#f0e8cc);border:1px solid #8a6030;padding:24px 20px;max-width:320px;width:100%;box-shadow:0 0 50px rgba(0,0,0,0.7),3px 3px 0 #8a6030;position:relative;font-family:'Noto Serif TC',serif;}
@@ -307,6 +317,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     </div>
   </div>
   <div id="chapter-title"><div class="ch-jp" id="ch-jp"></div><div class="ch-main" id="ch-main"></div><div class="ch-line"></div><div class="ch-sub" id="ch-sub"></div></div>
+  <div id="blackout-screen"><div class="blackout-text" id="blackout-text"></div></div>
   <div id="dialog-area">
     <div id="speaker-box"><span id="speaker-name"></span></div>
     <div id="dialog-box">
@@ -314,6 +325,22 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
       <div id="action-btns"></div>
       <div id="next-hint">▶</div>
     </div>
+  </div>
+</div>
+<!-- 接電話關卡：疊在遊戲畫面上 -->
+<div id="stage-phone-ring">
+  <div id="ring-flash-overlay"></div>
+</div>
+<!-- 接電話關卡：對話框＋按鈕全部在同一個 fixed 容器 -->
+<div id="ring-dialog-area" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;padding:0 8px 10px;">
+  <div id="ring-speaker-box" style="display:none;align-items:center;background:var(--dialog-bg);border:1px solid #2a4a30;border-bottom:none;padding:7px 20px;width:fit-content;"><span id="ring-speaker-name" style="font-size:var(--speaker-font-size);color:#60d080;letter-spacing:0.2em;font-weight:600;"></span></div>
+  <div id="ring-dialog-box" style="background:var(--dialog-bg);border:1px solid #2a4a30;padding:var(--dialog-padding);min-height:var(--dialog-min-height);position:relative;">
+    <div id="ring-dialog-text" style="color:#f8eed5;font-size:var(--dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;padding-bottom:24px;"></div>
+    <div id="ring-next-hint" style="position:absolute;bottom:9px;right:15px;color:#30a050;font-size:15px;animation:blink 1.3s ease-in-out infinite;display:none;">▶</div>
+  </div>
+  <!-- 拿起話筒按鈕：在對話框下方 -->
+  <div id="ring-answer-wrap" style="display:none;padding-top:6px;">
+    <button id="ring-answer-btn" onclick="answerPhone()" style="width:100%;padding:16px;background:linear-gradient(90deg,rgba(8,20,10,0.98),rgba(12,28,16,0.98));border:2px solid #30a060;color:#60d090;font-size:16px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;border-radius:3px;text-align:center;">☎　拿起話筒</button>
   </div>
 </div>
 <div id="inventory">
@@ -359,6 +386,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     <div class="adm-tab" onclick="switchTab('ch4')">第四章</div>
     <div class="adm-tab" onclick="switchTab('ch5')">第五章</div>
     <div class="adm-tab" onclick="switchTab('calls')">接線關卡</div>
+    <div class="adm-tab" onclick="switchTab('phonering')">接電話</div>
     <div class="adm-tab" onclick="switchTab('stage2')">關卡二</div>
     <div class="adm-tab" onclick="switchTab('sprite')">立繪</div>
     <div class="adm-tab" onclick="switchTab('appear')">外觀</div>
@@ -397,6 +425,19 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     <div id="tab-calls" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">插孔設定</div><div id="jack-list"></div><button class="adm-btn" onclick="addJack()" style="margin-top:6px;">＋ 新增插孔</button></div>
       <div class="adm-section"><div class="adm-section-title">通話設定</div><div id="call-list"></div><button class="adm-btn" onclick="addCall()" style="margin-top:6px;">＋ 新增通話</button></div>
+    </div>
+    <div id="tab-phonering" style="display:none;">
+      <div class="adm-section">
+        <div class="adm-section-title">接電話關卡　等待旁白（三段）</div>
+        <div style="font-size:10px;color:#5a4a2a;letter-spacing:0.1em;margin-bottom:10px;">鈴聲響起後依序顯示的三段旁白文字，第三段結束後出現「拿起話筒」按鈕。</div>
+        <div id="phonering-narr-list"></div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">接聽後對話</div>
+        <div style="font-size:10px;color:#5a4a2a;letter-spacing:0.1em;margin-bottom:10px;">玩家按下話筒後，電話那端的對話依序播放。</div>
+        <div id="phonering-dialog-list"></div>
+        <button class="adm-btn" onclick="addPhoneRingDialog()" style="margin-top:8px;">＋ 新增對話行</button>
+      </div>
     </div>
     <div id="tab-stage2" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">關卡二　方位謎題設定</div><div id="tab-stage2-inner"></div></div>
@@ -489,36 +530,40 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 </div>
 <script>
 var D_CH1=[
-  {t:'chapter',jp:'序章',main:'暴雨，路旁的電話亭',sub:'臺中市・某條街'},
-  {t:'narr',text:'風暴大雨的夜晚。\n街燈在雨幕後頭搖搖欲墜，映出濕透的柏油路面。'},
-  {t:'narr',text:'有個身影踉蹌地跑過——\n竄進了路旁一座老舊的電話亭。'},
+  {t:'chapter',jp:'序章',main:'電話亭',sub:'臺中市・某條街'},
+  {t:'narr',text:'風暴大雨的夜晚。街上杳無人煙，燈火闌珊。\n街燈在雨幕後搖搖欲墜，映著路面。'},
+  {t:'narr',text:'閃爍的光線下，有個人影跌跌撞撞地跑過\n竄進路旁一座老舊的電話亭內。'},
+  {t:'narr',text:'狼狽躲雨的女子氣喘吁吁，脫下被雨淋得濕透的外衣。'},
   {t:'show',id:'sp-yuyan'},
-  {t:'line',who:'語嫣',text:'……哈、哈——\n先躲一下好了。'},
-  {t:'line',who:'語嫣',text:'（掏出手機）沒訊號？！'},
-  {t:'narr',text:'她靠在門板上，看著玻璃外頭嘩嘩流下的雨水。'},
-  {t:'line',who:'語嫣',text:'（輕聲）他不知道在不在擔心……'},
-  {t:'narr',text:'四周靜得只剩雨聲。電話亭老舊，\n一張告示寫著「停用中」。'},
-  {t:'narr',text:'語嫣無所事事地看著那台笨重的老式電話。'},
+  {t:'line',who:'語嫣',text:'……真是倒楣啊，怎麼迷路還碰上下雨啊，還這麼大！\n唉算了，先給男朋友打個電話吧。'},
+  {t:'narr',text:'（嘟嘟嘟⋯⋯）\n（⋯⋯嘟嘟嘟⋯⋯）（⋯⋯）'},
+  {t:'line',who:'語嫣',text:'蛤？怎麼沒有訊號？！'},
+  {t:'narr',text:'女子洩氣般的滑坐在地。'},
+  {t:'narr',text:'她靠在門板上，側頭看著玻璃外頭嘩嘩流下的雨水。'},
+  {t:'line',who:'語嫣',text:'不知道什麼時候這雨才會停呢⋯⋯'},
+  {t:'narr',text:'四周靜得只剩嘈雜雨聲。\n電話亭老舊，門口卻貼著一張在風雨中屹立不搖的告示。'},
+  {t:'narr',text:'「停用中」'},
+  {t:'narr',text:'看著眼下似乎做不了什麼事，語嫣終於抬起頭，認真端詳起那台笨重的老式電話機。'},
+  {t:'narr',text:'忽然'},
   {t:'fx',fn:'phoneGlow'},
-  {t:'line',who:'語嫣',text:'（愣住）……咦？'},
-  {t:'narr',text:'螢幕上亮著螢綠色的光，閃著「投幣」兩個字。'},
-  {t:'line',who:'語嫣',text:'故障的電話……在亮燈？'},
-  {t:'narr',text:'她伸出手。就這樣，鬼使神差地。'},
+  // 接電話體驗關卡（資料從 PHONE_RING 讀取）
+  {t:'stage',id:'phone-ring'},
   {t:'fx',fn:'lightning2'},
   {t:'fx',fn:'rainFade'},
   {t:'narr',text:'話筒是冰涼的，帶著鐵的氣味。'},
-  {t:'narr',text:'一陣陰風驟來。雨聲——輕了。'},
-  {t:'narr',text:'再輕了一些。再輕。直到，幾乎——停了。'},
-  {t:'narr',text:'玻璃外的世界，悄悄換了個樣子。\n露出原先隱藏在暴風雨中的……日式建築。'},
+  {t:'narr',text:'一陣陰風驟來。雨聲忽地輕了，語嫣的世界歸於安靜。'},
+  {t:'narr',text:'玻璃外的世界，悄悄換了個樣子。\n露出原先在暴風雨中被隱藏的'},
+  {t:'blackout',text:'日式建築',duration:2600},
   {t:'hide',id:'sp-yuyan'},
-  {t:'chapter',jp:'第一章　明治四十一年',main:'1908年\n臺中郵便局　電話交換室',sub:''},
+  {t:'chapter',jp:'第一章',main:'臺中郵便局　電信課',sub:'西元1908年'},
   {t:'bg',scene:'1908'},
   {t:'show',id:'sp-yuyan-1908'},
-  {t:'narr',text:'意識模糊，像剛從深水裡浮起來。'},
-  {t:'line',who:'語嫣',text:'（盯著自己的手）……這是……什麼？'},
-  {t:'narr',text:'眼前是一面巨大的木製機台——\n密密麻麻的圓形插孔，懸掛的跳線，信號掉牌。'},
-  {t:'line',who:'語嫣',text:'（喃喃）我……是誰？'},
-  {t:'narr',text:'腦子裡有什麼東西破碎了。\n只剩一件事是清楚的——有個人，在等她。'},
+  {t:'narr',text:'睜開雙眼，語嫣茫然地看了看四周。\n她的意識模糊，像剛從深水裡被打撈起來。'},
+  {t:'narr',text:'待她看清周遭情況後，簡直嚇呆了。'},
+  {t:'line',who:'語嫣',text:'……這是……怎麼回事？'},
+  {t:'narr',text:'眼前是一面巨大的木製機台，\n密密麻麻的圓形插孔，懸掛的跳線，還有信號掉牌。'},
+  {t:'line',who:'語嫣',text:'我……到底在哪？'},
+  {t:'narr',text:'她喃喃自語。'},
   {t:'narr',text:'桌角壓著一張摺疊的紙條。'},
   {t:'line',who:'語嫣',text:'（拾起紙條）'},
   {t:'note',body:'妳醒了。\n\n別怕。\n\n妳需要做的事情，都在這座城市裡。\n就從這裡開始——\n\n    臺中驛，明治四十一年。\n    縱貫鐵路，即將全線通車。\n\n先完成眼前的工作。\n有人在等妳的消息。\n\n                ——一個妳認識的人'},
@@ -581,13 +626,23 @@ var D_CALLS=[
    dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有人受傷！'},{who:'語嫣',text:'馬上接通！'},{who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]}
 ];
 var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10};
+var D_PHONE_RING={
+  waitNarr:[
+    '鈴聲響起。\n那台「停用中」的電話，在空蕩蕩的電話亭裡兀自鳴響。',
+    '十五秒了，鈴聲依舊沒停，\n變本加厲地迴盪在語嫣耳邊。',
+    '三十秒了。\n她凝視著那個沉甸甸的話筒，\n很久很久。'
+  ],
+  dialogs:[
+    {who:'',text:'⋯⋯⋯⋯'}
+  ]
+};
 var D_STAGE2={
   hint:'請在臺中驛正門口，對準地面俯拍一張照片。',
   successText:'位置確認！歡迎來到臺中驛。',
   threshold:60,   // 相似度門檻（0-100），後台可調
   refImage:null   // 參考圖 base64，後台上傳
 };
-var CH1,CH2,CH3,CH4,CH5,JACKS,CALLS,APPEAR,STAGE2,SCRIPT;
+var CH1,CH2,CH3,CH4,CH5,JACKS,CALLS,APPEAR,STAGE2,PHONE_RING,SCRIPT;
 function init(){
   CH1=JSON.parse(JSON.stringify(D_CH1));
   CH2=JSON.parse(JSON.stringify(D_CH2));
@@ -597,6 +652,7 @@ function init(){
   JACKS=JSON.parse(JSON.stringify(D_JACKS));
   CALLS=JSON.parse(JSON.stringify(D_CALLS));
   APPEAR=JSON.parse(JSON.stringify(D_APPEAR));
+  PHONE_RING=JSON.parse(JSON.stringify(D_PHONE_RING));
   STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
 }
 init();
@@ -677,6 +733,7 @@ function processLine(){
   else if(s.t==='note')showNote(s);
   else if(s.t==='inv_note')putNoteInInventory();
   else if(s.t==='action')showActionBtns(s.buttons);
+  else if(s.t==='blackout')showBlackout(s);
   else if(s.t==='stage')launchStage(s.id);
 }
 function showDialog(s){
@@ -704,6 +761,136 @@ function showChapter(s){
   gel('ch-jp').textContent=s.jp;gel('ch-main').innerHTML=s.main.replace(/\n/g,'<br>');gel('ch-sub').textContent=s.sub||'';
   var ct=gel('chapter-title');ct.classList.add('show');
   setTimeout(function(){ct.classList.remove('show');setTimeout(function(){waitChapter=false;processLine();},900);},3200);
+}
+
+// 黑屏白字
+function showBlackout(s){
+  waitChapter=true;
+  var bs=gel('blackout-screen');
+  gel('blackout-text').innerHTML=(s.text||'').replace(/\n/g,'<br>');
+  bs.classList.add('show');
+  var dur=s.duration||2800;
+  setTimeout(function(){
+    bs.style.transition='opacity 1.4s';
+    bs.style.opacity='0';
+    setTimeout(function(){
+      bs.classList.remove('show');
+      bs.style.opacity='';bs.style.transition='';
+      waitChapter=false;processLine();
+    },1400);
+  },dur);
+}
+
+// ══ 接電話關卡 ══
+// ══ 接電話關卡　狀態機 ══
+// phase: 'narr' → 播三段旁白
+//        'answer' → 等玩家按接聽按鈕
+//        'ellipsis' → 打刪節號
+//        'done' → 等玩家點 ▶ 結束
+var phonePhase='narr';
+var phoneRingState={narrIdx:0,narrTyping:null,vibTimer:null};
+
+function launchPhoneRing(){
+  phonePhase='narr';
+  phoneRingState.narrIdx=0;
+  phoneRingState.narrTyping=null;
+
+  gel('stage-phone-ring').style.display='block';
+  gel('ring-dialog-area').style.display='block';
+  gel('ring-answer-wrap').style.display='none';
+  gel('ring-speaker-box').style.display='none';
+  gel('ring-next-hint').style.display='none';
+  gel('ring-dialog-text').innerHTML='';
+
+  // 震動
+  if(navigator.vibrate)navigator.vibrate([300,150,300,150,300]);
+  phoneRingState.vibTimer=setInterval(function(){
+    if(navigator.vibrate)navigator.vibrate([250,150,250]);
+  },2200);
+
+  showRingNarr();
+}
+
+function showRingNarr(){
+  var narrs=PHONE_RING.waitNarr||[];
+  var idx=phoneRingState.narrIdx;
+  var isLast=(idx===narrs.length-1);
+  var txt=narrs[idx]||'';
+
+  gel('ring-next-hint').style.display='none';
+  gel('ring-answer-wrap').style.display='none';
+  var el=gel('ring-dialog-text');
+  el.innerHTML='';var i=0;
+
+  phoneRingState.narrTyping=setInterval(function(){
+    if(i<txt.length){
+      el.innerHTML=txt.substring(0,++i).replace(/\n/g,'<br>');
+    }else{
+      clearInterval(phoneRingState.narrTyping);
+      phoneRingState.narrTyping=null;
+      if(isLast){
+        phonePhase='answer';
+        setTimeout(function(){gel('ring-answer-wrap').style.display='block';},600);
+      }else{
+        gel('ring-next-hint').style.display='block';
+      }
+    }
+  },38);
+}
+
+function ringNarrTap(){
+  // 打字中：跳完當前段
+  if(phoneRingState.narrTyping){
+    clearInterval(phoneRingState.narrTyping);
+    phoneRingState.narrTyping=null;
+    var narrs=PHONE_RING.waitNarr||[];
+    var idx=phoneRingState.narrIdx;
+    var isLast=(idx===narrs.length-1);
+    gel('ring-dialog-text').innerHTML=(narrs[idx]||'').replace(/\n/g,'<br>');
+    if(isLast){
+      phonePhase='answer';
+      setTimeout(function(){gel('ring-answer-wrap').style.display='block';},600);
+    }else{
+      gel('ring-next-hint').style.display='block';
+    }
+    return;
+  }
+  // ▶ 可見：推進到下一段
+  if(gel('ring-next-hint').style.display==='block'){
+    gel('ring-next-hint').style.display='none';
+    phoneRingState.narrIdx++;
+    showRingNarr();
+  }
+}
+
+function answerPhone(){
+  if(phoneRingState.vibTimer){clearInterval(phoneRingState.vibTimer);phoneRingState.vibTimer=null;}
+  if(navigator.vibrate)navigator.vibrate(0);
+  phonePhase='ellipsis';
+  gel('ring-answer-wrap').style.display='none';
+  gel('ring-speaker-box').style.display='none';
+  gel('ring-next-hint').style.display='none';
+
+  var el=gel('ring-dialog-text');
+  el.innerHTML='';
+  var txt='⋯⋯⋯⋯';
+  var i=0;
+  var t=setInterval(function(){
+    if(i<txt.length){el.innerHTML=txt.substring(0,++i);}
+    else{
+      clearInterval(t);
+      phonePhase='done';
+      gel('ring-next-hint').style.display='block';
+    }
+  },220);
+}
+
+function phoneRingDialogNext(){} // 保留相容
+
+function endPhoneRing(){
+  gel('stage-phone-ring').style.display='none';
+  gel('ring-dialog-area').style.display='none';
+  processLine();
 }
 function switchBg(scene){
   gel('phonebooth-scene').style.display=scene==='phonebooth'?'flex':'none';
@@ -785,6 +972,7 @@ var sbState={callIdx:0,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:fals
 function launchStage(id){
   if(id==='switchboard'){gel('stage-switchboard').style.display='flex';loadCall(0);}
   else if(id==='map'){launchMap();}
+  else if(id==='phone-ring'){launchPhoneRing();}
 }
 function loadCall(idx){
   sbState={callIdx:idx,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
@@ -1002,6 +1190,13 @@ function onTap(){
   if(waitChapter)return;
   if(gel('stage-switchboard').style.display==='flex')return;
   if(gel('stage-map').style.display==='flex')return;
+  // 接電話關卡
+  if(gel('ring-dialog-area').style.display==='block'){
+    if(phonePhase==='narr')ringNarrTap();
+    else if(phonePhase==='done')endPhoneRing();
+    // 'answer' 和 'ellipsis' 階段不回應點擊
+    return;
+  }
   if(document.querySelector('.note-overlay'))return;
   if(gel('action-btns').style.display==='flex')return;
   if(gel('inventory').classList.contains('open'))return;
@@ -1027,6 +1222,7 @@ function openAdmin(){
   edt.ch3=JSON.parse(JSON.stringify(CH3));edt.ch4=JSON.parse(JSON.stringify(CH4));edt.ch5=JSON.parse(JSON.stringify(CH5));
   edt.jacks=JSON.parse(JSON.stringify(JACKS));edt.calls=JSON.parse(JSON.stringify(CALLS));
   edt.stage2=JSON.parse(JSON.stringify(STAGE2));
+  edt.phoneRing=JSON.parse(JSON.stringify(PHONE_RING));
   syncAppearSliders();
   renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
   renderJackList();renderCallList();renderStage2Admin();
@@ -1038,6 +1234,7 @@ function saveAndClose(){
   CH3=JSON.parse(JSON.stringify(edt.ch3));CH4=JSON.parse(JSON.stringify(edt.ch4));CH5=JSON.parse(JSON.stringify(edt.ch5));
   JACKS=JSON.parse(JSON.stringify(edt.jacks));CALLS=JSON.parse(JSON.stringify(edt.calls));
   STAGE2=JSON.parse(JSON.stringify(edt.stage2));
+  PHONE_RING=JSON.parse(JSON.stringify(edt.phoneRing));
   // 動態章節
   for(var k in extraChapters){
     if(extraChapters.hasOwnProperty(k)&&edt[k])extraChapters[k]=JSON.parse(JSON.stringify(edt[k]));
@@ -1047,12 +1244,13 @@ function saveAndClose(){
   closeAdmin();alert('已儲存。');
 }
 function switchTab(tab){
-  var tabs=['ch1','ch2','ch3','ch4','ch5','calls','stage2','sprite','appear','io'];
+  var tabs=['ch1','ch2','ch3','ch4','ch5','calls','phonering','stage2','sprite','appear','io'];
   tabs.forEach(function(t){
     var el=gel('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
   });
   document.querySelectorAll('.adm-tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===tab);});
   if(tab==='sprite')initSpriteDragAdmin();
+  if(tab==='phonering')renderPhoneRingAdmin();
 }
 
 // ══ 立繪管理 ══
@@ -1204,8 +1402,8 @@ function renderList(ch){
   var data=edt[ch];
   var list=gel('script-list-'+ch);if(!list)return;
   list.innerHTML='';
-  var labels={narr:'旁白',line:'對話',chapter:'章節標題',note:'紙條',action:'行動按鈕'};
-  var badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
+  var labels={narr:'旁白',line:'對話',chapter:'章節標題',note:'紙條',action:'行動按鈕',blackout:'黑屏白字'};
+  var badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action',blackout:'sc-type-chapter'};
   data.forEach(function(s,i){
     if(['show','hide','bg','fx','stage','inv_note'].indexOf(s.t)>=0){
       var sysDiv=document.createElement('div');
@@ -1220,6 +1418,7 @@ function renderList(ch){
     else if(s.t==='line')fields='<div class="adm-field"><label class="adm-label">說話者</label><input class="adm-input" value="'+esc(s.who)+'" oninput="edt.'+ch+'['+i+'].who=this.value"></div><div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.'+ch+'['+i+'].text=this.value">'+esc(s.text)+'</textarea></div>';
     else if(s.t==='chapter')fields='<div class="adm-field"><label class="adm-label">副標</label><input class="adm-input" value="'+esc(s.jp||'')+'" oninput="edt.'+ch+'['+i+'].jp=this.value"></div><div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.'+ch+'['+i+'].main=this.value">'+esc(s.main||'')+'</textarea></div><div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="'+esc(s.sub||'')+'" oninput="edt.'+ch+'['+i+'].sub=this.value"></div>';
     else if(s.t==='note')fields='<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.'+ch+'['+i+'].body=this.value">'+esc(s.body||'')+'</textarea></div>';
+    else if(s.t==='blackout')fields='<div class="adm-field"><label class="adm-label">顯示文字</label><input class="adm-input" value="'+esc(s.text||'')+'" oninput="edt.'+ch+'['+i+'].text=this.value"></div><div class="adm-field"><label class="adm-label">停留時間 ms（預設 2600）</label><input class="adm-input" type="number" value="'+(s.duration||2600)+'" oninput="edt.'+ch+'['+i+'].duration=+this.value"></div>';
     else if(s.t==='action')fields='<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="'+esc(s.buttons&&s.buttons[0]?s.buttons[0].label:'')+'" oninput="edt.'+ch+'['+i+'].buttons[0].label=this.value"></div>';
     // 右上角按鈕列：類型標籤 ＋旁白 ＋對話 ↑ ↓ ✕
     card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;">'
@@ -1239,7 +1438,7 @@ function renderList(ch){
 }
 
 function insertLineAt(ch,idx,type){
-  var defaults={narr:{t:'narr',text:'（旁白）'},line:{t:'line',who:'語嫣',text:'（對白）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（紙條內容）'}};
+  var defaults={narr:{t:'narr',text:'（旁白）'},line:{t:'line',who:'語嫣',text:'（對白）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（紙條內容）'},blackout:{t:'blackout',text:'文字',duration:2600}};
   edt[ch].splice(idx,0,JSON.parse(JSON.stringify(defaults[type])));
   renderList(ch);
   // 捲動到插入位置
@@ -1255,7 +1454,8 @@ function buildAddRow(ch){
     +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'narr\')">＋ 旁白</button>'
     +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'line\')">＋ 對話</button>'
     +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'chapter\')">＋ 章節標題</button>'
-    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'note\')">＋ 紙條</button>';
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'note\')">＋ 紙條</button>'
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'blackout\')">＋ 黑屏</button>';
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function renderJackList(){
@@ -1277,6 +1477,41 @@ function renderCallList(){
   }).join('');
 }
 function addCall(){edt.calls.push({fromId:edt.jacks[0]?edt.jacks[0].id:'j01',toId:edt.jacks[1]?edt.jacks[1].id:'j02',fromNum:'',fromName:'',toNum:'',toName:'',dialogs:[{who:'用戶',text:''}]});renderCallList();}
+function renderPhoneRingAdmin(){
+  var pr=edt.phoneRing;if(!pr)return;
+  // 等待旁白（固定三段）
+  var narrList=gel('phonering-narr-list');
+  if(narrList){
+    narrList.innerHTML='';
+    (pr.waitNarr||[]).forEach(function(txt,i){
+      var div=document.createElement('div');
+      div.style.cssText='margin-bottom:12px;';
+      div.innerHTML='<label class="adm-label">第'+(i+1)+'段'+(i===2?' （第三段結束後出現「拿起話筒」）':'')+'</label>'
+        +'<textarea class="adm-input adm-textarea" rows="3" oninput="edt.phoneRing.waitNarr['+i+']=this.value">'+esc(txt)+'</textarea>';
+      narrList.appendChild(div);
+    });
+  }
+  // 來電對話
+  var dlgList=gel('phonering-dialog-list');
+  if(dlgList){
+    dlgList.innerHTML='';
+    (pr.dialogs||[]).forEach(function(d,i){
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;gap:6px;align-items:flex-start;margin-bottom:8px;background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:8px;';
+      row.innerHTML='<div style="flex:1;">'
+        +'<input class="adm-input" placeholder="說話者" value="'+esc(d.who||'')+'" style="margin-bottom:6px;" oninput="edt.phoneRing.dialogs['+i+'].who=this.value">'
+        +'<textarea class="adm-input adm-textarea" rows="2" oninput="edt.phoneRing.dialogs['+i+'].text=this.value">'+esc(d.text||'')+'</textarea>'
+        +'</div>'
+        +'<button style="background:none;border:none;color:#6a2a20;font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;" onclick="edt.phoneRing.dialogs.splice('+i+',1);renderPhoneRingAdmin()">✕</button>';
+      dlgList.appendChild(row);
+    });
+  }
+}
+function addPhoneRingDialog(){
+  if(!edt.phoneRing)edt.phoneRing={waitNarr:[],dialogs:[]};
+  edt.phoneRing.dialogs.push({who:'電話那端',text:''});
+  renderPhoneRingAdmin();
+}
 function renderStage2Admin(){
   var s=edt.stage2;
   var el=gel('tab-stage2-inner');if(!el)return;
@@ -1314,6 +1549,7 @@ function setDevToolbar(show){
 }
 function devSkip(){
   if(waitChapter)return;
+  if(gel('ring-dialog-area').style.display==='block'){endPhoneRing();return;}
   if(gel('stage-switchboard').style.display==='flex')return;
   if(gel('stage-map').style.display==='flex')return;
   if(document.querySelector('.note-overlay')){document.querySelector('.note-overlay').remove();processLine();return;}
@@ -1483,6 +1719,9 @@ function resetAll(){
 document.addEventListener('DOMContentLoaded',function(){
   gel('game').addEventListener('click',onTap);
   gel('game').addEventListener('touchend',function(e){e.preventDefault();onTap();},{passive:false});
+  // 接電話對話框點擊
+  gel('ring-dialog-area').addEventListener('click',onTap);
+  gel('ring-dialog-area').addEventListener('touchend',function(e){e.preventDefault();onTap();},{passive:false});
 });
 </script>
 </body>
