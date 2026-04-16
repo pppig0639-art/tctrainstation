@@ -64,7 +64,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 #lightning.flash{animation:lflash 0.4s ease;}
 @keyframes lflash{0%{opacity:0}15%{opacity:1}35%{opacity:0}55%{opacity:0.6}100%{opacity:0}}
 #sprites{position:absolute;inset:0;display:flex;align-items:flex-end;pointer-events:none;z-index:5;}
-.sprite{position:absolute;bottom:0;width:72vw;max-width:400px;transition:opacity 0.6s;}
+.sprite{position:absolute;width:72vw;max-width:400px;transition:opacity 0.6s;}
 .sprite.left{left:-4vw;}.sprite.hidden{opacity:0;}
 .sprite img{width:100%;display:block;mix-blend-mode:multiply;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.9));}
 #dialog-area{position:relative;z-index:10;padding:0 8px var(--dialog-bottom);display:flex;flex-direction:column;gap:0;}
@@ -700,25 +700,44 @@ function loadSpriteSrc(cb){
   });
 }
 
-// localStorage 只存文字設定（不含圖片）
+// localStorage 只存文字設定（不含任何圖片）
 function saveToLocal(){
   try{
     var settings=JSON.parse(JSON.stringify(SPRITE_SETTINGS));
-    settings.src=null; // 圖片另外存 IndexedDB
+    settings.src=null;
+    var stage2save=JSON.parse(JSON.stringify(STAGE2));
+    var refImg=stage2save.refImage;
+    stage2save.refImage=null; // 參考圖也太大，另存 IndexedDB
     var data={
       ch1:CH1,ch2:CH2,ch3:CH3,ch4:CH4,ch5:CH5,
       jacks:JACKS,calls:CALLS,appear:APPEAR,
-      stage2:STAGE2,phoneRing:PHONE_RING,
+      stage2:stage2save,phoneRing:PHONE_RING,
       extraChapters:extraChapters,
       extraChapterCount:extraChapterCount,
       spriteSettings:settings
     };
     localStorage.setItem(LS_KEY,JSON.stringify(data));
-    // 圖片單獨存 IndexedDB
-    if(SPRITE_SETTINGS&&SPRITE_SETTINGS.src){
-      saveSpriteSrc(SPRITE_SETTINGS.src);
-    }
+    // 圖片存 IndexedDB
+    if(SPRITE_SETTINGS&&SPRITE_SETTINGS.src)saveIDB('spriteSrc',SPRITE_SETTINGS.src);
+    if(refImg)saveIDB('refImage',refImg);
   }catch(e){console.warn('儲存失敗',e);}
+}
+
+function saveIDB(key,val){
+  openIDB(function(db){
+    if(!db)return;
+    var tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(val,key);
+  });
+}
+function loadIDB(key,cb){
+  openIDB(function(db){
+    if(!db){cb(null);return;}
+    var tx=db.transaction(IDB_STORE,'readonly');
+    var req=tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess=function(){cb(req.result||null);};
+    req.onerror=function(){cb(null);};
+  });
 }
 
 function loadFromLocal(){
@@ -746,22 +765,36 @@ document.addEventListener('DOMContentLoaded',function(){
   loadFromLocal();
   applyAppearVars(APPEAR);
   precomputeRefHash();
-  // 還原動態章節 UI
   for(var k in extraChapters){
     if(extraChapters.hasOwnProperty(k))_restoreExtraChapterUI(k);
   }
   // 從 IndexedDB 讀立繪圖片
-  loadSpriteSrc(function(src){
+  loadIDB('spriteSrc',function(src){
     if(src){
       SPRITE_SETTINGS.src=src;
       document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
+      positionSprite();
     }
   });
-  // 綁定點擊事件
+  // 從 IndexedDB 讀參考圖
+  loadIDB('refImage',function(src){
+    if(src)STAGE2.refImage=src;
+    precomputeRefHash();
+  });
+  // game 點擊
   gel('game').addEventListener('click',onTap);
-  gel('game').addEventListener('touchend',function(e){e.preventDefault();onTap();},{passive:false});
-  gel('ring-dialog-area').addEventListener('click',onTap);
-  gel('ring-dialog-area').addEventListener('touchend',function(e){e.preventDefault();onTap();},{passive:false});
+  gel('game').addEventListener('touchend',function(e){
+    // 如果點擊來源在 ring-dialog-area 內就不處理（避免雙重觸發）
+    if(gel('ring-dialog-area').contains(e.target))return;
+    e.preventDefault();onTap();
+  },{passive:false});
+  // ring-dialog-area 獨立處理，不冒泡到 game
+  gel('ring-dialog-area').addEventListener('click',function(e){
+    e.stopPropagation();onTap();
+  });
+  gel('ring-dialog-area').addEventListener('touchend',function(e){
+    e.stopPropagation();e.preventDefault();onTap();
+  },{passive:false});
 });
 function _restoreExtraChapterUI(key){
   var n=parseInt(key.replace('ch',''));
@@ -1023,6 +1056,19 @@ function endPhoneRing(){
 function switchBg(scene){
   gel('phonebooth-scene').style.display=scene==='phonebooth'?'flex':'none';
   gel('exchange-scene').style.display=scene==='1908'?'block':'none';
+}
+// 語嫣對齊對話框上緣
+function positionSprite(){
+  var dialogArea=gel('dialog-area');
+  if(!dialogArea)return;
+  var rect=dialogArea.getBoundingClientRect();
+  var gameRect=gel('game').getBoundingClientRect();
+  // 對話框相對於 game 的頂部距離，從底部算
+  var fromBottom=gameRect.height-(rect.top-gameRect.top);
+  document.querySelectorAll('.sprite').forEach(function(s){
+    s.style.bottom=fromBottom+'px';
+    if(!s.style.left)s.style.left='-4vw';
+  });
 }
 function showNote(s){
   var ov=document.createElement('div');ov.className='note-overlay';
@@ -1339,6 +1385,7 @@ function startGame(){
     gel('game').style.display='flex';
     createRain();buildDecoSwitchboard();switchBg('phonebooth');applyAppearVars(APPEAR);
     initSpriteDrag();
+    setTimeout(positionSprite,100); // 等 layout 完成再計算位置
     setInterval(function(){if(Math.random()<0.25)lightning();},4500);
     processLine();
     updateDevInfo();
@@ -1450,7 +1497,7 @@ function onSpriteUpload(input){
     if(pi){pi.src=src;pi.style.display='';}
     document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
     // 立即存到 IndexedDB（圖片太大不能放 localStorage）
-    saveSpriteSrc(src);
+    saveIDB('spriteSrc',src);
   };
   reader.readAsDataURL(file);
 }
