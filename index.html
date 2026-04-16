@@ -209,6 +209,16 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .s-rule{width:1px;height:50px;background:linear-gradient(to bottom,transparent,#5a3c10,transparent);margin-bottom:36px;}
 #start-btn{background:none;border:1px solid #3a2a12;color:#c8b882;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.4em;padding:11px 32px;cursor:pointer;transition:all 0.3s;}
 #admin-btn{position:absolute;top:14px;left:14px;background:rgba(10,8,4,0.7);border:1px solid #3a2a10;color:#5a4020;font-size:10px;letter-spacing:0.25em;padding:5px 10px;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.3s;z-index:31;border-radius:2px;}
+
+/* 開發者工具列 */
+#dev-toolbar{position:fixed;top:0;left:0;right:0;z-index:90;background:rgba(6,4,2,0.95);border-bottom:1px solid #3a2810;padding:6px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+#dev-toolbar.hidden{display:none;}
+.dev-btn{background:none;border:1px solid #4a3010;color:#c8a050;font-size:11px;padding:5px 10px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;letter-spacing:0.1em;white-space:nowrap;transition:all 0.2s;}
+.dev-btn:active{background:rgba(200,160,80,0.15);}
+.dev-label{font-size:9px;color:#4a3010;letter-spacing:0.3em;}
+.dev-toggle{background:rgba(100,40,20,0.4);border-color:#6a2010;color:#e06040;}
+/* 工具列顯示時遊戲往下偏移 */
+#game.dev-on,#start-screen.dev-on{padding-top:38px;}
 #admin-panel{position:fixed;inset:0;z-index:100;background:#0a0806;display:none;flex-direction:column;font-family:'Noto Serif TC',serif;color:#d4c090;}
 #admin-panel.open{display:flex;}
 .adm-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #3a2810;background:#0e0c08;flex-shrink:0;}
@@ -249,6 +259,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 </style>
 </head>
 <body>
+<!-- 開發者工具列（測試用，後台可隱藏） -->
+<div id="dev-toolbar" class="hidden">
+  <span class="dev-label">DEV</span>
+  <button class="dev-btn" onclick="devSkip()">⏭ 跳過</button>
+  <button class="dev-btn" onclick="devSkipToNextChapter()">章節跳過</button>
+  <button class="dev-btn" onclick="devHome()">⏮ 主畫面</button>
+  <button class="dev-btn" onclick="devRestartCh()">本章重來</button>
+  <span id="dev-info" style="font-size:9px;color:#4a3010;letter-spacing:0.1em;margin-left:4px;"></span>
+</div>
 <div id="start-screen">
   <button id="admin-btn" onclick="openAdmin()">⚙ 後台</button>
   <div class="s-deco">國定古蹟臺中車站・實境解謎</div>
@@ -344,6 +363,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     <div class="adm-tab" onclick="switchTab('sprite')">立繪</div>
     <div class="adm-tab" onclick="switchTab('appear')">外觀</div>
     <div class="adm-tab" onclick="switchTab('io')">匯入匯出</div>
+    <!-- 動態新增章節分頁標籤 -->
+    <div id="extra-ch-tab-labels"></div>
   </div>
   <div class="adm-body">
     <div id="tab-ch1">
@@ -371,6 +392,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
         <div class="sc-add-row" id="add-row-ch5"></div>
       </div>
     </div>
+    <!-- 動態新增章節容器 -->
+    <div id="extra-ch-tabs"></div>
     <div id="tab-calls" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">插孔設定</div><div id="jack-list"></div><button class="adm-btn" onclick="addJack()" style="margin-top:6px;">＋ 新增插孔</button></div>
       <div class="adm-section"><div class="adm-section-title">通話設定</div><div id="call-list"></div><button class="adm-btn" onclick="addCall()" style="margin-top:6px;">＋ 新增通話</button></div>
@@ -432,16 +455,33 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
       <div class="adm-btn-row"><button class="adm-btn primary" onclick="applyAppear()">套用</button><button class="adm-btn" onclick="resetAppear()">還原</button></div>
     </div>
     <div id="tab-io" style="display:none;">
-      <div class="adm-section"><div class="adm-section-title">匯出</div>
-        <button class="adm-btn primary" onclick="exportAll()">匯出</button>
-        <textarea id="export-area" class="adm-input adm-textarea" rows="7" readonly style="margin-top:8px;" placeholder="點擊上方匯出…"></textarea>
-        <button class="adm-btn" onclick="copyExport()" style="margin-top:6px;">複製</button>
+      <div class="adm-section">
+        <div class="adm-section-title">匯出設定檔</div>
+        <button class="adm-btn primary" onclick="exportToFile()" style="width:100%;padding:12px;font-size:13px;">⬇ 下載 JSON 設定檔</button>
+        <div style="font-size:10px;color:#5a4a2a;margin-top:6px;letter-spacing:0.1em;">下載後可在其他裝置匯入，或作為備份。</div>
       </div>
-      <div class="adm-section" style="margin-top:16px;"><div class="adm-section-title">匯入</div>
-        <textarea id="import-area" class="adm-input adm-textarea" rows="7" placeholder="貼上 JSON…"></textarea>
-        <button class="adm-btn primary" onclick="importAll()" style="margin-top:6px;">匯入並套用</button>
+      <div class="adm-section" style="margin-top:16px;">
+        <div class="adm-section-title">匯入設定檔</div>
+        <label style="display:block;padding:12px;background:none;border:2px dashed #3a2810;border-radius:3px;color:#c8a050;font-size:13px;letter-spacing:0.2em;cursor:pointer;text-align:center;font-family:'Noto Serif TC',serif;" for="import-file-input">⬆ 選擇 JSON 設定檔</label>
+        <input type="file" id="import-file-input" accept=".json,application/json" style="display:none;" onchange="importFromFile(this)">
+        <div style="font-size:10px;color:#5a4a2a;margin-top:6px;letter-spacing:0.1em;">選擇之前匯出的 .json 檔即可自動套用。</div>
       </div>
-      <div class="adm-section" style="margin-top:16px;"><div class="adm-section-title">重置</div>
+      <div class="adm-section" style="margin-top:16px;">
+        <div class="adm-section-title">開發者工具列</div>
+        <div style="font-size:12px;color:#d4c090;margin-bottom:10px;line-height:1.8;">遊戲左上角測試按鈕（跳過、返回、章節重來）。正式活動前可隱藏。</div>
+        <div class="adm-btn-row">
+          <button class="adm-btn primary" onclick="setDevToolbar(true)">顯示工具列</button>
+          <button class="adm-btn danger" onclick="setDevToolbar(false)">隱藏工具列</button>
+        </div>
+      </div>
+      <div class="adm-section" style="margin-top:16px;">
+        <div class="adm-section-title">新增章節</div>
+        <div style="font-size:12px;color:#d4c090;margin-bottom:10px;line-height:1.8;">動態新增第六章以後的劇情分頁。</div>
+        <button class="adm-btn primary" onclick="addChapter()" style="width:100%;padding:10px;">＋ 新增下一章</button>
+        <div id="extra-chapters-info" style="font-size:10px;color:#5a4a2a;margin-top:6px;letter-spacing:0.1em;"></div>
+      </div>
+      <div class="adm-section" style="margin-top:16px;">
+        <div class="adm-section-title">重置</div>
         <button class="adm-btn danger" onclick="resetAll()">還原所有預設</button>
       </div>
     </div>
@@ -561,7 +601,6 @@ function init(){
 }
 init();
 precomputeRefHash();
-function buildFullScript(){return CH1.concat(CH2).concat(CH3).concat(CH4).concat(CH5);}
 function applyAppearVars(a){
   var r=document.documentElement.style;
   r.setProperty('--dialog-font-size',a.dialogFont+'px');
@@ -625,6 +664,7 @@ var cursor=0,isTyping=false,typeTimer=null,waitChapter=false;
 var inventory=[];
 function gel(id){return document.getElementById(id);}
 function processLine(){
+  updateDevInfo();
   if(cursor>=SCRIPT.length)return;
   var s=SCRIPT[cursor++];
   if(s.t==='chapter')showChapter(s);
@@ -973,10 +1013,12 @@ function startGame(){
   var ss=gel('start-screen');ss.style.transition='opacity 0.9s';ss.style.opacity='0';
   setTimeout(function(){
     ss.style.display='none';
+    gel('game').style.display='flex';
     createRain();buildDecoSwitchboard();switchBg('phonebooth');applyAppearVars(APPEAR);
     initSpriteDrag();
     setInterval(function(){if(Math.random()<0.25)lightning();},4500);
     processLine();
+    updateDevInfo();
   },900);
 }
 var edt={ch1:[],ch2:[],ch3:[],ch4:[],ch5:[],jacks:[],calls:[],stage2:{}};
@@ -996,8 +1038,13 @@ function saveAndClose(){
   CH3=JSON.parse(JSON.stringify(edt.ch3));CH4=JSON.parse(JSON.stringify(edt.ch4));CH5=JSON.parse(JSON.stringify(edt.ch5));
   JACKS=JSON.parse(JSON.stringify(edt.jacks));CALLS=JSON.parse(JSON.stringify(edt.calls));
   STAGE2=JSON.parse(JSON.stringify(edt.stage2));
+  // 動態章節
+  for(var k in extraChapters){
+    if(extraChapters.hasOwnProperty(k)&&edt[k])extraChapters[k]=JSON.parse(JSON.stringify(edt[k]));
+  }
   precomputeRefHash();
-  closeAdmin();alert('已儲存。重新開始遊戲後生效。');
+  SCRIPT=buildFullScript();
+  closeAdmin();alert('已儲存。');
 }
 function switchTab(tab){
   var tabs=['ch1','ch2','ch3','ch4','ch5','calls','stage2','sprite','appear','io'];
@@ -1258,27 +1305,177 @@ function onRefUpload(input){
   };
   reader.readAsDataURL(file);
 }
-function exportAll(){
-  var data={ch1:edt.ch1,ch2:edt.ch2,ch3:edt.ch3,ch4:edt.ch4,ch5:edt.ch5,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
-  gel('export-area').value=JSON.stringify(data,null,2);
+// ══ 開發者工具列 ══
+function setDevToolbar(show){
+  var tb=gel('dev-toolbar');
+  if(!tb)return;
+  if(show){tb.classList.remove('hidden');}
+  else{tb.classList.add('hidden');}
 }
-function copyExport(){var el=gel('export-area');el.select();document.execCommand('copy');alert('已複製');}
-function importAll(){
-  try{
-    var d=JSON.parse(gel('import-area').value);
-    if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
-    if(d.ch3)edt.ch3=d.ch3;if(d.ch4)edt.ch4=d.ch4;if(d.ch5)edt.ch5=d.ch5;
-    if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
-    if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
-    if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
-    renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
-    renderJackList();renderCallList();
-    alert('匯入成功！請點「儲存並關閉」。');
-  }catch(e){alert('格式錯誤：'+e.message);}
+function devSkip(){
+  if(waitChapter)return;
+  if(gel('stage-switchboard').style.display==='flex')return;
+  if(gel('stage-map').style.display==='flex')return;
+  if(document.querySelector('.note-overlay')){document.querySelector('.note-overlay').remove();processLine();return;}
+  if(gel('action-btns').style.display==='flex'){hideActionBtns();processLine();return;}
+  if(isTyping){skipType();return;}
+  processLine();
+  updateDevInfo();
 }
+function devSkipToNextChapter(){
+  var chLens=[CH1.length,CH2.length,CH3.length,CH4.length,CH5.length];
+  // 加上動態章節
+  for(var k in extraChapters){if(extraChapters.hasOwnProperty(k))chLens.push(extraChapters[k].length);}
+  var pos=0;
+  for(var i=0;i<chLens.length;i++){
+    pos+=chLens[i];
+    if(cursor<pos){cursor=pos;break;}
+  }
+  // 關閉所有關卡
+  gel('stage-switchboard').style.display='none';
+  gel('stage-map').style.display='none';
+  var ov=document.querySelector('.note-overlay');if(ov)ov.remove();
+  waitChapter=false;
+  processLine();
+  updateDevInfo();
+}
+function devHome(){
+  gel('stage-switchboard').style.display='none';
+  gel('stage-map').style.display='none';
+  var ov=document.querySelector('.note-overlay');if(ov)ov.remove();
+  var ss=gel('start-screen');
+  ss.style.display='flex';ss.style.opacity='1';ss.style.transition='';
+  gel('game').style.display='none';
+}
+function devRestartCh(){
+  var chLens=[CH1.length,CH2.length,CH3.length,CH4.length,CH5.length];
+  for(var k in extraChapters){if(extraChapters.hasOwnProperty(k))chLens.push(extraChapters[k].length);}
+  var pos=0,chStart=0;
+  for(var i=0;i<chLens.length;i++){
+    if(cursor<=pos+chLens[i]){chStart=pos;break;}
+    pos+=chLens[i];
+  }
+  cursor=chStart;
+  gel('stage-switchboard').style.display='none';
+  gel('stage-map').style.display='none';
+  var ov=document.querySelector('.note-overlay');if(ov)ov.remove();
+  waitChapter=false;isTyping=false;
+  processLine();
+  updateDevInfo();
+}
+function updateDevInfo(){
+  var el=gel('dev-info');if(!el)return;
+  el.textContent='cursor:'+cursor+'/'+SCRIPT.length;
+}
+
+// ══ 動態新增章節 ══
+var extraChapters={};  // {ch6:[...], ch7:[...], ...}
+var extraChapterCount=0;
+
+function addChapter(){
+  extraChapterCount++;
+  var n=5+extraChapterCount;
+  var key='ch'+n;
+  var label='第'+n+'章';
+  // 初始化資料
+  extraChapters[key]=[
+    {t:'chapter',jp:'第'+n+'章',main:'（第'+n+'章標題）',sub:''},
+    {t:'narr',text:'（旁白）'},
+    {t:'line',who:'語嫣',text:'（對白）'}
+  ];
+  edt[key]=JSON.parse(JSON.stringify(extraChapters[key]));
+  // 加標籤
+  var tabBar=gel('extra-ch-tab-labels');
+  var tab=document.createElement('div');
+  tab.className='adm-tab';
+  tab.textContent=label;
+  tab.onclick=(function(k){return function(){switchTabExtra(k);};})(key);
+  tab.id='tab-label-'+key;
+  tabBar.appendChild(tab);
+  // 加內容區
+  var body=gel('extra-ch-tabs');
+  var div=document.createElement('div');
+  div.id='tab-'+key;div.style.display='none';
+  div.innerHTML='<div class="adm-section"><div class="adm-section-title">'+label+'　劇情腳本</div><div id="script-list-'+key+'"></div><div class="sc-add-row" id="add-row-'+key+'"></div></div>';
+  body.appendChild(div);
+  renderList(key);
+  switchTabExtra(key);
+  // 更新資訊
+  var info=gel('extra-chapters-info');
+  if(info)info.textContent='目前已新增：第6章～第'+n+'章';
+  // 重建腳本
+  SCRIPT=buildFullScript();
+}
+
+function switchTabExtra(key){
+  // 關閉所有分頁
+  var allTabs=['ch1','ch2','ch3','ch4','ch5','calls','stage2','sprite','appear','io'];
+  allTabs.forEach(function(t){var el=gel('tab-'+t);if(el)el.style.display='none';});
+  for(var k in extraChapters){var el=gel('tab-'+k);if(el)el.style.display='none';}
+  // 開啟指定
+  var el=gel('tab-'+key);if(el)el.style.display='block';
+  // 更新 active 樣式
+  document.querySelectorAll('.adm-tab').forEach(function(t){t.classList.remove('active');});
+  var lbl=gel('tab-label-'+key);if(lbl)lbl.classList.add('active');
+}
+
+// ══ 匯出匯入（檔案） ══
+function exportToFile(){
+  var data={ch1:edt.ch1,ch2:edt.ch2,ch3:edt.ch3,ch4:edt.ch4,ch5:edt.ch5,
+    jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2,
+    extraChapters:edt.extraChapters||{},extraChapterCount:extraChapterCount};
+  var json=JSON.stringify(data,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='tctrainstation-settings.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importFromFile(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var d=JSON.parse(e.target.result);
+      if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
+      if(d.ch3)edt.ch3=d.ch3;if(d.ch4)edt.ch4=d.ch4;if(d.ch5)edt.ch5=d.ch5;
+      if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
+      if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
+      if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
+      // 動態章節
+      if(d.extraChapters){
+        for(var k in d.extraChapters){
+          if(d.extraChapters.hasOwnProperty(k)){
+            edt[k]=d.extraChapters[k];
+            extraChapters[k]=d.extraChapters[k];
+          }
+        }
+        if(d.extraChapterCount)extraChapterCount=d.extraChapterCount;
+      }
+      renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
+      for(var k in extraChapters){if(extraChapters.hasOwnProperty(k))renderList(k);}
+      renderJackList();renderCallList();
+      alert('匯入成功！請點「儲存並關閉」。');
+    }catch(err){alert('格式錯誤：'+err.message);}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+function buildFullScript(){
+  var s=CH1.concat(CH2).concat(CH3).concat(CH4).concat(CH5);
+  for(var k in extraChapters){
+    if(extraChapters.hasOwnProperty(k))s=s.concat(extraChapters[k]);
+  }
+  return s;
+}
+function exportAll(){exportToFile();}
+function copyExport(){}
+function importAll(){}
 function resetAll(){
   if(!confirm('確定還原所有預設？'))return;
-  init();syncAppearSliders();applyAppearVars(APPEAR);
+  init();extraChapters={};extraChapterCount=0;
+  syncAppearSliders();applyAppearVars(APPEAR);
   renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
   renderJackList();renderCallList();renderStage2Admin();
 }
