@@ -73,7 +73,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 #dialog-box{background:var(--dialog-bg);border:1px solid var(--dialog-border);padding:var(--dialog-padding);min-height:var(--dialog-min-height);position:relative;}
 #dialog-box::before{content:'◆';position:absolute;top:7px;left:9px;color:var(--gold);font-size:8px;opacity:0.55;}
 #dialog-box::after{content:'◆';position:absolute;bottom:7px;right:9px;color:var(--gold);font-size:8px;opacity:0.55;}
-#dialog-text{color:#f8eed5;font-size:var(--dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;}
+#dialog-text{color:#ffffff;font-size:var(--dialog-font-size);line-height:2.0;letter-spacing:0.06em;min-height:3em;}
 #next-hint{position:absolute;bottom:9px;right:15px;color:var(--gold);font-size:15px;animation:blink 1.3s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
 #action-btns{display:none;flex-direction:column;gap:8px;padding:10px 0 4px;}
@@ -112,12 +112,12 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .cb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .cb-from,.cb-to{display:flex;flex-direction:column;gap:3px;flex:1;}
 .cb-to{text-align:right;}
-.cb-label{font-size:11px;color:#8a6030;letter-spacing:0.15em;}
+.cb-label{font-size:11px;color:#d4a840;letter-spacing:0.15em;}
 .cb-number{font-size:22px;color:#ffd050;letter-spacing:0.15em;font-weight:600;line-height:1.2;}
 .cb-arrow{font-size:26px;color:#6a4818;flex-shrink:0;}
 .call-banner.connected .cb-arrow{color:#30b080;}
 .sb-panel-wrap{margin:8px 12px 0;background:linear-gradient(180deg,#1e1608,#140e06);border:1px solid #3a2810;border-radius:3px;padding:8px 10px;}
-.sb-panel-label{font-size:10px;color:#6a5020;letter-spacing:0.4em;text-align:center;margin-bottom:6px;}
+.sb-panel-label{font-size:10px;color:#c8a050;letter-spacing:0.4em;text-align:center;margin-bottom:6px;}
 .sb-jacks{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
 .sb-jack{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 2px;border:1px solid transparent;border-radius:3px;transition:all 0.2s;user-select:none;}
 .sb-jack:active{transform:scale(0.94);}
@@ -132,24 +132,24 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .sb-jack.plugged .sb-jack-hole{background:radial-gradient(circle,#8a6020,#2a1808);border-color:#c8a030;}
 .sb-jack.correct .sb-jack-hole{background:radial-gradient(circle,#104030 40%,#0a1a14);border-color:#30c090;box-shadow:0 0 5px rgba(48,192,144,0.4);}
 @keyframes jack-blink{0%,100%{opacity:1}50%{opacity:0.4}}
-.sb-jack-name{font-size:10px;color:#7a6040;text-align:center;line-height:1.3;}
-.sb-jack.ringing .sb-jack-name{color:#e0b050;}
-.sb-jack.correct .sb-jack-name{color:#50c090;}
+.sb-jack-name{font-size:10px;color:#ffffff;text-align:center;line-height:1.3;}
+.sb-jack.ringing .sb-jack-name{color:#ffd060;}
+.sb-jack.correct .sb-jack-name{color:#60e0a0;}
 .sb-cords{display:flex;gap:10px;justify-content:center;padding:6px 0;border-top:1px solid #1e1406;border-bottom:1px solid #1e1406;margin-bottom:6px;}
 .sb-cord{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 14px;border:1px solid #3a2810;border-radius:3px;transition:all 0.2s;user-select:none;}
 .sb-cord.selected{border-color:var(--gold);background:rgba(212,168,48,0.1);}
 .sb-cord.used{opacity:0.45;cursor:default;border-color:#2a1a08;}
 .sb-cord-plug{width:11px;height:17px;background:linear-gradient(180deg,#d4c060,#8a7030);border-radius:2px 2px 4px 4px;border:1px solid #4a3010;}
 .sb-cord-wire{width:2px;height:18px;background:repeating-linear-gradient(180deg,#4a3010 0px,#4a3010 3px,#6a5020 3px,#6a5020 6px);}
-.sb-cord-name{font-size:10px;color:#7a6030;}
+.sb-cord-name{font-size:10px;color:#ffffff;}
 .sb-cord.selected .sb-cord-name{color:var(--gold);}
-.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#9a8050;font-size:12px;letter-spacing:0.3em;cursor:pointer;transition:all 0.2s;}
+.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#ffffff;font-size:12px;letter-spacing:0.3em;cursor:pointer;transition:all 0.2s;}
 .sb-talk-btn.active{background:linear-gradient(180deg,#4a3010,#2a1e0a);color:var(--gold);border-color:var(--gold-dim);}
 .sb-talk-btn:disabled{opacity:0.4;cursor:default;}
 .sb-bottom{flex:1;display:flex;flex-direction:column;padding:6px 12px 8px;overflow:hidden;min-height:0;}
 .sb-dialog-box{flex:1;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #1e1808;border-radius:2px;padding:8px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;}
-.sb-msg-who{font-size:11px;color:#8a7040;letter-spacing:0.2em;}
-.sb-msg-text{font-size:15px;color:#e8d8b0;line-height:1.85;letter-spacing:0.04em;}
+.sb-msg-who{font-size:11px;color:#ffd060;letter-spacing:0.2em;}
+.sb-msg-text{font-size:15px;color:#ffffff;line-height:1.85;letter-spacing:0.04em;}
 .sb-finish-btn{margin-top:8px;padding:11px 20px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;display:none;align-self:center;transition:all 0.2s;}
 #stage-map{position:fixed;inset:0;z-index:40;background:linear-gradient(180deg,#08060a,#100e08);display:none;flex-direction:column;align-items:center;overflow-y:auto;padding:0 0 20px;}
 .s2-header{width:100%;padding:12px 16px 10px;border-bottom:1px solid #2a1808;text-align:center;font-size:13px;color:var(--gold);letter-spacing:0.4em;flex-shrink:0;}
@@ -168,21 +168,40 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .s2-route-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #1a1408;}
 .s2-route-step:last-child{border-bottom:none;}
 .s2-step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#2a1e0a;border:1px solid #6a4818;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);margin-top:2px;}
-.s2-step-text{font-size:14px;color:#d4c090;line-height:1.8;letter-spacing:0.04em;}
+.s2-step-text{font-size:14px;color:#ffffff;line-height:1.8;letter-spacing:0.04em;}
 .s2-compass-wrap{width:calc(100% - 24px);max-width:400px;margin:12px auto 0;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #3a2810;border-radius:4px;padding:16px;}
-.s2-compass-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:6px;}
-.s2-compass-q{font-size:15px;color:#f0e0b0;line-height:1.8;letter-spacing:0.05em;margin-bottom:12px;}
+.s2-compass-title{font-size:11px;color:#c8a050;letter-spacing:0.4em;margin-bottom:6px;}
+.s2-compass-q{font-size:15px;color:#ffffff;line-height:1.8;letter-spacing:0.05em;margin-bottom:12px;}
 .s2-compass-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
-.s2-dir-btn{padding:10px 4px;background:linear-gradient(135deg,#1a1408,#0e0c06);border:1px solid #3a2810;border-radius:3px;color:#8a7040;font-size:14px;letter-spacing:0.1em;cursor:pointer;text-align:center;transition:all 0.2s;font-family:'Noto Serif TC',serif;user-select:none;}
-.s2-dir-btn:active{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.08);}
+.s2-dir-btn{padding:10px 4px;background:linear-gradient(135deg,#1a1408,#0e0c06);border:1px solid #3a2810;border-radius:3px;color:#d4c090;font-size:14px;letter-spacing:0.1em;cursor:pointer;text-align:center;transition:all 0.2s;font-family:'Noto Serif TC',serif;user-select:none;}
+.s2-dir-btn:active{border-color:var(--gold);color:var(--gold);}
 .s2-dir-btn.selected{border-color:var(--gold);color:var(--gold);background:rgba(212,168,48,0.12);}
 .s2-dir-btn.wrong{border-color:#c03030!important;color:#c05040!important;animation:shake 0.4s;}
 .s2-dir-btn.correct{border-color:#30c090!important;color:#50d0a0!important;background:rgba(48,192,144,0.12)!important;}
 .s2-dir-btn.empty{visibility:hidden;pointer-events:none;}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.s2-compass-feedback{min-height:2em;font-size:13px;color:#8a7040;text-align:center;letter-spacing:0.1em;margin-bottom:8px;}
+.s2-compass-feedback{min-height:2em;font-size:13px;color:#d4c090;text-align:center;letter-spacing:0.1em;margin-bottom:8px;}
 .s2-compass-feedback.ok{color:#50c090;}.s2-compass-feedback.err{color:#c06050;}
 .s2-confirm-btn{width:100%;padding:11px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;transition:all 0.2s;border-radius:2px;display:none;}
+
+/* 拍照比對 */
+.s2-photo-wrap{width:calc(100% - 24px);max-width:400px;margin:12px auto 0;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #3a2810;border-radius:4px;padding:16px;}
+.s2-photo-title{font-size:11px;color:#c8a050;letter-spacing:0.4em;margin-bottom:8px;}
+.s2-photo-q{font-size:15px;color:#ffffff;line-height:1.8;margin-bottom:14px;}
+.s2-photo-hint{font-size:11px;color:#8a7050;letter-spacing:0.1em;margin-bottom:12px;}
+.s2-camera-btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#1a1a0a,#0e1008);border:2px dashed #5a4820;border-radius:4px;color:#d4a840;font-size:16px;letter-spacing:0.2em;cursor:pointer;text-align:center;margin-bottom:10px;transition:all 0.2s;font-family:'Noto Serif TC',serif;}
+.s2-camera-btn:active{border-color:var(--gold);background:rgba(212,168,48,0.06);}
+.s2-preview-row{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.s2-preview-box{flex:1;aspect-ratio:1;background:#0a0806;border:1px solid #2a1808;border-radius:3px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;}
+.s2-preview-box img{width:100%;height:100%;object-fit:cover;}
+.s2-preview-label{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:#6a5020;letter-spacing:0.1em;background:rgba(0,0,0,0.5);padding:2px 0;}
+.s2-score-bar{height:6px;background:#1a1408;border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.s2-score-fill{height:100%;background:linear-gradient(90deg,#c03030,#d4a830,#30c090);width:0%;transition:width 0.8s ease;border-radius:3px;}
+.s2-photo-feedback{font-size:14px;color:#d4c090;text-align:center;min-height:2em;letter-spacing:0.05em;margin-bottom:10px;}
+.s2-photo-feedback.ok{color:#50c090;font-size:15px;}
+.s2-photo-feedback.err{color:#c06050;}
+.s2-submit-btn{width:100%;padding:12px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;border-radius:2px;display:none;transition:all 0.2s;}
+.s2-submit-btn:active{background:rgba(212,168,48,0.08);}
 #start-screen{position:absolute;inset:0;z-index:30;background:radial-gradient(ellipse at 50% 40%,#0e0a06,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .s-deco{font-size:10px;color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
 .s-title-jp{font-size:26px;color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
@@ -202,8 +221,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .adm-section{margin-bottom:18px;}
 .adm-section-title{font-size:11px;color:#8a6030;letter-spacing:0.4em;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #2a1808;}
 .adm-field{margin-bottom:10px;}
-.adm-label{font-size:11px;color:#7a6040;letter-spacing:0.15em;display:block;margin-bottom:4px;}
-.adm-input{width:100%;background:#0e0c08;border:1px solid #3a2810;color:#d4c090;font-size:14px;padding:8px 10px;font-family:'Noto Serif TC',serif;border-radius:2px;resize:vertical;}
+.adm-label{font-size:11px;color:#c8b070;letter-spacing:0.15em;display:block;margin-bottom:4px;}
+.adm-input{width:100%;background:#0e0c08;border:1px solid #3a2810;color:#f0e8d0;font-size:14px;padding:8px 10px;font-family:'Noto Serif TC',serif;border-radius:2px;resize:vertical;}
 .adm-input:focus{outline:none;border-color:var(--gold-dim);}
 .adm-textarea{min-height:80px;}
 .script-line-card{background:#0e0c08;border:1px solid #2a1808;border-radius:3px;padding:10px 12px;margin-bottom:8px;position:relative;}
@@ -523,10 +542,10 @@ var D_CALLS=[
 ];
 var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10};
 var D_STAGE2={
-  question:'車站大門內，朝著門外方向，\n門框上方的方位指針指向哪個方位？',
-  answer:'北',
-  hint:'仔細抬頭看車站門口上方。',
-  successText:'正確！你已站在臺中驛門口。\n接下來，進入車站尋找更多線索。'
+  hint:'請在臺中驛正門口，對準地面俯拍一張照片。',
+  successText:'位置確認！歡迎來到臺中驛。',
+  threshold:60,   // 相似度門檻（0-100），後台可調
+  refImage:null   // 參考圖 base64，後台上傳
 };
 var CH1,CH2,CH3,CH4,CH5,JACKS,CALLS,APPEAR,STAGE2,SCRIPT;
 function init(){
@@ -541,6 +560,7 @@ function init(){
   STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
 }
 init();
+precomputeRefHash();
 function buildFullScript(){return CH1.concat(CH2).concat(CH3).concat(CH4).concat(CH5);}
 function applyAppearVars(a){
   var r=document.documentElement.style;
@@ -818,69 +838,120 @@ function launchMap(){
     +'<div class="s2-route-step"><div class="s2-step-num">2</div><div class="s2-step-text">步行約五分鐘，右手邊出現紅磚白飾帶的日式建築——那就是臺中驛。</div></div>'
     +'<div class="s2-route-step"><div class="s2-step-num">3</div><div class="s2-step-text">走到車站正面大門口，到達後解開下方謎題。</div></div>'
     +'</div></div>'
-    +'<div class="s2-compass-wrap">'
-    +'<div class="s2-compass-title">到達確認　抵達後作答</div>'
-    +'<div class="s2-compass-q" id="s2-question">'+STAGE2.question.replace(/\n/g,'<br>')+'</div>'
-    +'<div style="font-size:11px;color:#6a5030;letter-spacing:0.15em;margin-bottom:10px;">'+STAGE2.hint+'</div>'
-    +'<div class="s2-compass-grid" id="s2-dir-grid"></div>'
-    +'<div class="s2-compass-feedback" id="s2-feedback">請選擇一個方位</div>'
-    +'<button class="s2-confirm-btn" id="s2-confirm-btn" onclick="s2Confirm()">確認答案</button>'
+    +'<div class="s2-photo-wrap">'
+    +'<div class="s2-photo-title">到達確認　拍照驗證</div>'
+    +'<div class="s2-photo-q">請在臺中驛門口，對著地面俯拍一張照片。</div>'
+    +'<div class="s2-photo-hint">'+STAGE2.hint+'</div>'
+    +'<label class="s2-camera-btn" for="s2-photo-input">📷　點此拍照 ／ 選擇照片</label>'
+    +'<input type="file" id="s2-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelected(this)">'
+    +'<div class="s2-preview-row">'
+    +'<div class="s2-preview-box" id="s2-ref-box"><div style="font-size:10px;color:#3a2810;letter-spacing:0.1em;text-align:center;padding:8px;">參考圖<br>（後台設定）</div><div class="s2-preview-label">參考圖</div></div>'
+    +'<div class="s2-preview-box" id="s2-user-box"><div style="font-size:10px;color:#3a2810;letter-spacing:0.1em;text-align:center;padding:8px;">你的照片<br>會出現在這裡</div><div class="s2-preview-label">你的照片</div></div>'
+    +'</div>'
+    +'<div class="s2-score-bar"><div class="s2-score-fill" id="s2-score-fill"></div></div>'
+    +'<div class="s2-photo-feedback" id="s2-photo-feedback">請先拍照</div>'
+    +'<button class="s2-submit-btn" id="s2-submit-btn" onclick="s2PhotoConfirm()">確認到達　進入車站 ▶</button>'
     +'</div>';
-  s2Selected=null;
-  var grid=gel('s2-dir-grid');
-  cells.forEach(function(dir){
-    var btn=document.createElement('button');
-    if(!dir){btn.className='s2-dir-btn empty';btn.disabled=true;btn.textContent=' ';}
-    else{btn.className='s2-dir-btn';btn.textContent=dir;btn.onclick=(function(d,b){return function(){s2SelectDir(d,b);};})(dir,btn);}
-    grid.appendChild(btn);
-  });
-}
-var s2WrongCount=0;
-function s2SelectDir(dir,btn){
-  s2Selected=dir;
-  document.querySelectorAll('.s2-dir-btn').forEach(function(b){b.classList.remove('selected');});
-  btn.classList.add('selected');
-  gel('s2-feedback').textContent='已選擇：'+dir;
-  gel('s2-feedback').className='s2-compass-feedback';
-  gel('s2-confirm-btn').style.display='block';
-}
-function s2Confirm(){
-  if(!s2Selected)return;
-  if(s2Selected===STAGE2.answer.trim()){
-    document.querySelectorAll('.s2-dir-btn.selected').forEach(function(b){b.classList.add('correct');});
-    gel('s2-feedback').textContent=STAGE2.successText.replace(/\n/g,' ');
-    gel('s2-feedback').className='s2-compass-feedback ok';
-    var btn=gel('s2-confirm-btn');btn.textContent='進入車站 ▶';
-    btn.onclick=function(){
-      gel('stage-map').style.display='none';
-      s2WrongCount=0;
-      addItem('map','🗺️','臺中市街地圖');
-      // 跳到第三章開頭
-      cursor=CH1.length+CH2.length;
-      processLine();
-    };
-  }else{
-    s2WrongCount++;
-    document.querySelectorAll('.s2-dir-btn.selected').forEach(function(b){b.classList.add('wrong');setTimeout(function(){b.classList.remove('wrong','selected');},500);});
-    s2Selected=null;
-    gel('s2-confirm-btn').style.display='none';
-    if(s2WrongCount>=2){
-      gel('s2-feedback').innerHTML='答錯兩次了。<br>請實際走到臺中車站門口，仔細觀察後再作答。<br><br><button onclick="s2RetryFromStart()" style="background:none;border:1px solid #c87020;color:#e8a040;padding:8px 16px;font-size:12px;letter-spacing:0.2em;cursor:pointer;font-family:\'Noto Serif TC\',serif;">重新出發</button>';
-      gel('s2-feedback').className='s2-compass-feedback err';
-    }else{
-      gel('s2-feedback').textContent='方位有誤（剩餘機會：'+(2-s2WrongCount)+'次）。\n請仔細觀察現場後再試。';
-      gel('s2-feedback').className='s2-compass-feedback err';
+  // 顯示參考圖（如果後台有設定）
+  s2WrongCount=0;
+  if(STAGE2.refImage){
+    var refBox=gel('s2-ref-box');
+    if(refBox){
+      refBox.innerHTML='<img src="'+STAGE2.refImage+'" style="width:100%;height:100%;object-fit:cover;"><div class="s2-preview-label">參考圖</div>';
     }
   }
 }
+// ══ 圖像哈希比對引擎 ══
+function imgToHash(img,size){
+  size=size||16;
+  var canvas=document.createElement('canvas');
+  canvas.width=size;canvas.height=size;
+  var ctx=canvas.getContext('2d');
+  ctx.drawImage(img,0,0,size,size);
+  var data=ctx.getImageData(0,0,size,size).data;
+  // 轉灰階
+  var gray=[];
+  for(var i=0;i<size*size;i++){
+    gray.push(0.299*data[i*4]+0.587*data[i*4+1]+0.114*data[i*4+2]);
+  }
+  // 計算平均值
+  var avg=gray.reduce(function(a,b){return a+b;},0)/gray.length;
+  // 生成哈希（亮於平均=1，暗=0）
+  return gray.map(function(v){return v>=avg?1:0;});
+}
+
+function hashSimilarity(h1,h2){
+  if(!h1||!h2||h1.length!==h2.length)return 0;
+  var same=0;
+  for(var i=0;i<h1.length;i++){if(h1[i]===h2[i])same++;}
+  return Math.round(same/h1.length*100);
+}
+
+var refHash=null; // 參考圖哈希
+var s2PhotoHash=null; // 玩家照片哈希
+
+// 預先計算參考圖哈希
+function precomputeRefHash(){
+  if(!STAGE2.refImage)return;
+  var img=new Image();
+  img.onload=function(){refHash=imgToHash(img);};
+  img.src=STAGE2.refImage;
+}
+
+function onPhotoSelected(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var src=e.target.result;
+    // 顯示預覽
+    var userBox=gel('s2-user-box');
+    if(userBox)userBox.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;"><div class="s2-preview-label">你的照片</div>';
+    // 計算哈希並比對
+    var img=new Image();
+    img.onload=function(){
+      s2PhotoHash=imgToHash(img);
+      var score=refHash?hashSimilarity(refHash,s2PhotoHash):0;
+      var threshold=STAGE2.threshold||60;
+      showPhotoScore(score,threshold);
+    };
+    img.src=src;
+  };
+  reader.readAsDataURL(file);
+}
+
+function showPhotoScore(score,threshold){
+  var fill=gel('s2-score-fill');
+  var feedback=gel('s2-photo-feedback');
+  var submitBtn=gel('s2-submit-btn');
+  if(fill)fill.style.width=score+'%';
+  if(!refHash){
+    if(feedback){feedback.textContent='參考圖尚未設定，請洽主辦人。';feedback.className='s2-photo-feedback err';}
+    return;
+  }
+  if(score>=threshold){
+    if(feedback){feedback.textContent='位置確認！相似度 '+score+'%';feedback.className='s2-photo-feedback ok';}
+    if(submitBtn)submitBtn.style.display='block';
+  }else if(score>=threshold*0.7){
+    if(feedback){feedback.textContent='有點像，但還不夠準確（'+score+'%）。\n請確認拍攝角度，或再試一次。';feedback.className='s2-photo-feedback err';}
+    if(submitBtn)submitBtn.style.display='none';
+  }else{
+    if(feedback){feedback.textContent='位置不符（'+score+'%）。\n請走到臺中驛正門口，對準地面俯拍。';feedback.className='s2-photo-feedback err';}
+    if(submitBtn)submitBtn.style.display='none';
+  }
+}
+
+function s2PhotoConfirm(){
+  gel('stage-map').style.display='none';
+  s2WrongCount=0;
+  addItem('map','🗺️','臺中市街地圖');
+  cursor=CH1.length+CH2.length;
+  processLine();
+}
+
 function s2RetryFromStart(){
   s2WrongCount=0;
-  s2Selected=null;
-  // 返回接線關卡（重新跑第二章）
   gel('stage-map').style.display='none';
-  // 重置 cursor 到第二章開頭
-  var ch2Start=CH1.length;
-  cursor=ch2Start;
+  cursor=CH1.length;
   processLine();
 }
 function buildDecoSwitchboard(){
@@ -925,6 +996,7 @@ function saveAndClose(){
   CH3=JSON.parse(JSON.stringify(edt.ch3));CH4=JSON.parse(JSON.stringify(edt.ch4));CH5=JSON.parse(JSON.stringify(edt.ch5));
   JACKS=JSON.parse(JSON.stringify(edt.jacks));CALLS=JSON.parse(JSON.stringify(edt.calls));
   STAGE2=JSON.parse(JSON.stringify(edt.stage2));
+  precomputeRefHash();
   closeAdmin();alert('已儲存。重新開始遊戲後生效。');
 }
 function switchTab(tab){
@@ -958,7 +1030,7 @@ function initSpriteDragAdmin(){
   gel('show-sprite-size').textContent=sz+'%';
   // 同步位置（從遊戲換算到預覽比例）
   var stageW=stage.offsetWidth||300;
-  var stageH=stage.offsetHeight||stageW*16/9;
+  var stageH=stageW*16/9; // 固定 9:16 比例
   if(SPRITE_SETTINGS.leftPct!=null) img.style.left=(SPRITE_SETTINGS.leftPct*stageW/100)+'px';
   if(SPRITE_SETTINGS.bottomPct!=null) img.style.bottom=(SPRITE_SETTINGS.bottomPct*stageH/100)+'px';
 
@@ -974,7 +1046,7 @@ function initSpriteDragAdmin(){
     if(!spDragState.active)return;
     e.preventDefault();
     var p=getPos(e);
-    var sw=stage.offsetWidth, sh=stage.offsetHeight;
+    var sw=stage.offsetWidth, sh=sw*16/9;
     var newL=spDragState.origL+(p.x-spDragState.startX);
     var newB=spDragState.origB-(p.y-spDragState.startY);
     newL=Math.max(-sw*0.3,Math.min(sw*0.8,newL));
@@ -1010,17 +1082,18 @@ function onSpriteUpload(input){
 function applySpriteToGame(){
   var stage=gel('sprite-stage');
   if(!stage){alert('找不到預覽框');return;}
-  var sw=stage.offsetWidth, sh=stage.offsetHeight;
+  var sw=stage.offsetWidth;
+  var sh=sw*16/9; // 9:16 比例（直式手機）
   var img=gel('sprite-stage-img');
   var imgL=parseInt(img?img.style.left:0)||0;
   var imgB=parseInt(img?img.style.bottom:0)||0;
   var pct=SPRITE_SETTINGS.pct||55;
-  // 換算：預覽框佔的百分比 → 螢幕真實px
+  // 換算到螢幕真實尺寸
   var scaleX=window.innerWidth/sw;
   var scaleY=window.innerHeight/sh;
-  var gameL=imgL*scaleX;
-  var gameB=imgB*scaleY;
-  var gameW=(pct/100)*sw*scaleX;
+  var gameW=Math.round((pct/100)*sw*scaleX);
+  var gameL=Math.round(imgL*scaleX);
+  var gameB=Math.round(imgB*scaleY);
   document.querySelectorAll('.sprite').forEach(function(s){
     s.style.width=gameW+'px';
     s.style.maxWidth='none';
@@ -1029,7 +1102,7 @@ function applySpriteToGame(){
   });
   SPRITE_SETTINGS.leftPct=imgL/sw*100;
   SPRITE_SETTINGS.bottomPct=imgB/sh*100;
-  alert('已套用！');
+  closeAdmin();
 }
 function resetSpriteSettings(){
   SPRITE_SETTINGS={pct:55,leftPct:0,bottomPct:28,src:SPRITE_SETTINGS.src};
@@ -1102,14 +1175,15 @@ function renderList(ch){
     else if(s.t==='note')fields='<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.'+ch+'['+i+'].body=this.value">'+esc(s.body||'')+'</textarea></div>';
     else if(s.t==='action')fields='<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="'+esc(s.buttons&&s.buttons[0]?s.buttons[0].label:'')+'" oninput="edt.'+ch+'['+i+'].buttons[0].label=this.value"></div>';
     // 右上角按鈕列：類型標籤 ＋旁白 ＋對話 ↑ ↓ ✕
-    card.innerHTML='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;flex-wrap:wrap;">'
-      +'<span class="sc-type-badge '+(badges[s.t]||'sc-type-narr')+'" style="margin-bottom:0;">'+(labels[s.t]||s.t)+'</span>'
-      +'<div style="flex:1;"></div>'
-      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'narr\')" title="在此行後插入旁白" style="background:none;border:1px solid #2a1808;color:#6a5020;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:2px;white-space:nowrap;">後＋旁白</button>'
-      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'line\')" title="在此行後插入對話" style="background:none;border:1px solid #2a1808;color:#6a5020;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:2px;white-space:nowrap;">後＋對話</button>'
-      +'<button class="sc-dn-btn" onclick="if('+i+'<edt.'+ch+'.length-1){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i+1)+'];a['+(i+1)+']=t;renderList(\''+ch+'\')}">↓</button>'
-      +'<button class="sc-up-btn" onclick="if('+i+'>0){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=t;renderList(\''+ch+'\')}">↑</button>'
-      +'<button class="sc-del-btn" style="position:static;padding:2px 6px;" onclick="edt.'+ch+'.splice('+i+',1);renderList(\''+ch+'\')">✕</button>'
+    card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;">'
+      +'<span class="sc-type-badge '+(badges[s.t]||'sc-type-narr')+'" style="margin-bottom:0;flex-shrink:0;">'+(labels[s.t]||s.t)+'</span>'
+      +'<div style="display:flex;gap:4px;align-items:center;flex-wrap:nowrap;">'
+      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'narr\')" style="background:none;border:1px solid #3a2810;color:#c8a050;font-size:10px;padding:3px 6px;cursor:pointer;border-radius:2px;white-space:nowrap;">＋旁</button>'
+      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'line\')" style="background:none;border:1px solid #3a2810;color:#c8a050;font-size:10px;padding:3px 6px;cursor:pointer;border-radius:2px;white-space:nowrap;">＋對</button>'
+      +'<button class="sc-dn-btn" style="position:static;padding:3px 5px;" onclick="if('+i+'<edt.'+ch+'.length-1){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i+1)+'];a['+(i+1)+']=t;renderList(\''+ch+'\')}">↓</button>'
+      +'<button class="sc-up-btn" style="position:static;padding:3px 5px;" onclick="if('+i+'>0){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=t;renderList(\''+ch+'\')}">↑</button>'
+      +'<button style="background:none;border:none;color:#6a3020;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;" onclick="edt.'+ch+'.splice('+i+',1);renderList(\''+ch+'\')">✕</button>'
+      +'</div>'
       +'</div>'
       +fields;
     list.appendChild(card);
@@ -1158,18 +1232,31 @@ function renderCallList(){
 function addCall(){edt.calls.push({fromId:edt.jacks[0]?edt.jacks[0].id:'j01',toId:edt.jacks[1]?edt.jacks[1].id:'j02',fromNum:'',fromName:'',toNum:'',toName:'',dialogs:[{who:'用戶',text:''}]});renderCallList();}
 function renderStage2Admin(){
   var s=edt.stage2;
-  var dirs=['北','東北','東','東南','南','西南','西','西北'];
-  var radioHtml=dirs.map(function(d){return '<div class="s2-answer-radio'+(d===s.answer?' active':'')+'" onclick="setS2Answer(\''+d+'\',this)">'+d+'</div>';}).join('');
   var el=gel('tab-stage2-inner');if(!el)return;
-  el.innerHTML='<div class="adm-field"><label class="adm-label">題目文字</label><textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.question=this.value">'+esc(s.question)+'</textarea></div>'
-    +'<div class="adm-field"><label class="adm-label">提示文字</label><input class="adm-input" value="'+esc(s.hint)+'" oninput="edt.stage2.hint=this.value"></div>'
-    +'<div class="adm-field"><label class="adm-label">正確答案</label><div class="s2-answer-grid">'+radioHtml+'</div></div>'
-    +'<div class="adm-field"><label class="adm-label">答對後文字</label><textarea class="adm-input adm-textarea" rows="3" oninput="edt.stage2.successText=this.value">'+esc(s.successText)+'</textarea></div>';
+  el.innerHTML='<div class="adm-field"><label class="adm-label">提示文字（顯示在拍照說明下方）</label>'
+    +'<input class="adm-input" value="'+esc(s.hint||'')+'" oninput="edt.stage2.hint=this.value"></div>'
+    +'<div class="adm-field"><label class="adm-label">相似度門檻（目前：<span id="val-threshold">'+(s.threshold||60)+'</span>%，建議 55-70）</label>'
+    +'<div class="range-row"><input type="range" min="30" max="90" value="'+(s.threshold||60)+'" id="range-threshold" oninput="edt.stage2.threshold=+this.value;gel(\'val-threshold\').textContent=this.value"><span class="range-val" id="show-threshold">'+(s.threshold||60)+'%</span></div>'
+    +'<div style="font-size:10px;color:#5a4a2a;margin-top:4px;">數字越低越容易通過，越高越嚴格。建議先設 55 測試。</div></div>'
+    +'<div class="adm-field"><label class="adm-label">參考圖上傳（你在現場拍的標準照片）</label>'
+    +'<input type="file" accept="image/*" id="ref-upload" style="color:#d4c090;font-size:12px;width:100%;margin-bottom:8px;" onchange="onRefUpload(this)">'
+    +'<div id="ref-preview" style="width:120px;height:120px;background:#0e0c08;border:1px solid #3a2810;overflow:hidden;border-radius:3px;display:flex;align-items:center;justify-content:center;">'
+    +(s.refImage?'<img src="'+s.refImage+'" style="width:100%;height:100%;object-fit:cover;">'
+      :'<span style="font-size:10px;color:#3a2810;text-align:center;padding:8px;">尚未上傳</span>')
+    +'</div></div>'
+    +'<div class="adm-field"><label class="adm-label">答對後顯示文字</label>'
+    +'<input class="adm-input" value="'+esc(s.successText||'')+'" oninput="edt.stage2.successText=this.value"></div>';
 }
-function setS2Answer(dir,el){
-  edt.stage2.answer=dir;
-  document.querySelectorAll('.s2-answer-radio').forEach(function(b){b.classList.remove('active');});
-  el.classList.add('active');
+function onRefUpload(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var src=e.target.result;
+    edt.stage2.refImage=src;
+    var prev=gel('ref-preview');
+    if(prev)prev.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
 }
 function exportAll(){
   var data={ch1:edt.ch1,ch2:edt.ch2,ch3:edt.ch3,ch4:edt.ch4,ch5:edt.ch5,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
