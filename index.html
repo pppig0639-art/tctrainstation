@@ -317,6 +317,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
   <div class="adm-tabs">
     <div class="adm-tab active" onclick="switchTab('ch1')">第一章</div>
     <div class="adm-tab" onclick="switchTab('ch2')">第二章</div>
+    <div class="adm-tab" onclick="switchTab('ch3')">第三章</div>
+    <div class="adm-tab" onclick="switchTab('ch4')">第四章</div>
+    <div class="adm-tab" onclick="switchTab('ch5')">第五章</div>
     <div class="adm-tab" onclick="switchTab('calls')">接線關卡</div>
     <div class="adm-tab" onclick="switchTab('stage2')">關卡二</div>
     <div class="adm-tab" onclick="switchTab('sprite')">立繪</div>
@@ -326,23 +329,27 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
   <div class="adm-body">
     <div id="tab-ch1">
       <div class="adm-section"><div class="adm-section-title">第一章　劇情腳本</div><div id="script-list-ch1"></div>
-        <div class="sc-add-row">
-          <button class="sc-add-btn" onclick="addLine('ch1','narr')">＋ 旁白</button>
-          <button class="sc-add-btn" onclick="addLine('ch1','line')">＋ 對話</button>
-          <button class="sc-add-btn" onclick="addLine('ch1','chapter')">＋ 章節標題</button>
-          <button class="sc-add-btn" onclick="addLine('ch1','note')">＋ 紙條</button>
-        </div>
+        <div class="sc-add-row" id="add-row-ch1"></div>
       </div>
     </div>
     <div id="tab-ch2" style="display:none;">
       <div class="adm-section"><div class="adm-section-title">第二章　劇情腳本</div><div id="script-list-ch2"></div>
-        <div class="sc-add-row">
-          <button class="sc-add-btn" onclick="addLine('ch2','narr')">＋ 旁白</button>
-          <button class="sc-add-btn" onclick="addLine('ch2','line')">＋ 對話</button>
-          <button class="sc-add-btn" onclick="addLine('ch2','chapter')">＋ 章節標題</button>
-          <button class="sc-add-btn" onclick="addLine('ch2','note')">＋ 紙條</button>
-          <button class="sc-add-btn" onclick="addLine('ch2','action')">＋ 行動按鈕</button>
-        </div>
+        <div class="sc-add-row" id="add-row-ch2"></div>
+      </div>
+    </div>
+    <div id="tab-ch3" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">第三章　劇情腳本</div><div id="script-list-ch3"></div>
+        <div class="sc-add-row" id="add-row-ch3"></div>
+      </div>
+    </div>
+    <div id="tab-ch4" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">第四章　劇情腳本</div><div id="script-list-ch4"></div>
+        <div class="sc-add-row" id="add-row-ch4"></div>
+      </div>
+    </div>
+    <div id="tab-ch5" style="display:none;">
+      <div class="adm-section"><div class="adm-section-title">第五章　劇情腳本</div><div id="script-list-ch5"></div>
+        <div class="sc-add-row" id="add-row-ch5"></div>
       </div>
     </div>
     <div id="tab-calls" style="display:none;">
@@ -356,43 +363,35 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
       <div class="adm-section">
         <div class="adm-section-title">語嫣立繪設定</div>
         <div class="adm-field">
-          <label class="adm-label">更換圖片（建議去背PNG，或灰底JPG）</label>
+          <label class="adm-label">更換圖片（JPG / PNG）</label>
           <input type="file" accept="image/*" id="sprite-upload" style="color:#d4c090;font-size:12px;width:100%;" onchange="onSpriteUpload(this)">
         </div>
         <div class="adm-field">
-          <label class="adm-label">預覽</label>
-          <div id="sprite-preview" style="width:140px;height:140px;background:#1a1408;border:1px solid #3a2810;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-            <img id="sprite-preview-img" style="max-width:100%;max-height:100%;object-fit:contain;" src="" alt="">
+          <label class="adm-label">拖拽調整位置（在下方預覽框內拖動語嫣）</label>
+          <div id="sprite-drag-area" style="position:relative;width:100%;height:260px;background:linear-gradient(180deg,#0a0806,#1a1208);border:1px solid #3a2810;border-radius:3px;overflow:hidden;touch-action:none;">
+            <!-- 模擬背景 -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;"></div>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,#f0e0c0,#d4c090);border:2px solid #3a2810;opacity:0.4;"></div>
+            <!-- 可拖立繪 -->
+            <img id="sprite-drag-img"
+              src=""
+              style="position:absolute;width:55%;max-width:200px;bottom:0;left:0;cursor:grab;user-select:none;touch-action:none;filter:drop-shadow(2px 4px 12px rgba(0,0,0,0.7));"
+              draggable="false">
+            <div style="position:absolute;top:6px;right:8px;font-size:9px;color:#5a4020;letter-spacing:0.15em;">拖動語嫣調整位置</div>
           </div>
         </div>
         <div class="adm-field">
-          <label class="adm-label">位置與大小（可直接在遊戲畫面拖拽移動）</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <div>
-              <label class="adm-label">寬度 vw（<span id="val-sprite-w">72</span>）</label>
-              <div class="range-row"><input type="range" min="20" max="100" value="72" id="range-sprite-w" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-w">72vw</span></div>
-            </div>
-            <div>
-              <label class="adm-label">最大寬 px（<span id="val-sprite-maxw">400</span>）</label>
-              <div class="range-row"><input type="range" min="100" max="700" value="400" id="range-sprite-maxw" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-maxw">400px</span></div>
-            </div>
-            <div>
-              <label class="adm-label">水平位置 vw（<span id="val-sprite-x">-4</span>）</label>
-              <div class="range-row"><input type="range" min="-20" max="80" value="-4" id="range-sprite-x" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-x">-4vw</span></div>
-            </div>
-            <div>
-              <label class="adm-label">垂直偏移 px（<span id="val-sprite-y">0</span>）</label>
-              <div class="range-row"><input type="range" min="-300" max="100" value="0" id="range-sprite-y" oninput="applySpriteStyle()"><span class="range-val" id="show-sprite-y">0px</span></div>
-            </div>
+          <label class="adm-label">大小（<span id="val-sprite-size">55</span>%）</label>
+          <div class="range-row">
+            <input type="range" min="15" max="100" value="55" id="range-sprite-size" oninput="onSpriteSizeChange(this.value)">
+            <span class="range-val" id="show-sprite-size">55%</span>
           </div>
         </div>
         <div class="adm-btn-row">
-          <button class="adm-btn primary" onclick="saveSpriteSettings()">套用立繪設定</button>
+          <button class="adm-btn primary" onclick="applySpriteToGame()">套用到遊戲</button>
           <button class="adm-btn" onclick="resetSpriteSettings()">還原預設</button>
         </div>
-        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">
-          ※ 關閉後台後，可直接用手指拖拽立繪移動位置
-        </div>
+        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">套用後，遊戲畫面也可以直接用手指拖動語嫣。</div>
       </div>
     </div>
     <div id="tab-appear" style="display:none;">
@@ -474,6 +473,28 @@ var D_CH2=[
   {t:'chapter',jp:'第二章',main:'前往臺中驛',sub:''},
   {t:'stage',id:'map'}
 ];
+var D_CH3=[
+  {t:'chapter',jp:'第三章　臺中驛',main:'抵達\n臺中驛',sub:'明治四十一年'},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'},
+  {t:'narr',text:'（旁白）'}
+];
+var D_CH4=[
+  {t:'chapter',jp:'第四章',main:'（第四章標題）',sub:''},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'}
+];
+var D_CH5=[
+  {t:'chapter',jp:'第五章',main:'（第五章標題）',sub:''},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'},
+  {t:'narr',text:'（旁白）'},
+  {t:'line',who:'語嫣',text:'（對白）'}
+];
 var D_JACKS=[
   {id:'j01',name:'三井物産',num:'二三番'},{id:'j02',name:'臺中驛',num:'四番'},
   {id:'j03',name:'臺灣銀行',num:'五番'},{id:'j04',name:'醉月樓',num:'六番'},
@@ -501,17 +522,20 @@ var D_STAGE2={
   hint:'仔細抬頭看車站門口上方。',
   successText:'正確！你已站在臺中驛門口。\n接下來，進入車站尋找更多線索。'
 };
-var CH1,CH2,JACKS,CALLS,APPEAR,STAGE2,SCRIPT;
+var CH1,CH2,CH3,CH4,CH5,JACKS,CALLS,APPEAR,STAGE2,SCRIPT;
 function init(){
   CH1=JSON.parse(JSON.stringify(D_CH1));
   CH2=JSON.parse(JSON.stringify(D_CH2));
+  CH3=JSON.parse(JSON.stringify(D_CH3));
+  CH4=JSON.parse(JSON.stringify(D_CH4));
+  CH5=JSON.parse(JSON.stringify(D_CH5));
   JACKS=JSON.parse(JSON.stringify(D_JACKS));
   CALLS=JSON.parse(JSON.stringify(D_CALLS));
   APPEAR=JSON.parse(JSON.stringify(D_APPEAR));
   STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
 }
 init();
-function buildFullScript(){return CH1.concat(CH2);}
+function buildFullScript(){return CH1.concat(CH2).concat(CH3).concat(CH4).concat(CH5);}
 function applyAppearVars(a){
   var r=document.documentElement.style;
   r.setProperty('--dialog-font-size',a.dialogFont+'px');
@@ -687,13 +711,8 @@ function onNoteClosed(ov){
   }
 }
 function addItem(id,icon,name){
+  if(inventory.find(function(i){return i.id===id;}))return;
   inventory.push({id:id,icon:icon,name:name});renderInventory();
-}
-function renderInventory(){
-  gel('inv-count').textContent=inventory.length;
-  var c=gel('inv-content');
-  if(!inventory.length){c.innerHTML='<div style="font-size:11px;color:#3a2a10;letter-spacing:0.2em;width:100%;text-align:center;padding:18px 0;">── 尚無道具 ──</div>';return;}
-  c.innerHTML=inventory.map(function(i){return '<div class="inv-item"><div class="inv-item-icon">'+i.icon+'</div><div class="inv-item-name">'+i.name+'</div></div>';}).join('');
 }
 function toggleInventory(){gel('inventory').classList.toggle('open');}
 var sbState={callIdx:0,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
@@ -810,6 +829,7 @@ function launchMap(){
     grid.appendChild(btn);
   });
 }
+var s2WrongCount=0;
 function s2SelectDir(dir,btn){
   s2Selected=dir;
   document.querySelectorAll('.s2-dir-btn').forEach(function(b){b.classList.remove('selected');});
@@ -825,14 +845,37 @@ function s2Confirm(){
     gel('s2-feedback').textContent=STAGE2.successText.replace(/\n/g,' ');
     gel('s2-feedback').className='s2-compass-feedback ok';
     var btn=gel('s2-confirm-btn');btn.textContent='進入車站 ▶';
-    btn.onclick=function(){gel('stage-map').style.display='none';addItem('map','🗺️','臺中市街地圖');processLine();};
+    btn.onclick=function(){
+      gel('stage-map').style.display='none';
+      s2WrongCount=0;
+      addItem('map','🗺️','臺中市街地圖');
+      // 跳到第三章開頭
+      cursor=CH1.length+CH2.length;
+      processLine();
+    };
   }else{
+    s2WrongCount++;
     document.querySelectorAll('.s2-dir-btn.selected').forEach(function(b){b.classList.add('wrong');setTimeout(function(){b.classList.remove('wrong','selected');},500);});
     s2Selected=null;
-    gel('s2-feedback').textContent='方位有誤，請親自到現場確認。';
-    gel('s2-feedback').className='s2-compass-feedback err';
     gel('s2-confirm-btn').style.display='none';
+    if(s2WrongCount>=2){
+      gel('s2-feedback').innerHTML='答錯兩次了。<br>請實際走到臺中車站門口，仔細觀察後再作答。<br><br><button onclick="s2RetryFromStart()" style="background:none;border:1px solid #c87020;color:#e8a040;padding:8px 16px;font-size:12px;letter-spacing:0.2em;cursor:pointer;font-family:\'Noto Serif TC\',serif;">重新出發</button>';
+      gel('s2-feedback').className='s2-compass-feedback err';
+    }else{
+      gel('s2-feedback').textContent='方位有誤（剩餘機會：'+(2-s2WrongCount)+'次）。\n請仔細觀察現場後再試。';
+      gel('s2-feedback').className='s2-compass-feedback err';
+    }
   }
+}
+function s2RetryFromStart(){
+  s2WrongCount=0;
+  s2Selected=null;
+  // 返回接線關卡（重新跑第二章）
+  gel('stage-map').style.display='none';
+  // 重置 cursor 到第二章開頭
+  var ch2Start=CH1.length;
+  cursor=ch2Start;
+  processLine();
 }
 function buildDecoSwitchboard(){
   var jg=gel('deco-jacks');for(var i=0;i<16;i++){var d=document.createElement('div');d.className='sb-deco-jack';jg.appendChild(d);}
@@ -844,6 +887,7 @@ function onTap(){
   if(gel('stage-map').style.display==='flex')return;
   if(document.querySelector('.note-overlay'))return;
   if(gel('action-btns').style.display==='flex')return;
+  if(gel('inventory').classList.contains('open'))return;
   if(isTyping){skipType();return;}
   processLine();
 }
@@ -858,151 +902,221 @@ function startGame(){
     processLine();
   },900);
 }
-var edt={ch1:[],ch2:[],jacks:[],calls:[],stage2:{}};
+var edt={ch1:[],ch2:[],ch3:[],ch4:[],ch5:[],jacks:[],calls:[],stage2:{}};
 function openAdmin(){
   edt.ch1=JSON.parse(JSON.stringify(CH1));edt.ch2=JSON.parse(JSON.stringify(CH2));
+  edt.ch3=JSON.parse(JSON.stringify(CH3));edt.ch4=JSON.parse(JSON.stringify(CH4));edt.ch5=JSON.parse(JSON.stringify(CH5));
   edt.jacks=JSON.parse(JSON.stringify(JACKS));edt.calls=JSON.parse(JSON.stringify(CALLS));
   edt.stage2=JSON.parse(JSON.stringify(STAGE2));
-  syncAppearSliders();renderList('ch1');renderList('ch2');renderJackList();renderCallList();renderStage2Admin();
+  syncAppearSliders();
+  renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
+  renderJackList();renderCallList();renderStage2Admin();
   gel('admin-panel').classList.add('open');
 }
 function closeAdmin(){gel('admin-panel').classList.remove('open');}
 function saveAndClose(){
   CH1=JSON.parse(JSON.stringify(edt.ch1));CH2=JSON.parse(JSON.stringify(edt.ch2));
+  CH3=JSON.parse(JSON.stringify(edt.ch3));CH4=JSON.parse(JSON.stringify(edt.ch4));CH5=JSON.parse(JSON.stringify(edt.ch5));
   JACKS=JSON.parse(JSON.stringify(edt.jacks));CALLS=JSON.parse(JSON.stringify(edt.calls));
   STAGE2=JSON.parse(JSON.stringify(edt.stage2));
   closeAdmin();alert('已儲存。重新開始遊戲後生效。');
 }
 function switchTab(tab){
-  var tabs=['ch1','ch2','calls','stage2','sprite','appear','io'];
-  tabs.forEach(function(t){gel('tab-'+t).style.display=t===tab?'block':'none';});
+  var tabs=['ch1','ch2','ch3','ch4','ch5','calls','stage2','sprite','appear','io'];
+  tabs.forEach(function(t){
+    var el=gel('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
+  });
   document.querySelectorAll('.adm-tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===tab);});
-  if(tab==='sprite')syncSpriteSliders();
+  if(tab==='sprite')initSpriteDragAdmin();
 }
 
 // ══ 立繪管理 ══
-var SPRITE_SETTINGS={w:72,maxW:400,x:-4,y:0,src:null};
-
-function applySpriteStyle(){
-  var w=+gel('range-sprite-w').value;
-  var maxW=+gel('range-sprite-maxw').value;
-  var x=+gel('range-sprite-x').value;
-  var y=+gel('range-sprite-y').value;
-  gel('show-sprite-w').textContent=w+'vw';gel('val-sprite-w').textContent=w;
-  gel('show-sprite-maxw').textContent=maxW+'px';gel('val-sprite-maxw').textContent=maxW;
-  gel('show-sprite-x').textContent=x+'vw';gel('val-sprite-x').textContent=x;
-  gel('show-sprite-y').textContent=y+'px';gel('val-sprite-y').textContent=y;
-  var sprites=document.querySelectorAll('.sprite');
-  sprites.forEach(function(s){
-    s.style.width=w+'vw';
-    s.style.maxWidth=maxW+'px';
-    s.style.left=x+'vw';
-    s.style.bottom=(-y)+'px';
-  });
-}
-function syncSpriteSliders(){
-  gel('range-sprite-w').value=SPRITE_SETTINGS.w;
-  gel('range-sprite-maxw').value=SPRITE_SETTINGS.maxW;
-  gel('range-sprite-x').value=SPRITE_SETTINGS.x;
-  gel('range-sprite-y').value=SPRITE_SETTINGS.y;
-  applySpriteStyle();
-  if(SPRITE_SETTINGS.src){
-    gel('sprite-preview-img').src=SPRITE_SETTINGS.src;
+var SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:null};
+// 預覽框拖拽
+var spDragState={active:false,startX:0,startY:0,origL:0,origB:0};
+function initSpriteDragAdmin(){
+  var img=gel('sprite-drag-img');
+  var area=gel('sprite-drag-area');
+  if(!img||!area)return;
+  // 載入目前圖片
+  var gameSrc=document.querySelector('.sprite img');
+  if(gameSrc&&gameSrc.src&&!gel('sprite-drag-img').src){
+    gel('sprite-drag-img').src=gameSrc.src;
   }
+  img.style.width=SPRITE_SETTINGS.pct+'%';
+  img.style.left=SPRITE_SETTINGS.left+'px';
+  img.style.bottom=SPRITE_SETTINGS.bottom+'px';
+
+  function getXY(e){var t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+  img.onmousedown=img.ontouchstart=function(e){
+    e.preventDefault();
+    var p=getXY(e);
+    spDragState={active:true,startX:p.x,startY:p.y,origL:parseInt(img.style.left)||0,origB:parseInt(img.style.bottom)||0};
+  };
+  document.onmousemove=document.ontouchmove=function(e){
+    if(!spDragState.active)return;
+    var p=getXY(e);
+    var areaH=area.offsetHeight;
+    var newL=spDragState.origL+(p.x-spDragState.startX);
+    var newB=spDragState.origB-(p.y-spDragState.startY);
+    // 限制在框內
+    newL=Math.max(-20,Math.min(area.offsetWidth-30,newL));
+    newB=Math.max(-20,Math.min(areaH-20,newB));
+    img.style.left=newL+'px';
+    img.style.bottom=newB+'px';
+    SPRITE_SETTINGS.left=newL;SPRITE_SETTINGS.bottom=newB;
+  };
+  document.onmouseup=document.ontouchend=function(){spDragState.active=false;};
 }
-function saveSpriteSettings(){
-  SPRITE_SETTINGS.w=+gel('range-sprite-w').value;
-  SPRITE_SETTINGS.maxW=+gel('range-sprite-maxw').value;
-  SPRITE_SETTINGS.x=+gel('range-sprite-x').value;
-  SPRITE_SETTINGS.y=+gel('range-sprite-y').value;
-  applySpriteStyle();
-  alert('立繪設定已套用。');
-}
-function resetSpriteSettings(){
-  SPRITE_SETTINGS={w:72,maxW:400,x:-4,y:0,src:SPRITE_SETTINGS.src};
-  syncSpriteSliders();
+function onSpriteSizeChange(v){
+  v=+v;
+  gel('val-sprite-size').textContent=v;
+  gel('show-sprite-size').textContent=v+'%';
+  var img=gel('sprite-drag-img');
+  if(img)img.style.width=v+'%';
+  SPRITE_SETTINGS.pct=v;
 }
 function onSpriteUpload(input){
-  var file=input.files[0];
-  if(!file)return;
+  var file=input.files[0];if(!file)return;
   var reader=new FileReader();
   reader.onload=function(e){
     var src=e.target.result;
     SPRITE_SETTINGS.src=src;
-    gel('sprite-preview-img').src=src;
-    // 更新所有立繪圖片
+    var pi=gel('sprite-drag-img');if(pi)pi.src=src;
     document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
   };
   reader.readAsDataURL(file);
 }
-
-// ══ 立繪拖拽（遊戲畫面） ══
-function initSpriteDrag(){
-  var sprites=document.querySelectorAll('.sprite');
-  sprites.forEach(function(sp){
-    var startX,startY,origLeft,origBottom,dragging=false;
-    function onStart(e){
-      // 只在後台關閉時可以拖
-      if(gel('admin-panel').classList.contains('open'))return;
-      dragging=true;
-      var touch=e.touches?e.touches[0]:e;
-      startX=touch.clientX;startY=touch.clientY;
-      var rect=sp.getBoundingClientRect();
-      origLeft=sp.offsetLeft;
-      origBottom=parseInt(sp.style.bottom)||0;
-      e.preventDefault();
-    }
-    function onMove(e){
-      if(!dragging)return;
-      var touch=e.touches?e.touches[0]:e;
-      var dx=touch.clientX-startX;
-      var dy=touch.clientY-startY;
-      var newLeft=origLeft+dx;
-      var newBottom=origBottom-dy;
-      // 同步移動所有立繪
-      document.querySelectorAll('.sprite').forEach(function(s){
-        s.style.left=newLeft+'px';
-        s.style.bottom=newBottom+'px';
-      });
-      e.preventDefault();
-    }
-    function onEnd(){dragging=false;}
-    sp.addEventListener('touchstart',onStart,{passive:false});
-    sp.addEventListener('touchmove',onMove,{passive:false});
-    sp.addEventListener('touchend',onEnd);
-    sp.addEventListener('mousedown',onStart);
-    document.addEventListener('mousemove',onMove);
-    document.addEventListener('mouseup',onEnd);
+function applySpriteToGame(){
+  // 換算預覽框比例到螢幕
+  var area=gel('sprite-drag-area');
+  var areaW=area?area.offsetWidth:300;
+  var areaH=area?area.offsetHeight:260;
+  var leftPct=(SPRITE_SETTINGS.left/areaW)*100;
+  var bottomPct=(SPRITE_SETTINGS.bottom/areaH)*100;
+  var sizePct=SPRITE_SETTINGS.pct;
+  document.querySelectorAll('.sprite').forEach(function(s){
+    s.style.width=(sizePct*window.innerWidth/areaW)+'px';
+    s.style.maxWidth='none';
+    s.style.left=(leftPct*window.innerWidth/100)+'px';
+    s.style.bottom=(bottomPct*window.innerHeight/100)+'px';
+  });
+  alert('已套用！');
+}
+function resetSpriteSettings(){
+  SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:SPRITE_SETTINGS.src};
+  var r=gel('range-sprite-size');if(r)r.value=55;
+  onSpriteSizeChange(55);
+  document.querySelectorAll('.sprite').forEach(function(s){
+    s.style.width='72vw';s.style.maxWidth='400px';s.style.left='-4vw';s.style.bottom='0px';
   });
 }
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ══ 遊戲畫面立繪拖拽 ══
+function initSpriteDrag(){
+  var isDragging=false,startX,startY,origLeft,origBottom;
+  function onStart(e){
+    if(gel('admin-panel').classList.contains('open'))return;
+    isDragging=true;
+    var t=e.touches?e.touches[0]:e;
+    startX=t.clientX;startY=t.clientY;
+    var sp=document.querySelector('.sprite:not(.hidden)');
+    if(!sp)return;
+    origLeft=parseInt(sp.style.left)||sp.offsetLeft;
+    origBottom=parseInt(sp.style.bottom)||0;
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!isDragging)return;
+    var t=e.touches?e.touches[0]:e;
+    var dx=t.clientX-startX,dy=t.clientY-startY;
+    document.querySelectorAll('.sprite').forEach(function(s){
+      s.style.left=(origLeft+dx)+'px';
+      s.style.bottom=(origBottom-dy)+'px';
+      s.style.maxWidth='none';
+    });
+    e.preventDefault();
+  }
+  function onEnd(){isDragging=false;}
+  document.querySelectorAll('.sprite').forEach(function(sp){
+    sp.addEventListener('touchstart',onStart,{passive:false});
+  });
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+}
+
+// ══ renderList：支援插入位置 ══
 function renderList(ch){
-  var list=gel('script-list-'+ch);list.innerHTML='';
-  edt[ch].forEach(function(s,i){
-    if(['show','hide','bg','fx','stage'].indexOf(s.t)>=0)return;
+  var data=edt[ch];
+  var list=gel('script-list-'+ch);if(!list)return;
+  list.innerHTML='';
+  var labels={narr:'旁白',line:'對話',chapter:'章節標題',note:'紙條',action:'行動按鈕'};
+  var badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
+  data.forEach(function(s,i){
+    if(['show','hide','bg','fx','stage','inv_note'].indexOf(s.t)>=0){
+      // 系統行：只顯示標籤，不顯示內容
+      var sysDiv=document.createElement('div');
+      sysDiv.style.cssText='padding:4px 10px;margin-bottom:4px;font-size:9px;color:#3a2a10;letter-spacing:0.2em;border-left:2px solid #2a1808;';
+      sysDiv.textContent='［系統：'+s.t+(s.id?'('+s.id+')':s.scene?'('+s.scene+')':'')+'］';
+      list.appendChild(sysDiv);
+      // 在系統行後加插入按鈕
+      list.appendChild(makeInsertBtn(ch,i+1));
+      return;
+    }
+    // 插入按鈕（在這行之前）
+    list.appendChild(makeInsertBtn(ch,i));
     var card=document.createElement('div');card.className='script-line-card';
-    var labels={narr:'旁白',line:'對話',chapter:'章節標題',note:'紙條',action:'行動按鈕'};
-    var badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
     var fields='';
     if(s.t==='narr')fields='<div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.'+ch+'['+i+'].text=this.value">'+esc(s.text)+'</textarea></div>';
     else if(s.t==='line')fields='<div class="adm-field"><label class="adm-label">說話者</label><input class="adm-input" value="'+esc(s.who)+'" oninput="edt.'+ch+'['+i+'].who=this.value"></div><div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.'+ch+'['+i+'].text=this.value">'+esc(s.text)+'</textarea></div>';
-    else if(s.t==='chapter')fields='<div class="adm-field"><label class="adm-label">副標</label><input class="adm-input" value="'+esc(s.jp)+'" oninput="edt.'+ch+'['+i+'].jp=this.value"></div><div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.'+ch+'['+i+'].main=this.value">'+esc(s.main)+'</textarea></div><div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="'+esc(s.sub||'')+'" oninput="edt.'+ch+'['+i+'].sub=this.value"></div>';
-    else if(s.t==='note')fields='<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.'+ch+'['+i+'].body=this.value">'+esc(s.body)+'</textarea></div>';
+    else if(s.t==='chapter')fields='<div class="adm-field"><label class="adm-label">副標</label><input class="adm-input" value="'+esc(s.jp||'')+'" oninput="edt.'+ch+'['+i+'].jp=this.value"></div><div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.'+ch+'['+i+'].main=this.value">'+esc(s.main||'')+'</textarea></div><div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="'+esc(s.sub||'')+'" oninput="edt.'+ch+'['+i+'].sub=this.value"></div>';
+    else if(s.t==='note')fields='<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.'+ch+'['+i+'].body=this.value">'+esc(s.body||'')+'</textarea></div>';
     else if(s.t==='action')fields='<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="'+esc(s.buttons&&s.buttons[0]?s.buttons[0].label:'')+'" oninput="edt.'+ch+'['+i+'].buttons[0].label=this.value"></div>';
     card.innerHTML='<span class="sc-type-badge '+(badges[s.t]||'sc-type-narr')+'">'+(labels[s.t]||s.t)+'</span>'
       +'<button class="sc-del-btn" onclick="edt.'+ch+'.splice('+i+',1);renderList(\''+ch+'\')">✕</button>'
-      +'<button class="sc-up-btn" onclick="if('+i+'>0){var a=edt.'+ch+';var tmp=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=tmp;renderList(\''+ch+'\')}">↑</button>'
-      +'<button class="sc-dn-btn" onclick="if('+i+'<edt.'+ch+'.length-1){var a=edt.'+ch+';var tmp=a['+i+'];a['+i+']=a['+(i+1)+'];a['+(i+1)+']=tmp;renderList(\''+ch+'\')}">↓</button>'
+      +'<button class="sc-up-btn" onclick="if('+i+'>0){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=t;renderList(\''+ch+'\')}">↑</button>'
+      +'<button class="sc-dn-btn" onclick="if('+i+'<edt.'+ch+'.length-1){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i+1)+'];a['+(i+1)+']=t;renderList(\''+ch+'\')}">↓</button>'
       +fields;
     list.appendChild(card);
   });
+  // 最後的插入按鈕
+  list.appendChild(makeInsertBtn(ch,data.length));
+  // 更新新增按鈕列
+  buildAddRow(ch);
 }
-function addLine(ch,type){
-  var defaults={narr:{t:'narr',text:'（旁白）'},line:{t:'line',who:'語嫣',text:'（對話）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（紙條內容）'},action:{t:'action',buttons:[{label:'行動按鈕',fn:'takeOutNote'}]}};
-  var stageIdx=-1;edt[ch].forEach(function(s,i){if(s.t==='stage')stageIdx=i;});
-  if(stageIdx>=0)edt[ch].splice(stageIdx,0,defaults[type]);else edt[ch].push(defaults[type]);
+
+function makeInsertBtn(ch,idx){
+  var wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;gap:4px;align-items:center;margin:2px 0 2px;opacity:0.4;transition:opacity 0.2s;';
+  wrap.onmouseenter=function(){wrap.style.opacity='1';};
+  wrap.onmouseleave=function(){wrap.style.opacity='0.4';};
+  wrap.innerHTML='<div style="flex:1;height:1px;background:#2a1808;"></div>'
+    +'<button onclick="insertLineAt(\''+ch+'\','+idx+',\'narr\')" style="background:none;border:1px solid #2a1808;color:#5a4020;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:2px;">＋旁白</button>'
+    +'<button onclick="insertLineAt(\''+ch+'\','+idx+',\'line\')" style="background:none;border:1px solid #2a1808;color:#5a4020;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:2px;">＋對話</button>'
+    +'<div style="flex:1;height:1px;background:#2a1808;"></div>';
+  return wrap;
+}
+
+function insertLineAt(ch,idx,type){
+  var defaults={narr:{t:'narr',text:'（旁白）'},line:{t:'line',who:'語嫣',text:'（對白）'},chapter:{t:'chapter',jp:'',main:'章節標題',sub:''},note:{t:'note',body:'（紙條內容）'}};
+  edt[ch].splice(idx,0,JSON.parse(JSON.stringify(defaults[type])));
   renderList(ch);
+  // 捲動到插入位置
+  setTimeout(function(){
+    var cards=gel('script-list-'+ch).querySelectorAll('.script-line-card');
+    if(cards[idx])cards[idx].scrollIntoView({behavior:'smooth',block:'center'});
+  },100);
 }
+
+function buildAddRow(ch){
+  var row=gel('add-row-'+ch);if(!row)return;
+  row.innerHTML='<span style="font-size:10px;color:#5a4020;letter-spacing:0.15em;">末尾新增：</span>'
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'narr\')">＋ 旁白</button>'
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'line\')">＋ 對話</button>'
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'chapter\')">＋ 章節標題</button>'
+    +'<button class="sc-add-btn" onclick="insertLineAt(\''+ch+'\',edt.'+ch+'.length,\'note\')">＋ 紙條</button>';
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function renderJackList(){
   gel('jack-list').innerHTML=edt.jacks.map(function(j,i){
     return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;"><input class="adm-input" style="flex:1" value="'+esc(j.name)+'" placeholder="名稱" oninput="edt.jacks['+i+'].name=this.value"><input class="adm-input" style="width:80px" value="'+esc(j.num)+'" placeholder="番號" oninput="edt.jacks['+i+'].num=this.value"><button class="adm-btn danger" style="padding:6px 10px;" onclick="edt.jacks.splice('+i+',1);renderJackList()">✕</button></div>';
@@ -1038,7 +1152,7 @@ function setS2Answer(dir,el){
   el.classList.add('active');
 }
 function exportAll(){
-  var data={ch1:edt.ch1,ch2:edt.ch2,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
+  var data={ch1:edt.ch1,ch2:edt.ch2,ch3:edt.ch3,ch4:edt.ch4,ch5:edt.ch5,jacks:edt.jacks,calls:edt.calls,appear:APPEAR,stage2:edt.stage2};
   gel('export-area').value=JSON.stringify(data,null,2);
 }
 function copyExport(){var el=gel('export-area');el.select();document.execCommand('copy');alert('已複製');}
@@ -1046,17 +1160,20 @@ function importAll(){
   try{
     var d=JSON.parse(gel('import-area').value);
     if(d.ch1)edt.ch1=d.ch1;if(d.ch2)edt.ch2=d.ch2;
+    if(d.ch3)edt.ch3=d.ch3;if(d.ch4)edt.ch4=d.ch4;if(d.ch5)edt.ch5=d.ch5;
     if(d.jacks)edt.jacks=d.jacks;if(d.calls)edt.calls=d.calls;
     if(d.stage2){edt.stage2=d.stage2;renderStage2Admin();}
     if(d.appear){APPEAR=d.appear;syncAppearSliders();applyAppearVars(APPEAR);}
-    renderList('ch1');renderList('ch2');renderJackList();renderCallList();
+    renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
+    renderJackList();renderCallList();
     alert('匯入成功！請點「儲存並關閉」。');
   }catch(e){alert('格式錯誤：'+e.message);}
 }
 function resetAll(){
   if(!confirm('確定還原所有預設？'))return;
   init();syncAppearSliders();applyAppearVars(APPEAR);
-  renderList('ch1');renderList('ch2');renderJackList();renderCallList();renderStage2Admin();
+  renderList('ch1');renderList('ch2');renderList('ch3');renderList('ch4');renderList('ch5');
+  renderJackList();renderCallList();renderStage2Admin();
 }
 document.addEventListener('DOMContentLoaded',function(){
   gel('game').addEventListener('click',onTap);
