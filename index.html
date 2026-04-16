@@ -1343,6 +1343,7 @@ function devHome(){
   gel('stage-switchboard').style.display='none';
   gel('stage-map').style.display='none';
   var ov=document.querySelector('.note-overlay');if(ov)ov.remove();
+  gel('dev-toolbar').classList.add('hidden');
   var ss=gel('start-screen');
   ss.style.display='flex';ss.style.opacity='1';ss.style.transition='';
   gel('game').style.display='none';
