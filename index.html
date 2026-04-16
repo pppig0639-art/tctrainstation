@@ -367,23 +367,29 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
           <input type="file" accept="image/*" id="sprite-upload" style="color:#d4c090;font-size:12px;width:100%;" onchange="onSpriteUpload(this)">
         </div>
         <div class="adm-field">
-          <label class="adm-label">拖拽調整位置（在下方預覽框內拖動語嫣）</label>
-          <div id="sprite-drag-area" style="position:relative;width:100%;height:260px;background:linear-gradient(180deg,#0a0806,#1a1208);border:1px solid #3a2810;border-radius:3px;overflow:hidden;touch-action:none;">
-            <!-- 模擬背景 -->
-            <div style="position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;"></div>
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,#f0e0c0,#d4c090);border:2px solid #3a2810;opacity:0.4;"></div>
-            <!-- 可拖立繪 -->
-            <img id="sprite-drag-img"
+          <label class="adm-label">拖動語嫣到想要的位置，按「套用」確認</label>
+          <!-- 遊戲比例預覽框：9:16 直式 -->
+          <div id="sprite-stage"
+            style="position:relative;width:100%;padding-bottom:177.8%;background:linear-gradient(180deg,#04030a 0%,#0a0818 35%,#12100a 70%,#1a1208 100%);border:1px solid #3a2810;border-radius:3px;overflow:hidden;touch-action:none;user-select:none;">
+            <!-- 背景裝飾：地板 -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:25%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;pointer-events:none;"></div>
+            <!-- 背景裝飾：對話框輪廓 -->
+            <div style="position:absolute;bottom:0;left:0;right:0;height:28%;background:rgba(5,3,1,0.92);border-top:1px solid #6a4418;pointer-events:none;opacity:0.6;"></div>
+            <!-- 背景裝飾：電話亭 -->
+            <div style="position:absolute;top:20%;left:50%;transform:translateX(-50%);width:28%;height:45%;background:linear-gradient(135deg,#1a1208,#0e0c08);border:2px solid #3a2a10;border-radius:3px;pointer-events:none;opacity:0.5;"></div>
+            <!-- 說明文字 -->
+            <div style="position:absolute;top:8px;right:10px;font-size:9px;color:#5a4020;letter-spacing:0.1em;pointer-events:none;">拖動語嫣調整位置</div>
+            <!-- 語嫣圖片（可拖） -->
+            <img id="sprite-stage-img"
               src=""
-              style="position:absolute;width:55%;max-width:200px;bottom:0;left:0;cursor:grab;user-select:none;touch-action:none;filter:drop-shadow(2px 4px 12px rgba(0,0,0,0.7));"
-              draggable="false">
-            <div style="position:absolute;top:6px;right:8px;font-size:9px;color:#5a4020;letter-spacing:0.15em;">拖動語嫣調整位置</div>
+              draggable="false"
+              style="position:absolute;bottom:28%;left:0;width:55%;cursor:grab;touch-action:none;filter:drop-shadow(2px 4px 14px rgba(0,0,0,0.8));display:none;">
           </div>
         </div>
-        <div class="adm-field">
+        <div class="adm-field" style="margin-top:10px;">
           <label class="adm-label">大小（<span id="val-sprite-size">55</span>%）</label>
           <div class="range-row">
-            <input type="range" min="15" max="100" value="55" id="range-sprite-size" oninput="onSpriteSizeChange(this.value)">
+            <input type="range" min="10" max="100" value="55" id="range-sprite-size" oninput="onSpriteSizeChange(this.value)">
             <span class="range-val" id="show-sprite-size">55%</span>
           </div>
         </div>
@@ -935,44 +941,57 @@ var SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:null};
 // 預覽框拖拽
 var spDragState={active:false,startX:0,startY:0,origL:0,origB:0};
 function initSpriteDragAdmin(){
-  var img=gel('sprite-drag-img');
-  var area=gel('sprite-drag-area');
-  if(!img||!area)return;
+  var stage=gel('sprite-stage');
+  var img=gel('sprite-stage-img');
+  if(!img||!stage)return;
   // 載入目前圖片
   var gameSrc=document.querySelector('.sprite img');
-  if(gameSrc&&gameSrc.src&&!gel('sprite-drag-img').src){
-    gel('sprite-drag-img').src=gameSrc.src;
+  if(gameSrc&&gameSrc.src&&gameSrc.src.length>10){
+    img.src=gameSrc.src;
+    img.style.display='';
   }
-  img.style.width=SPRITE_SETTINGS.pct+'%';
-  img.style.left=SPRITE_SETTINGS.left+'px';
-  img.style.bottom=SPRITE_SETTINGS.bottom+'px';
+  // 同步大小滑桿
+  var sz=SPRITE_SETTINGS.pct||55;
+  img.style.width=sz+'%';
+  gel('range-sprite-size').value=sz;
+  gel('val-sprite-size').textContent=sz;
+  gel('show-sprite-size').textContent=sz+'%';
+  // 同步位置（從遊戲換算到預覽比例）
+  var stageW=stage.offsetWidth||300;
+  var stageH=stage.offsetHeight||stageW*16/9;
+  if(SPRITE_SETTINGS.leftPct!=null) img.style.left=(SPRITE_SETTINGS.leftPct*stageW/100)+'px';
+  if(SPRITE_SETTINGS.bottomPct!=null) img.style.bottom=(SPRITE_SETTINGS.bottomPct*stageH/100)+'px';
 
-  function getXY(e){var t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+  function getPos(e){var t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
   img.onmousedown=img.ontouchstart=function(e){
-    e.preventDefault();
-    var p=getXY(e);
-    spDragState={active:true,startX:p.x,startY:p.y,origL:parseInt(img.style.left)||0,origB:parseInt(img.style.bottom)||0};
+    e.stopPropagation();e.preventDefault();
+    var p=getPos(e);
+    spDragState={active:true,startX:p.x,startY:p.y,
+      origL:parseInt(img.style.left)||0,
+      origB:parseInt(img.style.bottom)||0};
   };
-  document.onmousemove=document.ontouchmove=function(e){
+  stage.onmousemove=stage.ontouchmove=function(e){
     if(!spDragState.active)return;
-    var p=getXY(e);
-    var areaH=area.offsetHeight;
+    e.preventDefault();
+    var p=getPos(e);
+    var sw=stage.offsetWidth, sh=stage.offsetHeight;
     var newL=spDragState.origL+(p.x-spDragState.startX);
     var newB=spDragState.origB-(p.y-spDragState.startY);
-    // 限制在框內
-    newL=Math.max(-20,Math.min(area.offsetWidth-30,newL));
-    newB=Math.max(-20,Math.min(areaH-20,newB));
+    newL=Math.max(-sw*0.3,Math.min(sw*0.8,newL));
+    newB=Math.max(-sh*0.1,Math.min(sh*0.9,newB));
     img.style.left=newL+'px';
     img.style.bottom=newB+'px';
-    SPRITE_SETTINGS.left=newL;SPRITE_SETTINGS.bottom=newB;
+    // 記錄百分比
+    SPRITE_SETTINGS.leftPct=newL/sw*100;
+    SPRITE_SETTINGS.bottomPct=newB/sh*100;
   };
-  document.onmouseup=document.ontouchend=function(){spDragState.active=false;};
+  stage.onmouseup=stage.ontouchend=function(){spDragState.active=false;};
 }
 function onSpriteSizeChange(v){
   v=+v;
   gel('val-sprite-size').textContent=v;
   gel('show-sprite-size').textContent=v+'%';
-  var img=gel('sprite-drag-img');
+  var img=gel('sprite-stage-img');
   if(img)img.style.width=v+'%';
   SPRITE_SETTINGS.pct=v;
 }
@@ -982,31 +1001,46 @@ function onSpriteUpload(input){
   reader.onload=function(e){
     var src=e.target.result;
     SPRITE_SETTINGS.src=src;
-    var pi=gel('sprite-drag-img');if(pi)pi.src=src;
+    var pi=gel('sprite-stage-img');
+    if(pi){pi.src=src;pi.style.display='';}
     document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
   };
   reader.readAsDataURL(file);
 }
 function applySpriteToGame(){
-  // 換算預覽框比例到螢幕
-  var area=gel('sprite-drag-area');
-  var areaW=area?area.offsetWidth:300;
-  var areaH=area?area.offsetHeight:260;
-  var leftPct=(SPRITE_SETTINGS.left/areaW)*100;
-  var bottomPct=(SPRITE_SETTINGS.bottom/areaH)*100;
-  var sizePct=SPRITE_SETTINGS.pct;
+  var stage=gel('sprite-stage');
+  if(!stage){alert('找不到預覽框');return;}
+  var sw=stage.offsetWidth, sh=stage.offsetHeight;
+  var img=gel('sprite-stage-img');
+  var imgL=parseInt(img?img.style.left:0)||0;
+  var imgB=parseInt(img?img.style.bottom:0)||0;
+  var pct=SPRITE_SETTINGS.pct||55;
+  // 換算：預覽框佔的百分比 → 螢幕真實px
+  var scaleX=window.innerWidth/sw;
+  var scaleY=window.innerHeight/sh;
+  var gameL=imgL*scaleX;
+  var gameB=imgB*scaleY;
+  var gameW=(pct/100)*sw*scaleX;
   document.querySelectorAll('.sprite').forEach(function(s){
-    s.style.width=(sizePct*window.innerWidth/areaW)+'px';
+    s.style.width=gameW+'px';
     s.style.maxWidth='none';
-    s.style.left=(leftPct*window.innerWidth/100)+'px';
-    s.style.bottom=(bottomPct*window.innerHeight/100)+'px';
+    s.style.left=gameL+'px';
+    s.style.bottom=gameB+'px';
   });
+  SPRITE_SETTINGS.leftPct=imgL/sw*100;
+  SPRITE_SETTINGS.bottomPct=imgB/sh*100;
   alert('已套用！');
 }
 function resetSpriteSettings(){
-  SPRITE_SETTINGS={pct:55,left:0,bottom:0,src:SPRITE_SETTINGS.src};
+  SPRITE_SETTINGS={pct:55,leftPct:0,bottomPct:28,src:SPRITE_SETTINGS.src};
   var r=gel('range-sprite-size');if(r)r.value=55;
   onSpriteSizeChange(55);
+  var img=gel('sprite-stage-img');
+  var stage=gel('sprite-stage');
+  if(img&&stage){
+    img.style.left='0px';
+    img.style.bottom=(stage.offsetHeight*0.28)+'px';
+  }
   document.querySelectorAll('.sprite').forEach(function(s){
     s.style.width='72vw';s.style.maxWidth='400px';s.style.left='-4vw';s.style.bottom='0px';
   });
@@ -1045,7 +1079,7 @@ function initSpriteDrag(){
   document.addEventListener('touchend',onEnd);
 }
 
-// ══ renderList：支援插入位置 ══
+// ══ renderList：插入按鈕在卡片右上角 ══
 function renderList(ch){
   var data=edt[ch];
   var list=gel('script-list-'+ch);if(!list)return;
@@ -1054,17 +1088,12 @@ function renderList(ch){
   var badges={narr:'sc-type-narr',line:'sc-type-line',chapter:'sc-type-chapter',note:'sc-type-note',action:'sc-type-action'};
   data.forEach(function(s,i){
     if(['show','hide','bg','fx','stage','inv_note'].indexOf(s.t)>=0){
-      // 系統行：只顯示標籤，不顯示內容
       var sysDiv=document.createElement('div');
       sysDiv.style.cssText='padding:4px 10px;margin-bottom:4px;font-size:9px;color:#3a2a10;letter-spacing:0.2em;border-left:2px solid #2a1808;';
       sysDiv.textContent='［系統：'+s.t+(s.id?'('+s.id+')':s.scene?'('+s.scene+')':'')+'］';
       list.appendChild(sysDiv);
-      // 在系統行後加插入按鈕
-      list.appendChild(makeInsertBtn(ch,i+1));
       return;
     }
-    // 插入按鈕（在這行之前）
-    list.appendChild(makeInsertBtn(ch,i));
     var card=document.createElement('div');card.className='script-line-card';
     var fields='';
     if(s.t==='narr')fields='<div class="adm-field"><label class="adm-label">內容</label><textarea class="adm-input adm-textarea" oninput="edt.'+ch+'['+i+'].text=this.value">'+esc(s.text)+'</textarea></div>';
@@ -1072,29 +1101,20 @@ function renderList(ch){
     else if(s.t==='chapter')fields='<div class="adm-field"><label class="adm-label">副標</label><input class="adm-input" value="'+esc(s.jp||'')+'" oninput="edt.'+ch+'['+i+'].jp=this.value"></div><div class="adm-field"><label class="adm-label">主標題</label><textarea class="adm-input" rows="2" oninput="edt.'+ch+'['+i+'].main=this.value">'+esc(s.main||'')+'</textarea></div><div class="adm-field"><label class="adm-label">副標題</label><input class="adm-input" value="'+esc(s.sub||'')+'" oninput="edt.'+ch+'['+i+'].sub=this.value"></div>';
     else if(s.t==='note')fields='<div class="adm-field"><label class="adm-label">紙條內容</label><textarea class="adm-input adm-textarea" rows="6" oninput="edt.'+ch+'['+i+'].body=this.value">'+esc(s.body||'')+'</textarea></div>';
     else if(s.t==='action')fields='<div class="adm-field"><label class="adm-label">按鈕標籤</label><input class="adm-input" value="'+esc(s.buttons&&s.buttons[0]?s.buttons[0].label:'')+'" oninput="edt.'+ch+'['+i+'].buttons[0].label=this.value"></div>';
-    card.innerHTML='<span class="sc-type-badge '+(badges[s.t]||'sc-type-narr')+'">'+(labels[s.t]||s.t)+'</span>'
-      +'<button class="sc-del-btn" onclick="edt.'+ch+'.splice('+i+',1);renderList(\''+ch+'\')">✕</button>'
-      +'<button class="sc-up-btn" onclick="if('+i+'>0){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=t;renderList(\''+ch+'\')}">↑</button>'
+    // 右上角按鈕列：類型標籤 ＋旁白 ＋對話 ↑ ↓ ✕
+    card.innerHTML='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;flex-wrap:wrap;">'
+      +'<span class="sc-type-badge '+(badges[s.t]||'sc-type-narr')+'" style="margin-bottom:0;">'+(labels[s.t]||s.t)+'</span>'
+      +'<div style="flex:1;"></div>'
+      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'narr\')" title="在此行後插入旁白" style="background:none;border:1px solid #2a1808;color:#6a5020;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:2px;white-space:nowrap;">後＋旁白</button>'
+      +'<button onclick="insertLineAt(\''+ch+'\','+(i+1)+',\'line\')" title="在此行後插入對話" style="background:none;border:1px solid #2a1808;color:#6a5020;font-size:9px;padding:2px 5px;cursor:pointer;border-radius:2px;white-space:nowrap;">後＋對話</button>'
       +'<button class="sc-dn-btn" onclick="if('+i+'<edt.'+ch+'.length-1){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i+1)+'];a['+(i+1)+']=t;renderList(\''+ch+'\')}">↓</button>'
+      +'<button class="sc-up-btn" onclick="if('+i+'>0){var a=edt.'+ch+';var t=a['+i+'];a['+i+']=a['+(i-1)+'];a['+(i-1)+']=t;renderList(\''+ch+'\')}">↑</button>'
+      +'<button class="sc-del-btn" style="position:static;padding:2px 6px;" onclick="edt.'+ch+'.splice('+i+',1);renderList(\''+ch+'\')">✕</button>'
+      +'</div>'
       +fields;
     list.appendChild(card);
   });
-  // 最後的插入按鈕
-  list.appendChild(makeInsertBtn(ch,data.length));
-  // 更新新增按鈕列
   buildAddRow(ch);
-}
-
-function makeInsertBtn(ch,idx){
-  var wrap=document.createElement('div');
-  wrap.style.cssText='display:flex;gap:4px;align-items:center;margin:2px 0 2px;opacity:0.4;transition:opacity 0.2s;';
-  wrap.onmouseenter=function(){wrap.style.opacity='1';};
-  wrap.onmouseleave=function(){wrap.style.opacity='0.4';};
-  wrap.innerHTML='<div style="flex:1;height:1px;background:#2a1808;"></div>'
-    +'<button onclick="insertLineAt(\''+ch+'\','+idx+',\'narr\')" style="background:none;border:1px solid #2a1808;color:#5a4020;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:2px;">＋旁白</button>'
-    +'<button onclick="insertLineAt(\''+ch+'\','+idx+',\'line\')" style="background:none;border:1px solid #2a1808;color:#5a4020;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:2px;">＋對話</button>'
-    +'<div style="flex:1;height:1px;background:#2a1808;"></div>';
-  return wrap;
 }
 
 function insertLineAt(ch,idx,type){
