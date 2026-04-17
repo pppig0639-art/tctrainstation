@@ -68,7 +68,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .sprite.left{left:-3vw;}.sprite.hidden{opacity:0;}
 .sprite img{width:100%;display:block;filter:drop-shadow(2px 4px 20px rgba(0,0,0,0.85));}
 .sprite img{width:100%;display:block;mix-blend-mode:multiply;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.9));}
-#dialog-area{position:relative;z-index:10;padding:0 8px var(--dialog-bottom);display:flex;flex-direction:column;gap:0;}
+#dialog-area{position:relative;z-index:10;padding:0 8px var(--dialog-bottom);display:flex;flex-direction:column;gap:0;opacity:0;transition:opacity 0.3s;}
 #speaker-box{display:inline-flex;align-items:center;background:var(--dialog-bg);border:1px solid var(--dialog-border);border-bottom:none;padding:7px 20px;width:fit-content;}
 #speaker-name{font-size:var(--speaker-font-size);color:#f5c830;letter-spacing:0.2em;font-weight:600;}
 #dialog-box{background:var(--dialog-bg);border:1px solid var(--dialog-border);padding:var(--dialog-padding);min-height:var(--dialog-min-height);position:relative;}
@@ -214,9 +214,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .s2-submit-btn{width:100%;padding:12px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-size:14px;letter-spacing:0.3em;font-family:'Noto Serif TC',serif;cursor:pointer;border-radius:2px;display:none;transition:all 0.2s;}
 .s2-submit-btn:active{background:rgba(212,168,48,0.08);}
 #start-screen{position:absolute;inset:0;z-index:30;background:radial-gradient(ellipse at 50% 40%,#0e0a06,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.s-deco{font-size:10px;color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
-.s-title-jp{font-size:26px;color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
-.s-title-zh{font-size:12px;color:#5a4020;letter-spacing:0.5em;margin-bottom:36px;}
+.s-deco{font-size:var(--start-deco-size,10px);color:#3a2a12;letter-spacing:0.5em;margin-bottom:20px;}
+.s-title-jp{font-size:var(--start-title-jp-size,26px);color:#c8b882;letter-spacing:0.35em;text-align:center;line-height:1.5;margin-bottom:6px;}
+.s-title-zh{font-size:var(--start-title-zh-size,12px);color:#5a4020;letter-spacing:0.5em;margin-bottom:36px;}
 .s-rule{width:1px;height:50px;background:linear-gradient(to bottom,transparent,#5a3c10,transparent);margin-bottom:36px;}
 #start-btn{background:none;border:1px solid #3a2a12;color:#c8b882;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:0.4em;padding:11px 32px;cursor:pointer;transition:all 0.3s;}
 #admin-btn{position:absolute;top:14px;left:14px;background:rgba(10,8,4,0.7);border:1px solid #3a2a10;color:#5a4020;font-size:10px;letter-spacing:0.25em;padding:5px 10px;cursor:pointer;font-family:'Noto Serif TC',serif;transition:all 0.3s;z-index:31;border-radius:2px;}
@@ -353,9 +353,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 </div>
 <div id="start-screen">
   <button id="admin-btn" onclick="openAdmin()">⚙ 後台</button>
-  <div class="s-deco">國定古蹟臺中車站・實境解謎</div>
-  <div class="s-title-jp">時の回廊</div>
-  <div class="s-title-zh">時光的走廊</div>
+  <div class="s-deco" id="start-deco">國定古蹟臺中車站・實境解謎</div>
+  <div class="s-title-jp" id="start-title-jp">時の回廊</div>
+  <div class="s-title-zh" id="start-title-zh">時光的走廊</div>
   <div class="s-rule"></div>
   <button id="start-btn" onclick="startGame()">開始遊戲</button>
 </div>
@@ -424,7 +424,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
   <div id="inv-content"><div style="font-size:11px;color:#3a2a10;letter-spacing:0.2em;width:100%;text-align:center;padding:18px 0;">── 尚無道具 ──</div></div>
 </div>
 <div id="stage-switchboard">
-  <div class="sb-header">關卡一　接線生的考驗</div>
+  <div class="sb-header"><span id="stage1-header-text">關卡一　接線生的考驗</span></div>
   <div id="call-banner" class="call-banner">
     <div class="cb-row">
       <div class="cb-from"><div class="cb-label">發話方</div><div class="cb-number" id="cb-from-num">——</div></div>
@@ -463,6 +463,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     <div class="adm-tab" onclick="switchTab('stage2')">關卡二</div>
     <div class="adm-tab" onclick="switchTab('sprite')">立繪</div>
     <div class="adm-tab" onclick="switchTab('appear')">外觀</div>
+    <div class="adm-tab" onclick="switchTab('ui')">介面文字</div>
     <div class="adm-tab" onclick="switchTab('io')">匯入匯出</div>
     <!-- 動態新增章節分頁標籤 -->
     <div id="extra-ch-tab-labels"></div>
@@ -537,6 +538,29 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
         <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">在視覺化編輯畫面直接拖動調整，更直覺。</div>
       </div>
     </div>
+    <div id="tab-ui" style="display:none;">
+      <div class="adm-section">
+        <div class="adm-section-title">開始畫面　文字內容</div>
+        <div class="adm-field"><label class="adm-label">副標（小字）</label><input class="adm-input" id="ui-startDeco" oninput="edt.ui.startDeco=this.value;UI.startDeco=this.value;applyUI()"></div>
+        <div class="adm-field"><label class="adm-label">主標題（日文／大字）</label><input class="adm-input" id="ui-startTitleJp" oninput="edt.ui.startTitleJp=this.value;UI.startTitleJp=this.value;applyUI()"></div>
+        <div class="adm-field"><label class="adm-label">主標題（中文）</label><input class="adm-input" id="ui-startTitleZh" oninput="edt.ui.startTitleZh=this.value;UI.startTitleZh=this.value;applyUI()"></div>
+        <div class="adm-field"><label class="adm-label">開始按鈕文字</label><input class="adm-input" id="ui-startBtn" oninput="edt.ui.startBtn=this.value;UI.startBtn=this.value;applyUI()"></div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">開始畫面　字體大小</div>
+        <div class="adm-field"><label class="adm-label">大標題大小（目前 <span id="ui-val-jp">26</span>px）</label>
+          <div class="range-row"><input type="range" min="12" max="60" value="26" id="ui-range-jp" oninput="UI.startTitleJpSize=+this.value;edt.ui.startTitleJpSize=+this.value;gel('ui-val-jp').textContent=this.value;applyUI()"><span class="range-val" id="ui-show-jp">26px</span></div></div>
+        <div class="adm-field"><label class="adm-label">中文標題大小（目前 <span id="ui-val-zh">12</span>px）</label>
+          <div class="range-row"><input type="range" min="8" max="36" value="12" id="ui-range-zh" oninput="UI.startTitleZhSize=+this.value;edt.ui.startTitleZhSize=+this.value;gel('ui-val-zh').textContent=this.value;applyUI()"><span class="range-val" id="ui-show-zh">12px</span></div></div>
+        <div class="adm-field"><label class="adm-label">副標大小（目前 <span id="ui-val-deco">10</span>px）</label>
+          <div class="range-row"><input type="range" min="8" max="24" value="10" id="ui-range-deco" oninput="UI.startDecoSize=+this.value;edt.ui.startDecoSize=+this.value;gel('ui-val-deco').textContent=this.value;applyUI()"><span class="range-val" id="ui-show-deco">10px</span></div></div>
+      </div>
+      <div class="adm-section">
+        <div class="adm-section-title">關卡標題文字</div>
+        <div class="adm-field"><label class="adm-label">關卡一標題</label><input class="adm-input" id="ui-stage1Header" oninput="edt.ui.stage1Header=this.value;UI.stage1Header=this.value;applyUI()"></div>
+        <div class="adm-field"><label class="adm-label">關卡二標題</label><input class="adm-input" id="ui-stage2Header" oninput="edt.ui.stage2Header=this.value;UI.stage2Header=this.value;applyUI()"></div>
+      </div>
+    </div>
     <div id="tab-io" style="display:none;">
       <div class="adm-section">
         <div class="adm-section-title">匯出設定檔</div>
@@ -574,25 +598,22 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 var D_CH1=[
   {t:'chapter',jp:'序章',main:'電話亭',sub:'臺中市・某條街'},
   {t:'narr',text:'風暴大雨的夜晚。街上杳無人煙，燈火闌珊。\n街燈在雨幕後搖搖欲墜，映著路面。'},
-  {t:'narr',text:'閃爍的光線下，有個人影跌跌撞撞地跑過\n竄進路旁一座老舊的電話亭內。'},
-  {t:'narr',text:'狼狽躲雨的女子氣喘吁吁，脫下被雨淋得濕透的外衣。'},
+  {t:'narr',text:'閃爍的光線下，有個人影跌跌撞撞地跑過——\n竄進路旁一座老舊的電話亭內。'},
+  {t:'narr',text:'狼狽躲雨的女子氣喘吁吁，靠上門板。'},
   {t:'show',id:'sp-yuyan'},
-  {t:'line',who:'語嫣',text:'……真是倒楣啊，怎麼迷路還碰上下雨啊，還這麼大！\n唉算了，先給男朋友打個電話吧。'},
-  {t:'narr',text:'（嘟嘟嘟⋯⋯）\n（⋯⋯嘟嘟嘟⋯⋯）（⋯⋯）'},
-  {t:'line',who:'語嫣',text:'蛤？怎麼沒有訊號？！'},
-  {t:'narr',text:'女子洩氣般的滑坐在地。'},
-  {t:'narr',text:'她靠在門板上，側頭看著玻璃外頭嘩嘩流下的雨水。'},
-  {t:'line',who:'語嫣',text:'不知道什麼時候這雨才會停呢⋯⋯'},
-  {t:'narr',text:'四周靜得只剩嘈雜雨聲。\n電話亭老舊，門口卻貼著一張在風雨中屹立不搖的告示。'},
+  {t:'line',who:'語嫣',text:'……真是倒楣啊。\n怎麼迷路還碰上這種大雨。'},
+  {t:'narr',text:'她掏出手機——沒有訊號。\n她沉默地看著螢幕，沒有多說什麼。'},
+  {t:'narr',text:'四周靜得只剩嘈雜雨聲。\n電話亭老舊，門口貼著一張在風雨中屹立不搖的告示。'},
   {t:'narr',text:'「停用中」'},
-  {t:'narr',text:'看著眼下似乎做不了什麼事，語嫣終於抬起頭，認真端詳起那台笨重的老式電話機。'},
-  {t:'narr',text:'忽然'},
+  {t:'narr',text:'語嫣終於抬起頭，看著那台笨重的老式電話機。\n她也說不清自己在想什麼。'},
   {t:'fx',fn:'phoneGlow'},
-  // 接電話體驗關卡（資料從 PHONE_RING 讀取）
+  {t:'narr',text:'電話機的螢幕忽然亮了起來。'},
+  {t:'line',who:'語嫣',text:'（愣住）'},
+  {t:'narr',text:'停用的電話，在響。'},
   {t:'stage',id:'phone-ring'},
+  {t:'narr',text:'話筒是冰涼的，帶著鐵的氣味和一種說不清的熟悉感。'},
   {t:'fx',fn:'lightning2'},
   {t:'fx',fn:'rainFade'},
-  {t:'narr',text:'話筒是冰涼的，帶著鐵的氣味。'},
   {t:'narr',text:'一陣陰風驟來。雨聲忽地輕了，語嫣的世界歸於安靜。'},
   {t:'narr',text:'玻璃外的世界，悄悄換了個樣子。\n露出原先在暴風雨中被隱藏的'},
   {t:'blackout',text:'日式建築',duration:2600},
@@ -600,28 +621,24 @@ var D_CH1=[
   {t:'chapter',jp:'第一章',main:'臺中郵便局　電信課',sub:'西元1908年'},
   {t:'bg',scene:'1908'},
   {t:'show',id:'sp-yuyan-1908'},
-  {t:'narr',text:'睜開雙眼，語嫣茫然地看了看四周。\n她的意識模糊，像剛從深水裡被打撈起來。'},
-  {t:'narr',text:'待她看清周遭情況後，簡直嚇呆了。'},
-  {t:'line',who:'語嫣',text:'……這是……怎麼回事？'},
-  {t:'narr',text:'眼前是一面巨大的木製機台，\n密密麻麻的圓形插孔，懸掛的跳線，還有信號掉牌。'},
-  {t:'line',who:'語嫣',text:'我……到底在哪？'},
-  {t:'narr',text:'她喃喃自語。'},
-  {t:'narr',text:'桌角壓著一張摺疊的紙條。'},
-  {t:'line',who:'語嫣',text:'（拾起紙條）'},
-  {t:'note',body:'妳醒了。\n\n別怕。\n\n妳需要做的事情，都在這座城市裡。\n就從這裡開始——\n\n    臺中驛，明治四十一年。\n    縱貫鐵路，即將全線通車。\n\n先完成眼前的工作。\n有人在等妳的消息。\n\n                ——一個妳認識的人'},
-  {t:'line',who:'語嫣',text:'（盯著紙條末尾那個未完成的名字。很久很久。）'},
-  {t:'line',who:'語嫣',text:'……好。\n（輕輕把紙條折好，收進衣袖）'},
+  {t:'narr',text:'睜開雙眼，她茫然地看了看四周。\n意識模糊，像剛從深水裡被打撈起來。'},
+  {t:'narr',text:'眼前是一面巨大的木製機台——\n密密麻麻的圓形插孔，懸掛的跳線，閃著昏黃光的信號掉牌。'},
+  {t:'line',who:'語嫣',text:'……這是哪裡？'},
+  {t:'narr',text:'她喃喃自語，沒有人回答。'},
+  {t:'narr',text:'腦子裡有什麼東西是空的。\n名字、家、昨天——什麼都想不起來。\n\n只有一件事隱隱約約的清楚：\n有個人，在某個地方，需要她。'},
+  {t:'line',who:'語嫣',text:'（盯著自己的手，很久。）'},
+  {t:'line',who:'語嫣',text:'……先做眼前的事吧。'},
   {t:'narr',text:'就在這時，交換機的信號掉牌，「啪」的一聲落下。\n\n來電了。'},
   {t:'stage',id:'switchboard'}
 ];
 var D_CH2=[
-  {t:'line',who:'語嫣',text:'呼……終於結束這工作了。'},
-  {t:'line',who:'語嫣',text:'對了……衣袖裡好像有什麼東西。'},
-  {t:'inv_note'},
-  {t:'line',who:'語嫣',text:'……噢，那我得去臺中火車站對吧？'},
-  {t:'narr',text:'她四處望了望，走到窗邊往外看，街道還是陌生的。'},
-  {t:'line',who:'語嫣',text:'去對面書店買個地圖吧。\n……找到了，臺中驛就在附近。'},
-  {t:'narr',text:'語嫣把地圖摺進口袋，推開了郵便局的大門。'},
+  {t:'line',who:'語嫣',text:'呼……終於結束了。'},
+  {t:'narr',text:'她靠在椅背上，望著天花板發呆。'},
+  {t:'narr',text:'腦子裡忽然有什麼東西一閃而過。\n像是聽見什麼，又像什麼都沒有。'},
+  {t:'line',who:'語嫣',text:'（喃喃）嫣嫣⋯⋯？'},
+  {t:'narr',text:'她搖搖頭。大概是幻覺。\n\n但她站了起來，走到窗邊往外看。\n陌生的街道，陌生的建築。'},
+  {t:'line',who:'語嫣',text:'臺中驛⋯⋯'},
+  {t:'narr',text:'她說不清楚為什麼，但她知道自己該去那裡。\n\n語嫣在對面書店買了一張地圖，找到了位置，\n推開郵便局的大門，走進雨後的街道。'},
   {t:'chapter',jp:'第二章',main:'前往臺中驛',sub:''},
   {t:'stage',id:'map'}
 ];
@@ -668,11 +685,23 @@ var D_CALLS=[
    dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有人受傷！'},{who:'語嫣',text:'馬上接通！'},{who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]}
 ];
 var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10,chMainFont:22,chJpFont:12,chSubFont:12};
+var D_UI={
+  startDeco:'國定古蹟臺中車站・實境解謎',
+  startTitleJp:'時の回廊',
+  startTitleZh:'時光的走廊',
+  startBtn:'開始遊戲',
+  stage1Header:'關卡一　接線生的考驗',
+  stage2Header:'關卡二　前往臺中驛',
+  startTitleJpSize:26,
+  startTitleZhSize:12,
+  startDecoSize:10
+};
+var UI={};
 var D_PHONE_RING={
   waitNarr:[
-    '鈴聲響起。\n那台「停用中」的電話，在空蕩蕩的電話亭裡兀自鳴響。',
-    '十五秒了，鈴聲依舊沒停，\n變本加厲地迴盪在語嫣耳邊。',
-    '三十秒了。\n她凝視著那個沉甸甸的話筒，\n很久很久。'
+    '電話響了。\n那台「停用中」的電話，在空蕩蕩的夜裡兀自鳴響。',
+    '十五秒了，鈴聲沒有停。\n語嫣盯著那個話筒，動也不動。',
+    '三十秒。\n她說不清楚為什麼，但她伸出了手。'
   ],
   dialogs:[
     {who:'',text:'⋯⋯⋯⋯'}
@@ -701,8 +730,21 @@ function init(){
   APPEAR=JSON.parse(JSON.stringify(D_APPEAR));
   PHONE_RING=JSON.parse(JSON.stringify(D_PHONE_RING));
   STAGE2=JSON.parse(JSON.stringify(D_STAGE2));
+  UI=JSON.parse(JSON.stringify(D_UI));
 }
-init(); // 先用預設值，DOMContentLoaded 時再用 localStorage 覆蓋
+function applyUI(){
+  var sd=gel('start-deco'),stj=gel('start-title-jp'),stz=gel('start-title-zh'),sb=gel('start-btn');
+  if(sd)sd.textContent=UI.startDeco||D_UI.startDeco;
+  if(stj)stj.textContent=UI.startTitleJp||D_UI.startTitleJp;
+  if(stz)stz.textContent=UI.startTitleZh||D_UI.startTitleZh;
+  if(sb)sb.textContent=UI.startBtn||D_UI.startBtn;
+  // 字體大小
+  var s=document.documentElement.style;
+  s.setProperty('--start-title-jp-size',(UI.startTitleJpSize||26)+'px');
+  s.setProperty('--start-title-zh-size',(UI.startTitleZhSize||12)+'px');
+  s.setProperty('--start-deco-size',(UI.startDecoSize||10)+'px');
+}
+init();
 precomputeRefHash();
 
 // ══ 本地自動儲存 ══
@@ -750,7 +792,7 @@ function saveToLocal(){
     var data={
       ch1:CH1,ch2:CH2,ch3:CH3,ch4:CH4,ch5:CH5,
       jacks:JACKS,calls:CALLS,appear:APPEAR,
-      stage2:STAGE2,phoneRing:PHONE_RING,
+      stage2:STAGE2,phoneRing:PHONE_RING,ui:UI,
       extraChapters:extraChapters,
       extraChapterCount:extraChapterCount,
       spriteSettings:settings
@@ -774,6 +816,7 @@ function loadFromLocal(){
     if(d.appear)APPEAR=d.appear;
     if(d.stage2)STAGE2=d.stage2;
     if(d.phoneRing)PHONE_RING=d.phoneRing;
+    if(d.ui)UI=d.ui;
     if(d.extraChapters){
       extraChapters=d.extraChapters;
       extraChapterCount=d.extraChapterCount||0;
@@ -787,6 +830,7 @@ function loadFromLocal(){
 document.addEventListener('DOMContentLoaded',function(){
   loadFromLocal();
   applyAppearVars(APPEAR);
+  applyUI();
   precomputeRefHash();
   // 還原動態章節 UI
   for(var k in extraChapters){
@@ -891,6 +935,7 @@ function showDialog(s){
   gel('speaker-name').textContent=s.who;
   gel('speaker-box').style.display=s.who==='——'?'none':'flex';
   gel('next-hint').style.display='block';
+  gel('dialog-area').style.opacity='1';
   typeText(gel('dialog-text'),s.text);
 }
 function typeText(el,txt){
@@ -908,18 +953,23 @@ function skipType(){
 }
 function showChapter(s){
   waitChapter=true;
-  // 隱藏對話框，避免閃屏
   gel('dialog-area').style.opacity='0';
+  gel('dialog-area').style.transition='none';
   gel('dialog-text').innerHTML='';
   gel('speaker-box').style.display='none';
   gel('next-hint').style.display='none';
-  gel('ch-jp').textContent=s.jp;gel('ch-main').innerHTML=s.main.replace(/\n/g,'<br>');gel('ch-sub').textContent=s.sub||'';
+  gel('inventory').style.visibility='hidden';
+  gel('ch-jp').textContent=s.jp;
+  gel('ch-main').innerHTML=s.main.replace(/\n/g,'<br>');
+  gel('ch-sub').textContent=s.sub||'';
   var ct=gel('chapter-title');ct.classList.add('show');
   setTimeout(function(){
     ct.classList.remove('show');
     setTimeout(function(){
-      gel('dialog-area').style.opacity='1';
-      waitChapter=false;processLine();
+      gel('inventory').style.visibility='';
+      gel('dialog-area').style.transition='opacity 0.3s';
+      waitChapter=false;
+      processLine();
     },900);
   },3200);
 }
@@ -928,7 +978,9 @@ function showChapter(s){
 function showBlackout(s){
   waitChapter=true;
   gel('dialog-area').style.opacity='0';
+  gel('dialog-area').style.transition='none';
   gel('dialog-text').innerHTML='';
+  gel('inventory').style.visibility='hidden';
   var bs=gel('blackout-screen');
   gel('blackout-text').innerHTML=(s.text||'').replace(/\n/g,'<br>');
   bs.classList.add('show');
@@ -939,8 +991,10 @@ function showBlackout(s){
     setTimeout(function(){
       bs.classList.remove('show');
       bs.style.opacity='';bs.style.transition='';
-      gel('dialog-area').style.opacity='1';
-      waitChapter=false;processLine();
+      gel('inventory').style.visibility='';
+      gel('dialog-area').style.transition='opacity 0.3s';
+      waitChapter=false;
+      processLine();
     },1400);
   },dur);
 }
@@ -1401,6 +1455,8 @@ function startGame(){
   setTimeout(function(){
     ss.style.display='none';
     gel('game').style.display='flex';
+    gel('dialog-area').style.opacity='0';
+    gel('dialog-area').style.transition='none';
     createRain();buildDecoSwitchboard();switchBg('phonebooth');applyAppearVars(APPEAR);
     initSpriteDrag();
     setTimeout(positionSprite,200);
