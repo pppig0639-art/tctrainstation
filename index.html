@@ -93,10 +93,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 .inv-item-name{font-size:10px;color:#a08050;letter-spacing:0.1em;text-align:center;}
 #chapter-title{position:absolute;inset:0;z-index:25;background:#000;opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.9s;}
 #chapter-title.show{opacity:1;pointer-events:all;}
-.ch-jp{font-size:12px;color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;}
-.ch-main{font-size:22px;color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;}
+.ch-jp{font-size:var(--ch-jp-font,12px);color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;}
+.ch-main{font-size:var(--ch-main-font,22px);color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;}
 .ch-line{width:50px;height:1px;background:var(--gold);margin:18px auto;opacity:0.5;}
-.ch-sub{font-size:12px;color:#6a5a3a;letter-spacing:0.3em;}
+.ch-sub{font-size:var(--ch-sub-font,12px);color:#6a5a3a;letter-spacing:0.3em;}
 
 /* 黑屏白字 */
 #blackout-screen{position:absolute;inset:0;z-index:26;background:#000;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s;}
@@ -279,6 +279,78 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
   <button class="dev-btn" onclick="devRestartCh()">本章重來</button>
   <span id="dev-info" style="font-size:9px;color:#4a3010;letter-spacing:0.1em;margin-left:4px;"></span>
 </div>
+<!-- 視覺化編輯器：獨立全螢幕，不依賴遊戲狀態 -->
+<div id="visual-editor" style="display:none;position:fixed;inset:0;z-index:150;background:#060402;overflow:hidden;touch-action:none;">
+
+  <!-- 遊戲場景複製（深色背景） -->
+  <div id="ve-bg" style="position:absolute;inset:0;background:linear-gradient(180deg,#04030a 0%,#0a0818 40%,#12100a 100%);"></div>
+
+  <!-- 章節標題預覽（chapter模式時顯示） -->
+  <div id="ve-chapter-preview" style="display:none;position:absolute;inset:0;background:#000;flex-direction:column;align-items:center;justify-content:center;z-index:2;">
+    <div id="ve-ch-jp" style="font-size:var(--ch-jp-font,12px);color:#5a4a2a;letter-spacing:0.5em;margin-bottom:18px;font-family:'Shippori Mincho',serif;">第一章　明治四十一年</div>
+    <div id="ve-ch-main" style="font-size:var(--ch-main-font,22px);color:#f0e8d5;letter-spacing:0.2em;text-align:center;line-height:1.7;font-family:'Noto Serif TC',serif;">臺中郵便局<br>電信課</div>
+    <div style="width:50px;height:1px;background:var(--gold);margin:18px auto;opacity:0.5;"></div>
+    <div style="font-size:var(--ch-sub-font,12px);color:#6a5a3a;letter-spacing:0.3em;">西元1908年</div>
+  </div>
+
+  <!-- 語嫣立繪（可拖可縮放） -->
+  <img id="ve-sprite" draggable="false"
+    style="position:absolute;bottom:0;left:-3vw;width:70vw;max-width:380px;display:none;touch-action:none;user-select:none;filter:drop-shadow(2px 4px 20px rgba(0,0,0,0.85));">
+
+  <!-- 模擬對話框 -->
+  <div id="ve-dialog-area" style="position:absolute;bottom:0;left:0;right:0;padding:0 8px 10px;">
+    <div id="ve-speaker-box" style="display:inline-flex;align-items:center;background:rgba(5,3,1,0.97);border:1px solid #6a4418;border-bottom:none;padding:7px 20px;">
+      <span id="ve-speaker-name" style="color:#f5c830;letter-spacing:0.2em;font-weight:600;font-family:'Shippori Mincho',serif;">語嫣</span>
+    </div>
+    <div id="ve-dialog-box" style="background:rgba(5,3,1,0.97);border:1px solid #6a4418;padding:18px 22px 28px;position:relative;min-height:140px;">
+      <div style="content:'◆';position:absolute;top:7px;left:9px;color:#d4a830;font-size:8px;opacity:0.55;">◆</div>
+      <div id="ve-dialog-text" style="color:#f8eed5;line-height:2.0;letter-spacing:0.06em;">（這裡是示範對話文字，調整字體大小可即時預覽效果。）</div>
+      <div style="position:absolute;bottom:9px;right:15px;color:#d4a830;font-size:15px;">▶</div>
+    </div>
+  </div>
+
+  <!-- 頂部工具列 -->
+  <div id="ve-toolbar" style="position:absolute;top:0;left:0;right:0;z-index:10;background:rgba(6,4,2,0.97);border-bottom:1px solid #3a2810;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span style="font-size:10px;color:#6a5030;letter-spacing:0.3em;flex-shrink:0;">編輯模式</span>
+    <button id="ve-btn-sprite" onclick="veSetMode('sprite')" style="border:1px solid var(--gold);color:var(--gold);background:rgba(212,168,48,0.15);font-size:11px;padding:5px 12px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;">立繪</button>
+    <button id="ve-btn-text" onclick="veSetMode('text')" style="border:1px solid #3a2810;color:#6a5030;background:none;font-size:11px;padding:5px 12px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;">對話框</button>
+    <button id="ve-btn-chapter" onclick="veSetMode('chapter')" style="border:1px solid #3a2810;color:#6a5030;background:none;font-size:11px;padding:5px 12px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;">章節標題</button>
+    <!-- 文字控制（text模式） -->
+    <div id="ve-text-controls" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-size:10px;color:#8a6030;">對話</span>
+      <button onclick="veAdjust('dialogFont',-1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">−</button>
+      <span id="ve-val-df" style="font-size:12px;color:var(--gold);min-width:24px;text-align:center;">19</span>
+      <button onclick="veAdjust('dialogFont',1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">＋</button>
+      <span style="font-size:10px;color:#8a6030;margin-left:4px;">說話者</span>
+      <button onclick="veAdjust('speakerFont',-1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">−</button>
+      <span id="ve-val-sf" style="font-size:12px;color:var(--gold);min-width:24px;text-align:center;">18</span>
+      <button onclick="veAdjust('speakerFont',1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">＋</button>
+      <span style="font-size:10px;color:#8a6030;margin-left:4px;">框高</span>
+      <button onclick="veAdjust('dialogHeight',-10)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">−</button>
+      <span id="ve-val-dh" style="font-size:12px;color:var(--gold);min-width:30px;text-align:center;">140</span>
+      <button onclick="veAdjust('dialogHeight',10)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">＋</button>
+    </div>
+    <!-- 章節標題控制（chapter模式） -->
+    <div id="ve-chapter-controls" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-size:10px;color:#8a6030;">主標題</span>
+      <button onclick="veAdjust('chMainFont',-1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">−</button>
+      <span id="ve-val-cmf" style="font-size:12px;color:var(--gold);min-width:24px;text-align:center;">22</span>
+      <button onclick="veAdjust('chMainFont',1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">＋</button>
+      <span style="font-size:10px;color:#8a6030;margin-left:4px;">副標</span>
+      <button onclick="veAdjust('chJpFont',-1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">−</button>
+      <span id="ve-val-cjf" style="font-size:12px;color:var(--gold);min-width:24px;text-align:center;">12</span>
+      <button onclick="veAdjust('chJpFont',1)" style="border:1px solid #3a2810;color:#c8a050;background:none;width:26px;height:26px;cursor:pointer;font-size:15px;border-radius:2px;">＋</button>
+    </div>
+    <div style="flex:1;min-width:8px;"></div>
+    <button onclick="veReset()" style="border:1px solid #6a2010;color:#c06050;background:none;font-size:11px;padding:5px 10px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;">還原</button>
+    <button onclick="veSave()" style="border:1px solid #30a060;color:#50d090;background:rgba(32,128,80,0.15);font-size:11px;padding:5px 14px;cursor:pointer;border-radius:2px;font-family:'Noto Serif TC',serif;font-weight:600;">✓ 完成</button>
+  </div>
+
+  <!-- 底部提示 -->
+  <div id="ve-hint" style="position:absolute;top:56px;left:50%;transform:translateX(-50%);background:rgba(6,4,2,0.85);border:1px solid #2a1808;padding:5px 14px;border-radius:20px;font-size:10px;color:#6a5030;letter-spacing:0.15em;pointer-events:none;white-space:nowrap;">
+    拖動語嫣調整位置・兩指縮放調整大小
+  </div>
+</div>
 <div id="start-screen">
   <button id="admin-btn" onclick="openAdmin()">⚙ 後台</button>
   <div class="s-deco">國定古蹟臺中車站・實境解謎</div>
@@ -445,56 +517,25 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
     </div>
     <div id="tab-sprite" style="display:none;">
       <div class="adm-section">
-        <div class="adm-section-title">語嫣立繪設定</div>
+        <div class="adm-section-title">語嫣立繪　更換圖片</div>
         <div class="adm-field">
-          <label class="adm-label">更換圖片（JPG / PNG）</label>
           <input type="file" accept="image/*" id="sprite-upload" style="color:#d4c090;font-size:12px;width:100%;" onchange="onSpriteUpload(this)">
         </div>
-        <div class="adm-field">
-          <label class="adm-label">拖動語嫣到想要的位置，按「套用」確認</label>
-          <!-- 遊戲比例預覽框：9:16 直式 -->
-          <div id="sprite-stage"
-            style="position:relative;width:100%;padding-bottom:177.8%;background:linear-gradient(180deg,#04030a 0%,#0a0818 35%,#12100a 70%,#1a1208 100%);border:1px solid #3a2810;border-radius:3px;overflow:hidden;touch-action:none;user-select:none;">
-            <!-- 背景裝飾：地板 -->
-            <div style="position:absolute;bottom:0;left:0;right:0;height:25%;background:linear-gradient(180deg,#1a1206,#0e0c06);border-top:1px solid #2a2010;pointer-events:none;"></div>
-            <!-- 背景裝飾：對話框輪廓 -->
-            <div style="position:absolute;bottom:0;left:0;right:0;height:28%;background:rgba(5,3,1,0.92);border-top:1px solid #6a4418;pointer-events:none;opacity:0.6;"></div>
-            <!-- 背景裝飾：電話亭 -->
-            <div style="position:absolute;top:20%;left:50%;transform:translateX(-50%);width:28%;height:45%;background:linear-gradient(135deg,#1a1208,#0e0c08);border:2px solid #3a2a10;border-radius:3px;pointer-events:none;opacity:0.5;"></div>
-            <!-- 說明文字 -->
-            <div style="position:absolute;top:8px;right:10px;font-size:9px;color:#5a4020;letter-spacing:0.1em;pointer-events:none;">拖動語嫣調整位置</div>
-            <!-- 語嫣圖片（可拖） -->
-            <img id="sprite-stage-img"
-              src=""
-              draggable="false"
-              style="position:absolute;bottom:28%;left:0;width:55%;cursor:grab;touch-action:none;filter:drop-shadow(2px 4px 14px rgba(0,0,0,0.8));display:none;">
-          </div>
-        </div>
-        <div class="adm-field" style="margin-top:10px;">
-          <label class="adm-label">大小（<span id="val-sprite-size">55</span>%）</label>
-          <div class="range-row">
-            <input type="range" min="10" max="100" value="55" id="range-sprite-size" oninput="onSpriteSizeChange(this.value)">
-            <span class="range-val" id="show-sprite-size">55%</span>
-          </div>
-        </div>
         <div class="adm-btn-row">
-          <button class="adm-btn primary" onclick="applySpriteToGame()">套用到遊戲</button>
-          <button class="adm-btn" onclick="resetSpriteSettings()">還原預設</button>
+          <button class="adm-btn primary" onclick="openVisualEditor()">🖊 開啟視覺化編輯畫面</button>
         </div>
-        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">套用後，遊戲畫面也可以直接用手指拖動語嫣。</div>
+        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">上傳圖片後，點「視覺化編輯」直接在遊戲畫面拖動語嫣、調整文字大小。</div>
       </div>
     </div>
     <div id="tab-appear" style="display:none;">
-      <div class="adm-section"><div class="adm-section-title">文字大小</div>
-        <div class="adm-field"><label class="adm-label">對話文字（<span id="val-dialog-font">19</span>px）</label><div class="range-row"><input type="range" min="12" max="28" value="19" id="range-dialog-font" oninput="previewAppear()"><span class="range-val" id="show-dialog-font">19px</span></div></div>
-        <div class="adm-field"><label class="adm-label">說話者名字（<span id="val-speaker-font">18</span>px）</label><div class="range-row"><input type="range" min="12" max="26" value="18" id="range-speaker-font" oninput="previewAppear()"><span class="range-val" id="show-speaker-font">18px</span></div></div>
+      <div class="adm-section">
+        <div class="adm-section-title">外觀　快速預設</div>
+        <div class="adm-btn-row">
+          <button class="adm-btn primary" onclick="openVisualEditor()">🖊 開啟視覺化編輯畫面</button>
+          <button class="adm-btn danger" onclick="resetAppear()">還原文字預設</button>
+        </div>
+        <div style="font-size:10px;color:#5a4a2a;margin-top:8px;letter-spacing:0.1em;">在視覺化編輯畫面直接拖動調整，更直覺。</div>
       </div>
-      <div class="adm-section"><div class="adm-section-title">對話框大小</div>
-        <div class="adm-field"><label class="adm-label">最小高度（<span id="val-dialog-height">140</span>px）</label><div class="range-row"><input type="range" min="80" max="300" value="140" id="range-dialog-height" oninput="previewAppear()"><span class="range-val" id="show-dialog-height">140px</span></div></div>
-        <div class="adm-field"><label class="adm-label">內距</label><div class="range-row"><input type="range" min="8" max="36" value="18" id="range-dialog-pad" oninput="previewAppear()"><span class="range-val" id="show-dialog-pad">18px</span></div></div>
-        <div class="adm-field"><label class="adm-label">距底部</label><div class="range-row"><input type="range" min="0" max="60" value="10" id="range-dialog-bottom" oninput="previewAppear()"><span class="range-val" id="show-dialog-bottom">10px</span></div></div>
-      </div>
-      <div class="adm-btn-row"><button class="adm-btn primary" onclick="applyAppear()">套用</button><button class="adm-btn" onclick="resetAppear()">還原</button></div>
     </div>
     <div id="tab-io" style="display:none;">
       <div class="adm-section">
@@ -626,7 +667,7 @@ var D_CALLS=[
   {fromId:'j13',toId:'j08',fromNum:'十五番',fromName:'青果組合',toNum:'十番',toName:'長谷川醫院',
    dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有人受傷！'},{who:'語嫣',text:'馬上接通！'},{who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]}
 ];
-var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10};
+var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10,chMainFont:22,chJpFont:12,chSubFont:12};
 var D_PHONE_RING={
   waitNarr:[
     '鈴聲響起。\n那台「停用中」的電話，在空蕩蕩的電話亭裡兀自鳴響。',
@@ -797,38 +838,14 @@ function applyAppearVars(a){
   r.setProperty('--dialog-min-height',a.dialogHeight+'px');
   r.setProperty('--dialog-padding',a.dialogPad+'px 22px '+(a.dialogPad+4)+'px');
   r.setProperty('--dialog-bottom',a.dialogBottom+'px');
+  r.setProperty('--ch-main-font',(a.chMainFont||22)+'px');
+  r.setProperty('--ch-jp-font',(a.chJpFont||12)+'px');
+  r.setProperty('--ch-sub-font',(a.chSubFont||12)+'px');
 }
-function previewAppear(){
-  var keys=['dialog-font','speaker-font','dialog-height','dialog-pad','dialog-bottom'];
-  var a={};
-  keys.forEach(function(k){
-    var key=k.replace(/-([a-z])/g,function(_,c){return c.toUpperCase();});
-    a[key]=+document.getElementById('range-'+k).value;
-    var sv=document.getElementById('show-'+k);if(sv)sv.textContent=a[key]+'px';
-    var vv=document.getElementById('val-'+k);if(vv)vv.textContent=a[key];
-  });
-  applyAppearVars({dialogFont:a.dialogFont,speakerFont:a.speakerFont,dialogHeight:a.dialogHeight,dialogPad:a.dialogPad,dialogBottom:a.dialogBottom});
-}
-function applyAppear(){
-  APPEAR={
-    dialogFont:+document.getElementById('range-dialog-font').value,
-    speakerFont:+document.getElementById('range-speaker-font').value,
-    dialogHeight:+document.getElementById('range-dialog-height').value,
-    dialogPad:+document.getElementById('range-dialog-pad').value,
-    dialogBottom:+document.getElementById('range-dialog-bottom').value
-  };
-  applyAppearVars(APPEAR);
-}
-function resetAppear(){APPEAR=JSON.parse(JSON.stringify(D_APPEAR));syncAppearSliders();applyAppearVars(APPEAR);}
-function syncAppearSliders(){
-  var keys=['dialog-font','speaker-font','dialog-height','dialog-pad','dialog-bottom'];
-  keys.forEach(function(k){
-    var key=k.replace(/-([a-z])/g,function(_,c){return c.toUpperCase();});
-    var el=document.getElementById('range-'+k);if(el)el.value=APPEAR[key];
-    var sv=document.getElementById('show-'+k);if(sv)sv.textContent=APPEAR[key]+'px';
-    var vv=document.getElementById('val-'+k);if(vv)vv.textContent=APPEAR[key];
-  });
-}
+function previewAppear(){} // 舊的 slider 不再使用
+function applyAppear(){} // 由視覺化編輯器取代
+function resetAppear(){APPEAR=JSON.parse(JSON.stringify(D_APPEAR));applyAppearVars(APPEAR);veUpdateLabels();}
+function syncAppearSliders(){} // stub，保留相容性
 var rainDrops=[],rainIntensity=1.0;
 function createRain(){
   var layer=document.getElementById('rain-layer');layer.innerHTML='';rainDrops=[];
@@ -891,14 +908,27 @@ function skipType(){
 }
 function showChapter(s){
   waitChapter=true;
+  // 隱藏對話框，避免閃屏
+  gel('dialog-area').style.opacity='0';
+  gel('dialog-text').innerHTML='';
+  gel('speaker-box').style.display='none';
+  gel('next-hint').style.display='none';
   gel('ch-jp').textContent=s.jp;gel('ch-main').innerHTML=s.main.replace(/\n/g,'<br>');gel('ch-sub').textContent=s.sub||'';
   var ct=gel('chapter-title');ct.classList.add('show');
-  setTimeout(function(){ct.classList.remove('show');setTimeout(function(){waitChapter=false;processLine();},900);},3200);
+  setTimeout(function(){
+    ct.classList.remove('show');
+    setTimeout(function(){
+      gel('dialog-area').style.opacity='1';
+      waitChapter=false;processLine();
+    },900);
+  },3200);
 }
 
 // 黑屏白字
 function showBlackout(s){
   waitChapter=true;
+  gel('dialog-area').style.opacity='0';
+  gel('dialog-text').innerHTML='';
   var bs=gel('blackout-screen');
   gel('blackout-text').innerHTML=(s.text||'').replace(/\n/g,'<br>');
   bs.classList.add('show');
@@ -909,6 +939,7 @@ function showBlackout(s){
     setTimeout(function(){
       bs.classList.remove('show');
       bs.style.opacity='';bs.style.transition='';
+      gel('dialog-area').style.opacity='1';
       waitChapter=false;processLine();
     },1400);
   },dur);
@@ -1030,12 +1061,22 @@ function switchBg(scene){
   gel('exchange-scene').style.display=scene==='1908'?'block':'none';
 }
 function positionSprite(){
+  // 如果有視覺化編輯器儲存的 px 值，直接套用
+  if(SPRITE_SETTINGS&&SPRITE_SETTINGS.px_w){
+    document.querySelectorAll('.sprite').forEach(function(s){
+      s.style.left=(SPRITE_SETTINGS.px_l||0)+'px';
+      s.style.bottom=(SPRITE_SETTINGS.px_b||0)+'px';
+      s.style.width=SPRITE_SETTINGS.px_w+'px';
+      s.style.maxWidth='none';
+    });
+    return;
+  }
+  // 否則自動對齊對話框上緣
   var da=gel('dialog-area');
   var game=gel('game');
   if(!da||!game)return;
   var gameRect=game.getBoundingClientRect();
   var daRect=da.getBoundingClientRect();
-  // 對話框頂端，從 game 底部往上算的距離
   var fromBottom=gameRect.bottom-daRect.top;
   document.querySelectorAll('.sprite').forEach(function(s){
     s.style.bottom=fromBottom+'px';
@@ -1470,86 +1511,222 @@ function onSpriteUpload(input){
   reader.onload=function(e){
     var src=e.target.result;
     SPRITE_SETTINGS.src=src;
-    var pi=gel('sprite-stage-img');
-    if(pi){pi.src=src;pi.style.display='';}
     document.querySelectorAll('.sprite img').forEach(function(img){img.src=src;});
-    // 立即存到 IndexedDB（圖片太大不能放 localStorage）
-    saveSpriteSrc(src);
+    saveIDB('spriteSrc',src);
   };
   reader.readAsDataURL(file);
 }
-function applySpriteToGame(){
-  var stage=gel('sprite-stage');
-  if(!stage){alert('找不到預覽框');return;}
-  var sw=stage.offsetWidth;
-  var sh=sw*16/9; // 9:16 比例（直式手機）
-  var img=gel('sprite-stage-img');
-  var imgL=parseInt(img?img.style.left:0)||0;
-  var imgB=parseInt(img?img.style.bottom:0)||0;
-  var pct=SPRITE_SETTINGS.pct||55;
-  // 換算到螢幕真實尺寸
-  var scaleX=window.innerWidth/sw;
-  var scaleY=window.innerHeight/sh;
-  var gameW=Math.round((pct/100)*sw*scaleX);
-  var gameL=Math.round(imgL*scaleX);
-  var gameB=Math.round(imgB*scaleY);
-  document.querySelectorAll('.sprite').forEach(function(s){
-    s.style.width=gameW+'px';
-    s.style.maxWidth='none';
-    s.style.left=gameL+'px';
-    s.style.bottom=gameB+'px';
-  });
-  SPRITE_SETTINGS.leftPct=imgL/sw*100;
-  SPRITE_SETTINGS.bottomPct=imgB/sh*100;
-  closeAdmin();
-}
-function resetSpriteSettings(){
-  SPRITE_SETTINGS={pct:55,leftPct:0,bottomPct:28,src:SPRITE_SETTINGS.src};
-  var r=gel('range-sprite-size');if(r)r.value=55;
-  onSpriteSizeChange(55);
-  var img=gel('sprite-stage-img');
-  var stage=gel('sprite-stage');
-  if(img&&stage){
-    img.style.left='0px';
-    img.style.bottom=(stage.offsetHeight*0.28)+'px';
+
+// 舊函式 stub（相容）
+function initSpriteDragAdmin(){}
+function onSpriteSizeChange(v){}
+function applySpriteToGame(){}
+function resetSpriteSettings(){positionSprite();}
+
+// ══ 視覺化編輯器 ══
+var veMode='sprite';
+var veDragging=false,veStartX,veStartY,veOrigL,veOrigB;
+var vePinchDist=0,veOrigW;
+
+function openVisualEditor(){
+  var ve=gel('visual-editor');
+  ve.style.display='block';
+
+  // 套用語嫣圖片到 ve-sprite
+  var vesp=gel('ve-sprite');
+  if(vesp){
+    if(SPRITE_SETTINGS&&SPRITE_SETTINGS.src){
+      vesp.src=SPRITE_SETTINGS.src;
+      vesp.style.display='block';
+    }else{
+      // 從遊戲的 sprite img 取
+      var gameImg=document.querySelector('.sprite img');
+      if(gameImg&&gameImg.src&&gameImg.src.length>10){
+        vesp.src=gameImg.src;vesp.style.display='block';
+      }else{
+        vesp.style.display='none';
+      }
+    }
+    // 還原儲存的位置
+    if(SPRITE_SETTINGS&&SPRITE_SETTINGS.px_w){
+      vesp.style.width=SPRITE_SETTINGS.px_w+'px';
+      vesp.style.left=(SPRITE_SETTINGS.px_l||0)+'px';
+      vesp.style.bottom=(SPRITE_SETTINGS.px_b||0)+'px';
+      vesp.style.maxWidth='none';
+    }else{
+      // 預設：對齊對話框上緣
+      setTimeout(function(){
+        var da=gel('ve-dialog-area');
+        var h=ve.offsetHeight;
+        var daT=da?da.offsetTop:h*0.72;
+        vesp.style.bottom=(h-daT)+'px';
+        vesp.style.left='-3vw';
+        vesp.style.width='70vw';
+        vesp.style.maxWidth='380px';
+      },50);
+    }
   }
-  document.querySelectorAll('.sprite').forEach(function(s){
-    s.style.width='72vw';s.style.maxWidth='400px';s.style.left='-4vw';s.style.bottom='0px';
-  });
+
+  // 套用現有文字設定到 ve 對話框
+  veApplyAppear();
+  veUpdateLabels();
+  veSetMode('sprite');
+
+  // 綁定事件
+  ve.addEventListener('touchstart',veOnStart,{passive:false});
+  ve.addEventListener('touchmove',veOnMove,{passive:false});
+  ve.addEventListener('touchend',veOnEnd);
+  ve.addEventListener('mousedown',veOnStart);
+  ve.addEventListener('mousemove',veOnMove);
+  ve.addEventListener('mouseup',veOnEnd);
+}
+
+function veApplyAppear(){
+  var dt=gel('ve-dialog-text'),sn=gel('ve-speaker-name'),db=gel('ve-dialog-box');
+  if(dt)dt.style.fontSize=APPEAR.dialogFont+'px';
+  if(sn)sn.style.fontSize=APPEAR.speakerFont+'px';
+  if(db)db.style.minHeight=APPEAR.dialogHeight+'px';
+}
+
+function veSetMode(m){
+  veMode=m;
+  var bs=gel('ve-btn-sprite'),bt=gel('ve-btn-text'),bc=gel('ve-btn-chapter');
+  var tc=gel('ve-text-controls'),cc=gel('ve-chapter-controls'),hint=gel('ve-hint');
+  var cp=gel('ve-chapter-preview'),da=gel('ve-dialog-area'),vesp=gel('ve-sprite');
+  // 重置所有按鈕
+  [bs,bt,bc].forEach(function(b){if(b){b.style.background='none';b.style.borderColor='#3a2810';b.style.color='#6a5030';}});
+  if(tc)tc.style.display='none';
+  if(cc)cc.style.display='none';
+  if(m==='sprite'){
+    if(bs){bs.style.background='rgba(212,168,48,0.15)';bs.style.borderColor='var(--gold)';bs.style.color='var(--gold)';}
+    if(cp)cp.style.display='none';
+    if(da)da.style.display='block';
+    if(vesp)vesp.style.zIndex='3';
+    if(hint)hint.textContent='拖動語嫣調整位置・兩指縮放調整大小';
+  }else if(m==='text'){
+    if(bt){bt.style.background='rgba(212,168,48,0.15)';bt.style.borderColor='var(--gold)';bt.style.color='var(--gold)';}
+    if(tc)tc.style.display='flex';
+    if(cp)cp.style.display='none';
+    if(da)da.style.display='block';
+    if(hint)hint.textContent='點 ＋/− 調整字體，即時在下方預覽';
+  }else if(m==='chapter'){
+    if(bc){bc.style.background='rgba(212,168,48,0.15)';bc.style.borderColor='var(--gold)';bc.style.color='var(--gold)';}
+    if(cc)cc.style.display='flex';
+    if(cp){cp.style.display='flex';}
+    if(da)da.style.display='none';
+    if(vesp)vesp.style.zIndex='-1';
+    if(hint)hint.textContent='點 ＋/− 調整主標題和副標大小';
+  }
+}
+
+function veUpdateLabels(){
+  var df=gel('ve-val-df'),sf=gel('ve-val-sf'),dh=gel('ve-val-dh');
+  var cmf=gel('ve-val-cmf'),cjf=gel('ve-val-cjf');
+  if(df)df.textContent=APPEAR.dialogFont;
+  if(sf)sf.textContent=APPEAR.speakerFont;
+  if(dh)dh.textContent=APPEAR.dialogHeight;
+  if(cmf)cmf.textContent=APPEAR.chMainFont||22;
+  if(cjf)cjf.textContent=APPEAR.chJpFont||12;
+}
+
+function veAdjust(key,delta){
+  var min={dialogFont:10,speakerFont:10,dialogHeight:80,chMainFont:12,chJpFont:8,chSubFont:8};
+  var max={dialogFont:36,speakerFont:32,dialogHeight:400,chMainFont:48,chJpFont:24,chSubFont:24};
+  APPEAR[key]=Math.max(min[key]||10,Math.min(max[key]||400,(APPEAR[key]||0)+delta));
+  applyAppearVars(APPEAR);
+  veApplyAppear();
+  veUpdateLabels();
+}
+
+function veOnStart(e){
+  if(veMode!=='sprite')return;
+  var toolbar=gel('ve-toolbar');
+  if(toolbar&&toolbar.contains(e.target))return;
+  var vesp=gel('ve-sprite');
+  if(!vesp||vesp.style.display==='none')return;
+  if(e.touches&&e.touches.length===2){
+    vePinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    veOrigW=vesp.offsetWidth||200;
+    e.preventDefault();return;
+  }
+  var t=e.touches?e.touches[0]:e;
+  veDragging=true;
+  veStartX=t.clientX;veStartY=t.clientY;
+  veOrigL=parseInt(vesp.style.left)||0;
+  veOrigB=parseInt(vesp.style.bottom)||0;
+  e.preventDefault();
+}
+
+function veOnMove(e){
+  if(veMode!=='sprite')return;
+  var vesp=gel('ve-sprite');if(!vesp)return;
+  if(e.touches&&e.touches.length===2&&vePinchDist>0){
+    var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    var newW=Math.round(veOrigW*(d/vePinchDist));
+    newW=Math.max(60,Math.min(window.innerWidth*1.5,newW));
+    vesp.style.width=newW+'px';vesp.style.maxWidth='none';
+    e.preventDefault();return;
+  }
+  if(!veDragging)return;
+  var t=e.touches?e.touches[0]:e;
+  vesp.style.left=(veOrigL+(t.clientX-veStartX))+'px';
+  vesp.style.bottom=(veOrigB-(t.clientY-veStartY))+'px';
+  vesp.style.maxWidth='none';
+  e.preventDefault();
+}
+
+function veOnEnd(e){
+  if(e&&e.touches&&e.touches.length>0)return;
+  veDragging=false;vePinchDist=0;
+}
+
+function veSave(){
+  var vesp=gel('ve-sprite');
+  if(vesp&&vesp.style.display!=='none'){
+    SPRITE_SETTINGS.px_l=parseInt(vesp.style.left)||0;
+    SPRITE_SETTINGS.px_b=parseInt(vesp.style.bottom)||0;
+    SPRITE_SETTINGS.px_w=vesp.offsetWidth;
+    // 同步到遊戲立繪
+    document.querySelectorAll('.sprite').forEach(function(s){
+      s.style.left=SPRITE_SETTINGS.px_l+'px';
+      s.style.bottom=SPRITE_SETTINGS.px_b+'px';
+      s.style.width=SPRITE_SETTINGS.px_w+'px';
+      s.style.maxWidth='none';
+    });
+  }
+  saveToLocal();
+  var ve=gel('visual-editor');
+  ve.style.display='none';
+  ve.removeEventListener('touchstart',veOnStart);
+  ve.removeEventListener('touchmove',veOnMove);
+  ve.removeEventListener('touchend',veOnEnd);
+  ve.removeEventListener('mousedown',veOnStart);
+  ve.removeEventListener('mousemove',veOnMove);
+  ve.removeEventListener('mouseup',veOnEnd);
+  openAdmin();
+}
+
+function veReset(){
+  APPEAR=JSON.parse(JSON.stringify(D_APPEAR));
+  applyAppearVars(APPEAR);
+  veApplyAppear();
+  veUpdateLabels();
+  var vesp=gel('ve-sprite');
+  if(vesp){
+    var ve=gel('visual-editor');
+    var da=gel('ve-dialog-area');
+    var h=ve?ve.offsetHeight:window.innerHeight;
+    var daT=da?da.offsetTop:h*0.72;
+    vesp.style.left='-3vw';
+    vesp.style.bottom=(h-daT)+'px';
+    vesp.style.width='70vw';
+    vesp.style.maxWidth='380px';
+  }
+  SPRITE_SETTINGS.px_w=0;SPRITE_SETTINGS.px_l=0;SPRITE_SETTINGS.px_b=0;
 }
 
 // ══ 遊戲畫面立繪拖拽 ══
-function initSpriteDrag(){
-  var isDragging=false,startX,startY,origLeft,origBottom;
-  function onStart(e){
-    if(gel('admin-panel').classList.contains('open'))return;
-    isDragging=true;
-    var t=e.touches?e.touches[0]:e;
-    startX=t.clientX;startY=t.clientY;
-    var sp=document.querySelector('.sprite:not(.hidden)');
-    if(!sp)return;
-    origLeft=parseInt(sp.style.left)||sp.offsetLeft;
-    origBottom=parseInt(sp.style.bottom)||0;
-    e.preventDefault();
-  }
-  function onMove(e){
-    if(!isDragging)return;
-    var t=e.touches?e.touches[0]:e;
-    var dx=t.clientX-startX,dy=t.clientY-startY;
-    document.querySelectorAll('.sprite').forEach(function(s){
-      s.style.left=(origLeft+dx)+'px';
-      s.style.bottom=(origBottom-dy)+'px';
-      s.style.maxWidth='none';
-    });
-    e.preventDefault();
-  }
-  function onEnd(){isDragging=false;}
-  document.querySelectorAll('.sprite').forEach(function(sp){
-    sp.addEventListener('touchstart',onStart,{passive:false});
-  });
-  document.addEventListener('touchmove',onMove,{passive:false});
-  document.addEventListener('touchend',onEnd);
-}
+function initSpriteDrag(){} // 由視覺化編輯器取代
 
 // ══ renderList：插入按鈕在卡片右上角 ══
 function renderList(ch){
