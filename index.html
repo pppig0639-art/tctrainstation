@@ -334,14 +334,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 #exchange-scene{position:absolute;inset:0;display:none;overflow:hidden;}
 </style>
 
-<!-- YouTube IFrame API for background music & rain -->
+<!-- YouTube IFrame API -->
 <script src="https://www.youtube.com/iframe_api"></script>
-<div id="yt-players" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;z-index:-1;">
-  <div id="yt-music"></div>
-  <div id="yt-rain"></div>
-</div>
 </head>
 <body>
+<!-- YouTube hidden players - needs non-zero size to avoid browser blocking -->
+<div id="yt-players" style="position:fixed;bottom:-200px;left:-200px;width:200px;height:200px;pointer-events:none;overflow:hidden;opacity:0.001;">
+  <div id="yt-music" style="width:200px;height:200px;"></div>
+  <div id="yt-rain" style="width:200px;height:200px;"></div>
+</div>
 <!-- 開發者工具列（測試用，後台可隱藏） -->
 <div id="dev-toolbar" class="hidden">
   <span class="dev-label">DEV</span>
@@ -686,7 +687,7 @@ function onYouTubeIframeAPIReady(){
     videoId:'eMnxjdGTK4w',
     playerVars:{autoplay:0,controls:0,loop:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1},
     events:{
-      onReady:function(){ytMusicReady=true;if(_pendingPlay)_startAllAudio();},
+      onReady:function(){ytMusicReady=true;if(_pendingPlay)_tryPlayMusic();},
       onError:function(e){console.warn('ytMusic error',e.data);}
     }
   });
@@ -695,7 +696,7 @@ function onYouTubeIframeAPIReady(){
     videoId:'gL8osq048fA',
     playerVars:{autoplay:0,controls:0,loop:1,playsinline:1,rel:0,modestbranding:1,enablejsapi:1,playlist:'gL8osq048fA'},
     events:{
-      onReady:function(){ytRainReady=true;if(_pendingPlay)_startAllAudio();},
+      onReady:function(){ytRainReady=true;if(_pendingPlay)_tryPlayRain();},
       onError:function(e){console.warn('ytRain error',e.data);}
     }
   });
@@ -705,22 +706,30 @@ function onYouTubeIframeAPIReady(){
 function startAllAudio(){
   _pendingPlay=true;
   try{getAudioCtx();}catch(e){}
-  _startAllAudio();
+  // 嘗試立即播放（player 可能已 ready）
+  _tryPlayMusic();
+  _tryPlayRain();
 }
-function _startAllAudio(){
-  if(!_pendingPlay)return;
+function _tryPlayMusic(){
   try{
-    if(ytMusicReady&&ytMusic&&typeof ytMusic.playVideo==='function'){
+    if(ytMusic&&typeof ytMusic.playVideo==='function'){
       ytMusic.playVideo();
       ytMusic.setVolume(70);
     }
   }catch(e){}
+}
+function _tryPlayRain(){
   try{
-    if(ytRainReady&&ytRain&&typeof ytRain.playVideo==='function'){
+    if(ytRain&&typeof ytRain.playVideo==='function'){
       ytRain.playVideo();
       ytRain.setVolume(40);
     }
   }catch(e){}
+}
+function _startAllAudio(){
+  if(!_pendingPlay)return;
+  _tryPlayMusic();
+  _tryPlayRain();
 }
 
 // 停止所有 YouTube 音訊（可選）
