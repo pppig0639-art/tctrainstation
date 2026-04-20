@@ -333,6 +333,13 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 
 #exchange-scene{position:absolute;inset:0;display:none;overflow:hidden;}
 </style>
+
+<!-- YouTube IFrame API for background music & rain -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<div id="yt-players" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;z-index:-1;">
+  <div id="yt-music"></div>
+  <div id="yt-rain"></div>
+</div>
 </head>
 <body>
 <!-- 開發者工具列（測試用，後台可隱藏） -->
@@ -666,7 +673,63 @@ function getAudioCtx(){
   return AudioCtx;
 }
 
-// 手搖式電話鈴聲：雙音鈴聲 (bell A + bell B 交替)
+// ── YouTube 播放器 ──
+var ytMusic=null, ytRain=null;
+var ytReady=false, ytMusicReady=false, ytRainReady=false;
+var _pendingPlay=false; // 使用者點擊後才能播放
+
+// YouTube IFrame API 準備完成時呼叫
+function onYouTubeIframeAPIReady(){
+  ytReady=true;
+  // 背景音樂（eMnxjdGTK4w）：播完就停，不循環
+  ytMusic=new YT.Player('yt-music',{
+    videoId:'eMnxjdGTK4w',
+    playerVars:{autoplay:0,controls:0,loop:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1},
+    events:{
+      onReady:function(){ytMusicReady=true;if(_pendingPlay)_startAllAudio();},
+      onError:function(e){console.warn('ytMusic error',e.data);}
+    }
+  });
+  // 雨聲（gL8osq048fA）：循環播放
+  ytRain=new YT.Player('yt-rain',{
+    videoId:'gL8osq048fA',
+    playerVars:{autoplay:0,controls:0,loop:1,playsinline:1,rel:0,modestbranding:1,enablejsapi:1,playlist:'gL8osq048fA'},
+    events:{
+      onReady:function(){ytRainReady=true;if(_pendingPlay)_startAllAudio();},
+      onError:function(e){console.warn('ytRain error',e.data);}
+    }
+  });
+}
+
+// 使用者點擊後呼叫此函式啟動所有音訊
+function startAllAudio(){
+  _pendingPlay=true;
+  try{getAudioCtx();}catch(e){}
+  _startAllAudio();
+}
+function _startAllAudio(){
+  if(!_pendingPlay)return;
+  try{
+    if(ytMusicReady&&ytMusic&&typeof ytMusic.playVideo==='function'){
+      ytMusic.playVideo();
+      ytMusic.setVolume(70);
+    }
+  }catch(e){}
+  try{
+    if(ytRainReady&&ytRain&&typeof ytRain.playVideo==='function'){
+      ytRain.playVideo();
+      ytRain.setVolume(40);
+    }
+  }catch(e){}
+}
+
+// 停止所有 YouTube 音訊（可選）
+function stopAllAudio(){
+  try{if(ytMusic)ytMusic.stopVideo();}catch(e){}
+  try{if(ytRain)ytRain.stopVideo();}catch(e){}
+}
+
+// ── 手搖式電話鈴聲 ──
 var _ringTimer=null;
 var _ringBells=[];
 function playRing(){
@@ -674,26 +737,24 @@ function playRing(){
   _doRingCycle();
 }
 function _doRingCycle(){
-  _ringOneRing(750, 0);  // 第一聲
-  _ringOneRing(750, 900); // 第二聲（連鈴）
-  _ringTimer=setTimeout(_doRingCycle, 2400); // 間歇後重複
+  _ringOneRing(0);
+  _ringOneRing(900);
+  _ringTimer=setTimeout(_doRingCycle, 2400);
 }
-function _ringOneRing(dur, offset){
+function _ringOneRing(offset){
   setTimeout(function(){
     try{
       var ctx=getAudioCtx();
-      // 模擬老式電話鈴鐺：兩個調不同的金屬鐘聲交替
       [0,100,200,300,400,500,600].forEach(function(t,i){
         var osc=ctx.createOscillator();
         var gain=ctx.createGain();
         osc.connect(gain);gain.connect(ctx.destination);
-        // 電話鈴聲：約1480Hz 和 2080Hz 交替
         osc.frequency.value=(i%2===0)?1480:2080;
         osc.type='sine';
         var start=ctx.currentTime+t/1000;
         var end=start+0.09;
         gain.gain.setValueAtTime(0,start);
-        gain.gain.linearRampToValueAtTime(0.22,start+0.005);
+        gain.gain.linearRampToValueAtTime(0.25,start+0.005);
         gain.gain.linearRampToValueAtTime(0.18,end-0.01);
         gain.gain.linearRampToValueAtTime(0,end);
         osc.start(start);osc.stop(end+0.01);
@@ -708,7 +769,7 @@ function stopRing(){
   _ringBells=[];
 }
 
-// 輕柔的「電話接通」提示音
+// 接通提示音
 function playPickup(){
   try{
     var ctx=getAudioCtx();
@@ -724,41 +785,7 @@ function playPickup(){
   }catch(e){}
 }
 
-var D_CH1=[
-  {t:'chapter',jp:'序章',main:'電話亭',sub:'臺中市・某條街'},
-  {t:'narr',text:'風暴大雨的夜晚。街上杳無人煙，燈火闌珊。\n街燈在雨幕後搖搖欲墜，映著路面。'},
-  {t:'narr',text:'閃爍的光線下，有個人影跌跌撞撞地跑過——\n竄進路旁一座老舊的電話亭內。'},
-  {t:'narr',text:'狼狽躲雨的女子氣喘吁吁，靠上門板。'},
-  {t:'show',id:'sp-yuyan'},
-  {t:'line',who:'語嫣',text:'……真是倒楣啊。\n怎麼迷路還碰上這種大雨。'},
-  {t:'narr',text:'她掏出手機——沒有訊號。\n她沉默地看著螢幕，沒有多說什麼。'},
-  {t:'narr',text:'四周靜得只剩嘈雜雨聲。\n電話亭老舊，門口貼著一張在風雨中屹立不搖的告示。'},
-  {t:'narr',text:'「停用中」'},
-  {t:'narr',text:'語嫣終於抬起頭，看著那台笨重的老式電話機。\n她也說不清自己在想什麼。'},
-  {t:'fx',fn:'phoneGlow'},
-  {t:'line',who:'語嫣',text:'（愣住）'},
-  {t:'narr',text:'停用的電話，在響。'},
-  {t:'stage',id:'phone-ring'},
-  {t:'narr',text:'話筒是冰涼的，帶著鐵的氣味和一種說不清的熟悉感。'},
-  {t:'fx',fn:'lightning2'},
-  {t:'fx',fn:'rainFade'},
-  {t:'narr',text:'一陣陰風驟來。雨聲忽地輕了，語嫣的世界歸於安靜。'},
-  {t:'narr',text:'玻璃外的世界，悄悄換了個樣子。\n露出原先在暴風雨中被隱藏的'},
-  {t:'blackout',text:'日式建築',duration:2600},
-  {t:'hide',id:'sp-yuyan'},
-  {t:'chapter',jp:'第一章',main:'臺中電話交換局',sub:'昭和年間'},
-  {t:'bg',scene:'1908'},
-  {t:'show',id:'sp-yuyan-1908'},
-  {t:'narr',text:'睜開雙眼，她茫然地看了看四周。\n意識模糊，像剛從深水裡被打撈起來。'},
-  {t:'narr',text:'眼前是一面巨大的木製機台——\n密密麻麻的圓形插孔，懸掛的跳線，閃著昏黃光的信號掉牌。\n那是日治年代的手搖式電話交換機——每一通電話，都要靠通信事務員手動轉接。'},
-  {t:'line',who:'語嫣',text:'……這是哪裡？'},
-  {t:'narr',text:'她喃喃自語，沒有人回答。'},
-  {t:'narr',text:'腦子裡有什麼東西是空的。\n名字、家、昨天——什麼都想不起來。\n\n只有一件事隱隱約約的清楚：\n有個人，在某個地方，需要她。'},
-  {t:'line',who:'語嫣',text:'（盯著自己的手，很久。）'},
-  {t:'line',who:'語嫣',text:'……先做眼前的事吧。'},
-  {t:'narr',text:'就在這時，交換機的信號掉牌，「啪」的一聲落下。\n\n來電了。'},
-  {t:'stage',id:'switchboard'}
-];
+var D_CH1=[{'t':'chapter','jp':'序章','main':'電話亭','sub':'臺中市・某條街'},{'t':'narr','text':'風暴大雨的夜晚。街上杳無人煙，燈火闌珊。\n街燈在雨幕後搖搖欲墜，映著路面。'},{'t':'narr','text':'閃爍的光線下，有個人影跌跌撞撞地跑過，\n竄進路旁一座老舊的電話亭內。'},{'t':'narr','text':'狼狽躲雨的女子氣喘吁吁，靠上門板。'},{'t':'show','id':'sp-yuyan'},{'t':'line','who':'語嫣','text':'……真是倒楣啊。\n怎麼迷路還碰上這種大雨。'},{'t':'narr','text':'她掏出手機，她沉默地看著螢幕。\n螢幕灰白的昭示著這裡沒有訊號。'},{'t':'narr','text':'四周靜得只剩嘈雜雨聲。\n電話亭老舊，門口貼著一張在風雨中屹立不搖的告示。'},{'t':'narr','text':'「停用中」'},{'t':'narr','text':'百無聊賴的語嫣終於抬起頭，看著那台笨重的老式電話機。'},{'t':'fx','fn':'phoneGlow'},{'t':'line','who':'語嫣','text':'……咦？'},{'t':'stage','id':'phone-ring'},{'t':'narr','text':'話筒是冰涼的，帶著鐵的金屬氣味和一種熟悉的感覺。'},{'t':'fx','fn':'lightning2'},{'t':'fx','fn':'rainFade'},{'t':'narr','text':'一陣陰風驟來。雨聲忽地輕了，語嫣的世界歸於安靜。'},{'t':'narr','text':'玻璃外的世界，悄悄換了個樣子。\n露出原先在暴風雨中被隱藏的'},{'t':'blackout','text':'日式建築','duration':3000},{'t':'hide','id':'sp-yuyan'},{'t':'chapter','jp':'第一章','main':'臺中郵便局 臺中電信交換局 ','sub':'電信課'},{'t':'bg','scene':'1908'},{'t':'show','id':'sp-yuyan-1908'},{'t':'narr','text':'睜開雙眼，她茫然地看了看四周。\n意識模糊，像剛從深水裡被打撈起來。'},{'t':'narr','text':'眼前是一面巨大的木製機台，\n密密麻麻的圓形插孔，懸掛的跳線，閃著昏黃光的信號掉牌。\n'},{'t':'narr','text':'那是日治年代的手搖式電話交換機。\n每一通電話，都要靠通信事務員手動轉接。'},{'t':'line','who':'語嫣','text':'……這是哪裡？'},{'t':'narr','text':'她喃喃自語，無人應答。'},{'t':'line','who':'語嫣','text':'噢⋯⋯我在工作呀。'},{'t':'narr','text':'就在這時，交換機的信號掉牌「啪」的一聲落下。\n來電了。'},{'t':'line','who':'語嫣','text':'……先做眼前的事吧。'},{'t':'stage','id':'switchboard'}];
 var D_CH2=[
   {t:'line',who:'語嫣',text:'呼……終於結束了。'},
   {t:'narr',text:'她靠在椅背上，望著天花板發呆。'},
@@ -792,27 +819,9 @@ var D_CH5=[
   {t:'narr',text:'（旁白）'},
   {t:'line',who:'語嫣',text:'（對白）'}
 ];
-var D_JACKS=[
-  {id:'j01',name:'三井物産',num:'二三番'},{id:'j02',name:'臺中驛',num:'四番'},
-  {id:'j03',name:'臺灣銀行',num:'五番'},{id:'j04',name:'醉月樓',num:'六番'},
-  {id:'j05',name:'郵便局',num:'七番'},{id:'j06',name:'彰化銀行',num:'八番'},
-  {id:'j07',name:'帝國製糖',num:'九番'},{id:'j08',name:'長谷川醫院',num:'十番'},
-  {id:'j09',name:'臺中廳',num:'十一番'},{id:'j10',name:'臺灣倉庫',num:'十二番'},
-  {id:'j11',name:'臺中座',num:'十三番'},{id:'j12',name:'大和料理店',num:'十四番'},
-  {id:'j13',name:'青果組合',num:'十五番'},{id:'j14',name:'臺中公園',num:'十六番'},
-  {id:'j15',name:'警察署',num:'十七番'},{id:'j16',name:'臺中學校',num:'十八番'}
-];
-var D_CALLS=[
-  {fromId:'j01',toId:'j02',fromNum:'二三番',fromName:'三井物産',toNum:'四番',toName:'臺中驛',
-   dialogs:[{who:'三井物産 用戶',text:'喂，是電話局嗎？請幫我接到臺中驛。'},{who:'語嫣',text:'好的，請稍候。'},{who:'臺中驛 站長',text:'喂，臺中驛，請說。'}]},
-  {fromId:'j06',toId:'j03',fromNum:'八番',fromName:'彰化銀行',toNum:'五番',toName:'臺灣銀行',
-   dialogs:[{who:'彰化銀行 行員',text:'麻煩幫我接臺灣銀行臺中支店。'},{who:'語嫣',text:'好的，請稍候。'},{who:'臺灣銀行 行員',text:'您好，臺灣銀行，請說。'}]},
-  {fromId:'j09',toId:'j05',fromNum:'十一番',fromName:'臺中廳',toNum:'七番',toName:'郵便局',
-   dialogs:[{who:'臺中廳 官員',text:'我是臺中廳，請接郵便局，有急件。'},{who:'語嫣',text:'是，馬上為您接通。'},{who:'郵便局 局員',text:'您好，郵便局，請說。'}]},
-  {fromId:'j13',toId:'j08',fromNum:'十五番',fromName:'青果組合',toNum:'十番',toName:'長谷川醫院',
-   dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有人受傷！'},{who:'語嫣',text:'馬上接通！'},{who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]}
-];
-var D_APPEAR={dialogFont:19,speakerFont:18,dialogHeight:140,dialogPad:18,dialogBottom:10,chMainFont:22,chJpFont:12,chSubFont:12};
+var D_JACKS=[{'id':'j01','name':'三井物産','num':'二三番'},{'id':'j02','name':'臺中驛','num':'四番'},{'id':'j03','name':'臺灣銀行','num':'五番'},{'id':'j04','name':'醉月樓','num':'六番'},{'id':'j05','name':'郵便局','num':'七番'},{'id':'j06','name':'彰化銀行','num':'八番'},{'id':'j07','name':'帝國製糖','num':'九番'},{'id':'j08','name':'長谷川醫院','num':'十番'},{'id':'j09','name':'臺中廳','num':'十一番'},{'id':'j10','name':'臺灣倉庫','num':'十二番'},{'id':'j11','name':'臺中座','num':'十三番'},{'id':'j12','name':'大和料理店','num':'十四番'},{'id':'j13','name':'青果組合','num':'十五番'},{'id':'j14','name':'臺中公園','num':'十六番'},{'id':'j15','name':'警察署','num':'十七番'},{'id':'j16','name':'臺中學校','num':'十八番'}];
+var D_CALLS=[{'fromId':'j01','toId':'j02','fromNum':'二三番','fromName':'三井物産','toNum':'四番','toName':'臺中驛','dialogs':[{'who':'三井物産 用戶','text':'喂，是電話局嗎？請幫我接到臺中驛。'},{'who':'語嫣','text':'好的，請稍候。'},{'who':'臺中驛 站長','text':'喂，臺中驛，請說。'}]},{'fromId':'j06','toId':'j03','fromNum':'八番','fromName':'彰化銀行','toNum':'五番','toName':'臺灣銀行','dialogs':[{'who':'彰化銀行 行員','text':'麻煩幫我接臺灣銀行臺中支店。'},{'who':'語嫣','text':'好的，請稍候。'},{'who':'臺灣銀行 行員','text':'您好，臺灣銀行，請說。'}]},{'fromId':'j09','toId':'j05','fromNum':'十一番','fromName':'臺中廳','toNum':'七番','toName':'郵便局','dialogs':[{'who':'臺中廳 官員','text':'我是臺中廳，請接郵便局，有急件。'},{'who':'語嫣','text':'是，馬上為您接通。'},{'who':'郵便局 局員','text':'您好，郵便局，請說。'}]},{'fromId':'j13','toId':'j08','fromNum':'十五番','fromName':'青果組合','toNum':'十番','toName':'長谷川醫院','dialogs':[{'who':'青果組合 職員','text':'快！幫我接長谷川醫院！有人受傷！'},{'who':'語嫣','text':'馬上接通！'},{'who':'長谷川醫院 護士','text':'長谷川醫院，請說。'}]}];
+var D_APPEAR={'dialogFont':20,'speakerFont':19,'dialogHeight':140,'dialogPad':18,'dialogBottom':10,'chMainFont':44,'chJpFont':20,'chSubFont':12};
 var D_UI={
   startDeco:'國定古蹟臺中車站・實境解謎',
   startTitleJp:'時の回廊',
@@ -1619,8 +1628,8 @@ function onTap(){
   processLine();
 }
 function startGame(){
-  // iOS音頻解鎖
-  try{getAudioCtx();}catch(e){}
+  // 使用者點擊解鎖音訊
+  startAllAudio();
   SCRIPT=buildFullScript();cursor=0;
   var ss=gel('start-screen');ss.style.transition='opacity 0.9s';ss.style.opacity='0';
   setTimeout(function(){
