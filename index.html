@@ -667,80 +667,72 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Noto Serif TC','He
 <script>
 
 // ══ 音效系統 ══
-var AudioCtx=null;
+var AudioCtx = null;
 function getAudioCtx(){
-  if(!AudioCtx)AudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  if(AudioCtx.state==='suspended')AudioCtx.resume();
+  if(!AudioCtx) AudioCtx = new(window.AudioContext||window.webkitAudioContext)();
+  if(AudioCtx.state==='suspended') AudioCtx.resume();
   return AudioCtx;
 }
 
 // ── YouTube 播放器 ──
-var ytMusic=null, ytRain=null;
-var ytReady=false, ytMusicReady=false, ytRainReady=false;
-var _pendingPlay=false; // 使用者點擊後才能播放
+// 雨聲（gL8osq048fA）：電話亭外景，循環
+// 背景音樂（eMnxjdGTK4w）：接起電話後播放，播完停止
+var ytRain  = null, ytMusic  = null;
+var ytRainReady = false, ytMusicReady = false;
+var _audioUnlocked = false;
 
-// YouTube IFrame API 準備完成時呼叫
 function onYouTubeIframeAPIReady(){
-  ytReady=true;
-  // 背景音樂（eMnxjdGTK4w）：播完就停，不循環
-  ytMusic=new YT.Player('yt-music',{
-    videoId:'eMnxjdGTK4w',
-    playerVars:{autoplay:0,controls:0,loop:0,playsinline:1,rel:0,modestbranding:1,enablejsapi:1},
-    events:{
-      onReady:function(){ytMusicReady=true;if(_pendingPlay)_tryPlayMusic();},
-      onError:function(e){console.warn('ytMusic error',e.data);}
+  ytRain = new YT.Player('yt-rain', {
+    videoId: 'gL8osq048fA',
+    playerVars: {autoplay:0, controls:0, loop:1, playsinline:1,
+                 rel:0, modestbranding:1, playlist:'gL8osq048fA'},
+    events: {
+      onReady: function(){ ytRainReady = true; if(_audioUnlocked) _playRain(); },
+      onError: function(e){ console.warn('ytRain error', e.data); }
     }
   });
-  // 雨聲（gL8osq048fA）：循環播放
-  ytRain=new YT.Player('yt-rain',{
-    videoId:'gL8osq048fA',
-    playerVars:{autoplay:0,controls:0,loop:1,playsinline:1,rel:0,modestbranding:1,enablejsapi:1,playlist:'gL8osq048fA'},
-    events:{
-      onReady:function(){ytRainReady=true;if(_pendingPlay)_tryPlayRain();},
-      onError:function(e){console.warn('ytRain error',e.data);}
+  ytMusic = new YT.Player('yt-music', {
+    videoId: 'eMnxjdGTK4w',
+    playerVars: {autoplay:0, controls:0, loop:0, playsinline:1, rel:0, modestbranding:1},
+    events: {
+      onReady: function(){ ytMusicReady = true; },
+      onError: function(e){ console.warn('ytMusic error', e.data); }
     }
   });
 }
 
-// 使用者點擊後呼叫此函式啟動所有音訊
+// 使用者點擊開始遊戲 → 解鎖音訊，立刻播雨聲
 function startAllAudio(){
-  _pendingPlay=true;
-  try{getAudioCtx();}catch(e){}
-  // 嘗試立即播放（player 可能已 ready）
-  _tryPlayMusic();
-  _tryPlayRain();
+  _audioUnlocked = true;
+  try{ getAudioCtx(); }catch(e){}
+  _playRain();
 }
-function _tryPlayMusic(){
+
+function _playRain(){
   try{
-    if(ytMusic&&typeof ytMusic.playVideo==='function'){
+    if(ytRain && typeof ytRain.playVideo === 'function'){
+      ytRain.playVideo();
+      ytRain.setVolume(55);
+    }
+  }catch(e){}
+}
+
+// 接起電話後呼叫：雨聲停，音樂開始
+function switchToMusic(){
+  // 停雨聲
+  try{ if(ytRain) ytRain.stopVideo(); }catch(e){}
+  // 播音樂
+  try{
+    if(ytMusic && typeof ytMusic.playVideo === 'function'){
       ytMusic.playVideo();
       ytMusic.setVolume(70);
     }
   }catch(e){}
 }
-function _tryPlayRain(){
-  try{
-    if(ytRain&&typeof ytRain.playVideo==='function'){
-      ytRain.playVideo();
-      ytRain.setVolume(40);
-    }
-  }catch(e){}
-}
-function _startAllAudio(){
-  if(!_pendingPlay)return;
-  _tryPlayMusic();
-  _tryPlayRain();
-}
 
-// 停止所有 YouTube 音訊（可選）
-function stopAllAudio(){
-  try{if(ytMusic)ytMusic.stopVideo();}catch(e){}
-  try{if(ytRain)ytRain.stopVideo();}catch(e){}
-}
-
-// ── 手搖式電話鈴聲 ──
-var _ringTimer=null;
-var _ringBells=[];
+// ── 手搖式電話鈴聲（Web Audio 合成，可與雨聲疊加）──
+var _ringTimer = null;
+var _ringBells = [];
 function playRing(){
   stopRing();
   _doRingCycle();
@@ -748,49 +740,49 @@ function playRing(){
 function _doRingCycle(){
   _ringOneRing(0);
   _ringOneRing(900);
-  _ringTimer=setTimeout(_doRingCycle, 2400);
+  _ringTimer = setTimeout(_doRingCycle, 2400);
 }
 function _ringOneRing(offset){
   setTimeout(function(){
     try{
-      var ctx=getAudioCtx();
+      var ctx = getAudioCtx();
       [0,100,200,300,400,500,600].forEach(function(t,i){
-        var osc=ctx.createOscillator();
-        var gain=ctx.createGain();
-        osc.connect(gain);gain.connect(ctx.destination);
-        osc.frequency.value=(i%2===0)?1480:2080;
-        osc.type='sine';
-        var start=ctx.currentTime+t/1000;
-        var end=start+0.09;
-        gain.gain.setValueAtTime(0,start);
-        gain.gain.linearRampToValueAtTime(0.25,start+0.005);
-        gain.gain.linearRampToValueAtTime(0.18,end-0.01);
-        gain.gain.linearRampToValueAtTime(0,end);
-        osc.start(start);osc.stop(end+0.01);
+        var osc  = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = (i%2===0) ? 1480 : 2080;
+        osc.type = 'sine';
+        var s = ctx.currentTime + t/1000;
+        var e = s + 0.09;
+        gain.gain.setValueAtTime(0, s);
+        gain.gain.linearRampToValueAtTime(0.25, s+0.005);
+        gain.gain.linearRampToValueAtTime(0.18, e-0.01);
+        gain.gain.linearRampToValueAtTime(0, e);
+        osc.start(s); osc.stop(e+0.01);
         _ringBells.push(osc);
       });
     }catch(e){}
-  },offset);
+  }, offset);
 }
 function stopRing(){
-  if(_ringTimer){clearTimeout(_ringTimer);_ringTimer=null;}
-  _ringBells.forEach(function(o){try{o.stop();}catch(e){}});
-  _ringBells=[];
+  if(_ringTimer){ clearTimeout(_ringTimer); _ringTimer = null; }
+  _ringBells.forEach(function(o){ try{ o.stop(); }catch(e){} });
+  _ringBells = [];
 }
 
 // 接通提示音
 function playPickup(){
   try{
-    var ctx=getAudioCtx();
-    var osc=ctx.createOscillator();
-    var gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.frequency.value=520;osc.type='sine';
-    var t=ctx.currentTime;
-    gain.gain.setValueAtTime(0,t);
-    gain.gain.linearRampToValueAtTime(0.15,t+0.02);
-    gain.gain.linearRampToValueAtTime(0,t+0.25);
-    osc.start(t);osc.stop(t+0.3);
+    var ctx = getAudioCtx();
+    var osc  = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 520; osc.type = 'sine';
+    var t = ctx.currentTime;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.15, t+0.02);
+    gain.gain.linearRampToValueAtTime(0, t+0.25);
+    osc.start(t); osc.stop(t+0.3);
   }catch(e){}
 }
 
@@ -1252,7 +1244,7 @@ function ringNarrTap(){
 function answerPhone(){
   if(phoneRingState.vibTimer){clearInterval(phoneRingState.vibTimer);phoneRingState.vibTimer=null;}
   if(navigator.vibrate)navigator.vibrate(0);
-  stopRing();playPickup();
+  stopRing();playPickup();switchToMusic();
   phonePhase='ellipsis';
   gel('ring-answer-wrap').style.display='none';
   gel('ring-speaker-box').style.display='none';
