@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>臺中古蹟體驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c8a050;--gold-dim:#7a6030;--gold-bright:#e8c070;
+  --text:#d4c090;--text-dim:#8a7050;--bg:#0e0a06;
+  --dlg-font:20px;--spk-font:17px;--dlg-h:96px;--dlg-pad:14px;--dlg-bot:0px;
+  --ch-main:44px;--ch-jp:20px;--ch-sub:12px;
+  --inv-bar-h:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+body{display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho','Noto Serif TC',serif;}
+
+/* ── Viewport 16:9 ── */
+#game{position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);background:var(--bg);overflow:hidden;user-select:none;}
+
+/* ── Background ── */
+#bg{position:absolute;inset:0;}
+#phonebooth-scene,#exchange-scene,#custom-bg{position:absolute;inset:0;}
+#phonebooth-exterior,#phone-interior{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  transition:opacity .5s;}
+#exchange-scene img{width:100%;height:100%;object-fit:cover;}
+#custom-bg{background-size:cover;background-position:center;}
+
+/* ── Sprites ──
+   用 width 驅動尺寸：sprite 寬度由 layout 設定為遊戲容器的百分比，
+   高度由圖片比例自動決定，讓後台預覽與遊戲內呈現完全一致。 */
+#sprites{position:absolute;inset:0;pointer-events:none;}
+.sprite{position:absolute;bottom:0;transition:opacity .4s;}
+.sprite img{width:100%;height:auto;object-fit:contain;display:block;}
+
+/* ── Rain ── */
+#rain{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 3s;
+  background:repeating-linear-gradient(180deg,
+    transparent 0,transparent 4px,
+    rgba(160,180,220,.09) 4px,rgba(160,180,220,.09) 5px);}
+#rain.on{opacity:1;}
+
+/* ── Phone glow ── */
+#phone-glow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 38%,rgba(200,160,80,.4) 0%,transparent 60%);
+  opacity:0;transition:opacity 1.2s;}
+#phone-glow.on{opacity:1;}
+
+/* ── Lightning ── */
+#lightning{position:absolute;inset:0;pointer-events:none;background:#e8f0ff;opacity:0;}
+
+/* ── Scene transition (full black) ── */
+#curtain{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:55;}
+#curtain.on{opacity:1;pointer-events:auto;}
+
+/* ── Blackout (with text) ── */
+#blackout{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:56;transition:opacity .6s;}
+#blackout.on{opacity:1;pointer-events:auto;}
+#blackout-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:var(--gold);font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:2.4em;letter-spacing:.7em;
+  opacity:0;transition:opacity .5s;}
+#blackout-text.on{opacity:1;}
+
+/* ── Chapter card ── */
+#ch-card{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#000;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s;cursor:pointer;}
+#ch-card.on{opacity:1;pointer-events:auto;}
+#ch-jp  {font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:var(--ch-jp);letter-spacing:.6em;color:var(--gold-dim);margin-bottom:.5em;}
+#ch-main{font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:var(--ch-main);letter-spacing:.3em;color:var(--gold);text-align:center;padding:0 40px;}
+#ch-sub {font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:var(--ch-sub);letter-spacing:.4em;color:var(--text-dim);margin-top:.8em;}
+#ch-line{width:60px;height:1px;background:var(--gold-dim);margin:1.2em 0;}
+#ch-hint{position:absolute;bottom:5%;font-size:11px;letter-spacing:.3em;color:var(--gold-dim);animation:blink 1.5s ease-in-out infinite;}
+
+/* ── Dialog（說話者小標籤 + 滿寬對話框） ── */
+#dialog-area{
+  position:absolute;left:0;right:0;bottom:var(--inv-bar-h);
+  z-index:80;opacity:0;pointer-events:none;transition:opacity .18s;cursor:pointer;}
+#dialog-area.on{opacity:1;pointer-events:auto;}
+#dialog-area.locked{cursor:default;}
+#dialog-area.locked #next-arrow{opacity:0;}
+#speaker-wrap{padding-left:24px;line-height:0;}
+#speaker{
+  display:inline-block;padding:5px 22px;background:#0a0704;
+  border:1px solid var(--gold-dim);border-bottom:none;
+  color:var(--gold);font-family:'Shippori Mincho','Noto Serif TC',serif;
+  font-size:var(--spk-font);letter-spacing:.3em;line-height:1.4;
+  border-radius:2px 2px 0 0;}
+#speaker:empty{display:none;}
+#dialog-main{
+  position:relative;background:#0a0704;border-top:1px solid var(--gold-dim);
+  padding:var(--dlg-pad) 28px calc(var(--dlg-pad) + 6px);
+  min-height:var(--dlg-h);}
+#dialog-text{
+  font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:var(--dlg-font);
+  color:var(--text);line-height:1.8;white-space:pre-wrap;}
+#dialog-text.narr{
+  color:var(--text-dim);letter-spacing:.1em;
+  transform:skewX(-5deg);transform-origin:left center;}
+#next-arrow{
+  position:absolute;right:20px;bottom:6px;
+  color:var(--gold-dim);font-size:11px;letter-spacing:.15em;
+  animation:blink 1.3s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:.2;}50%{opacity:1;}}
+
+/* ── Inventory（底部道具欄，點擊展開） ── */
+#inv-bar{position:absolute;left:0;right:0;bottom:0;height:var(--inv-bar-h);
+  background:#0a0704;border-top:1px solid var(--gold-dim);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;color:var(--gold);font-family:'Shippori Mincho','Noto Serif TC',serif;
+  font-size:13px;letter-spacing:.4em;cursor:pointer;z-index:85;user-select:none;transition:background .15s;}
+#inv-bar:hover{background:#140e08;}
+#inv-bar-label{color:var(--gold);}
+#inv-bar-count{color:var(--gold-dim);font-size:12px;letter-spacing:.15em;min-width:1em;text-align:right;}
+#inv-bar-arrow{color:var(--gold-dim);font-size:10px;letter-spacing:.2em;transition:transform .2s;margin-left:8px;}
+#inv-panel.on ~ #inv-bar #inv-bar-arrow,
+#inv-bar.open #inv-bar-arrow{transform:rotate(180deg);}
+#inv-panel{position:absolute;left:0;right:0;bottom:var(--inv-bar-h);
+  background:#0a0704;border-top:1px solid var(--gold-dim);
+  z-index:86;display:none;padding:12px 18px;max-height:38%;overflow-y:auto;}
+#inv-panel.on{display:block;}
+#inv-panel-title{display:none;}
+#inv-list{display:flex;flex-wrap:wrap;gap:10px;}
+.inv-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 8px;
+  border:1px solid var(--gold-dim);border-radius:2px;cursor:pointer;transition:all .15s;
+  background:rgba(20,14,8,.6);min-width:72px;}
+.inv-item:hover{background:rgba(200,160,80,.12);border-color:var(--gold);}
+.inv-item-icon{width:42px;height:42px;background:#1a1208;border:1px solid var(--gold-dim);
+  border-radius:2px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--gold);flex-shrink:0;overflow:hidden;}
+.inv-item-icon img{width:100%;height:100%;object-fit:cover;}
+.inv-item-name{font-size:11px;color:var(--text);letter-spacing:.15em;}
+#inv-viewer{position:absolute;inset:0;background:rgba(0,0,0,.92);z-index:95;display:none;flex-direction:column;align-items:center;justify-content:center;padding:5%;}
+#inv-viewer.on{display:flex;}
+#inv-viewer-img{max-width:90%;max-height:75%;object-fit:contain;border:1px solid var(--gold-dim);}
+#inv-viewer-name{color:var(--gold);font-size:14px;letter-spacing:.3em;margin-top:14px;}
+#inv-viewer-close{margin-top:18px;padding:8px 28px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:12px;letter-spacing:.3em;cursor:pointer;border-radius:2px;}
+#inv-viewer-close:hover{background:rgba(200,160,80,.15);}
+
+/* ── 提示燈泡 + 商城 ── */
+#hint-bulb{position:absolute;top:3.5%;right:calc(3.5% + 58px);width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffeaa0,#d4a830 55%,#7a5010);border:1px solid #d4a830;color:#2a1808;font-size:24px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:92;box-shadow:0 0 12px rgba(240,176,64,.55);animation:bulb-glow 1.4s ease-in-out infinite;}
+#hint-bulb.on{display:flex;}
+@keyframes bulb-glow{0%,100%{box-shadow:0 0 12px rgba(240,176,64,.55);transform:scale(1);}50%{box-shadow:0 0 22px rgba(240,176,64,.9);transform:scale(1.08);}}
+#hint-confirm{position:absolute;inset:0;background:rgba(0,0,0,.75);z-index:96;display:none;align-items:center;justify-content:center;}
+#hint-confirm.on{display:flex;}
+#hint-confirm-box{background:#0a0704;border:1px solid var(--gold-dim);padding:24px 32px;border-radius:3px;max-width:80%;text-align:center;}
+#hint-confirm-q{color:var(--text);font-size:1.05em;letter-spacing:.25em;margin-bottom:22px;font-family:'Shippori Mincho','Noto Serif TC',serif;}
+.hint-btn{margin:0 8px;padding:9px 32px;background:none;border:1px solid var(--gold-dim);color:var(--gold);font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:13px;letter-spacing:.35em;cursor:pointer;border-radius:2px;transition:all .15s;}
+.hint-btn:hover{background:rgba(200,160,80,.18);border-color:var(--gold);}
+
+/* ── Phone ring stage ── */
+#stage-phone-ring{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:24px;z-index:70;
+  background:#000;}
+#stage-phone-ring.on{display:flex;}
+#ring-prompt{color:var(--gold);font-size:1.1em;letter-spacing:.5em;}
+#ring-btn{
+  padding:14px 40px;background:none;border:1px solid var(--gold);color:var(--gold);
+  font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:1em;letter-spacing:.5em;cursor:pointer;
+  animation:pulse 1.8s ease-in-out infinite;transition:background .2s;}
+#ring-btn:hover{background:rgba(200,160,80,.18);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,160,80,.5);}55%{box-shadow:0 0 0 14px rgba(200,160,80,0);}}
+
+/* ── Switchboard（跳線版） ── */
+#stage-switchboard{position:absolute;inset:0;z-index:70;background:#070503;display:none;flex-direction:column;align-items:stretch;overflow:hidden;}
+#stage-switchboard.on{display:flex;}
+.sb-header{padding:10px 14px 8px;border-bottom:1px solid #2a1808;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gold);letter-spacing:.3em;}
+.sb-progress{font-size:10px;color:var(--gold-dim);letter-spacing:.2em;}
+.call-banner{margin:10px 12px 0;background:linear-gradient(90deg,#160e04,#221608,#160e04);border:2px solid #c87020;border-radius:3px;padding:12px 16px;animation:ring-pulse .9s ease-in-out infinite;}
+.call-banner.connected{border-color:#30b080;animation:none;}
+.call-banner.done{border-color:#3a6040;animation:none;opacity:.7;}
+@keyframes ring-pulse{0%,100%{border-color:#c87020}50%{border-color:#f0b040;box-shadow:0 0 10px rgba(240,176,64,.25)}}
+.cb-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.cb-from,.cb-to{display:flex;flex-direction:column;gap:3px;flex:1;}
+.cb-to{text-align:right;}
+.cb-label{font-size:11px;color:#d4a840;letter-spacing:.15em;}
+.cb-number{font-size:20px;color:#ffd050;letter-spacing:.15em;font-weight:600;line-height:1.2;}
+.cb-arrow{font-size:22px;color:#6a4818;flex-shrink:0;}
+.call-banner.connected .cb-arrow{color:#30b080;}
+.sb-panel-wrap{margin:6px 12px 0;background:linear-gradient(180deg,#1e1608,#140e06);border:1px solid #3a2810;border-radius:3px;padding:6px 10px;flex-shrink:0;}
+.sb-panel-label{display:none;}
+.sb-jacks{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
+.sb-jack{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 2px;border:1px solid transparent;border-radius:3px;transition:all .2s;user-select:none;}
+.sb-jack:active{transform:scale(.94);}
+.sb-jack.ringing{border-color:#c87020;background:rgba(200,112,32,.1);}
+.sb-jack.selected{border-color:var(--gold);background:rgba(212,168,48,.12);}
+.sb-jack.plugged{border-color:#208060;background:rgba(32,128,96,.08);}
+.sb-jack.correct{border-color:#30c090;background:rgba(48,192,144,.1);}
+.sb-jack.wrong-flash{border-color:#c03030!important;background:rgba(192,48,48,.12)!important;}
+.sb-jack-hole{width:22px;height:22px;background:radial-gradient(circle,#050402 40%,#1a1208);border:1.5px solid #3a2810;border-radius:50%;transition:all .3s;}
+.sb-jack.ringing .sb-jack-hole{border-color:#c87020;box-shadow:0 0 7px rgba(200,112,32,.6);animation:jack-blink .8s ease-in-out infinite;}
+.sb-jack.selected .sb-jack-hole{border-color:var(--gold);box-shadow:0 0 6px rgba(212,168,48,.5);}
+.sb-jack.plugged .sb-jack-hole{background:radial-gradient(circle,#8a6020,#2a1808);border-color:#c8a030;}
+.sb-jack.correct .sb-jack-hole{background:radial-gradient(circle,#104030 40%,#0a1a14);border-color:#30c090;box-shadow:0 0 5px rgba(48,192,144,.4);}
+@keyframes jack-blink{0%,100%{opacity:1}50%{opacity:.4}}
+.sb-jack-name{font-size:10px;color:#fff;text-align:center;line-height:1.3;}
+.sb-jack.ringing .sb-jack-name{color:#ffd060;}
+.sb-jack.correct .sb-jack-name{color:#60e0a0;}
+.sb-cords{display:flex;gap:10px;justify-content:center;padding:6px 0;border-top:1px solid #1e1406;border-bottom:1px solid #1e1406;margin-bottom:6px;}
+.sb-cord{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 14px;border:1px solid #3a2810;border-radius:3px;transition:all .2s;user-select:none;}
+.sb-cord.selected{border-color:var(--gold);background:rgba(212,168,48,.1);}
+.sb-cord.used{opacity:.45;cursor:default;border-color:#2a1a08;}
+.sb-cord-plug{width:11px;height:17px;background:linear-gradient(180deg,#d4c060,#8a7030);border-radius:2px 2px 4px 4px;border:1px solid #4a3010;}
+.sb-cord-wire{width:2px;height:18px;background:repeating-linear-gradient(180deg,#4a3010 0,#4a3010 3px,#6a5020 3px,#6a5020 6px);}
+.sb-cord-name{font-size:10px;color:#fff;}
+.sb-cord.selected .sb-cord-name{color:var(--gold);}
+.sb-talk-btn{width:100%;padding:8px;background:linear-gradient(180deg,#2a1e0a,#1a1206);border:1px solid #4a3010;border-radius:2px;color:#fff;font-size:12px;letter-spacing:.3em;font-family:'Shippori Mincho','Noto Serif TC',serif;cursor:pointer;transition:all .2s;}
+.sb-talk-btn.active{background:linear-gradient(180deg,#4a3010,#2a1e0a);color:var(--gold);border-color:var(--gold-dim);}
+.sb-talk-btn:disabled{opacity:.4;cursor:default;}
+.sb-bottom{flex:1;display:flex;flex-direction:column;padding:8px 12px 12px;overflow:hidden;min-height:0;position:relative;}
+.sb-dialog-box{flex:1;background:linear-gradient(135deg,#0e0c08,#080604);border:1px solid #1e1808;border-radius:2px;padding:10px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;min-height:120px;}
+.sb-msg-who{font-size:12px;color:#ffd060;letter-spacing:.2em;}
+.sb-msg-text{font-size:16px;color:#fff;line-height:1.9;letter-spacing:.04em;}
+.sb-finish-btn{position:absolute;right:14px;bottom:26px;padding:9px 20px;background:rgba(14,12,8,.92);border:1px solid var(--gold-dim);color:var(--gold);font-size:13px;letter-spacing:.3em;font-family:'Shippori Mincho','Noto Serif TC',serif;cursor:pointer;display:none;transition:all .2s;border-radius:2px;z-index:2;}
+.sb-finish-btn:hover{background:rgba(200,160,80,.18);border-color:var(--gold);}
+
+/* ── Map ── */
+#stage-map{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;z-index:70;background:#000;}
+#stage-map.on{display:flex;}
+#map-text{
+  font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--text);font-size:.9em;
+  letter-spacing:.15em;text-align:center;max-width:80%;line-height:2;
+  white-space:pre-wrap;margin-bottom:4px;}
+#map-img{max-width:72%;max-height:60%;object-fit:contain;border:1px solid var(--gold-dim);}
+#map-btn{
+  padding:12px 34px;background:none;border:1px solid var(--gold);color:var(--gold);
+  font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:.9em;letter-spacing:.45em;cursor:pointer;
+  transition:background .2s;}
+#map-btn:hover{background:rgba(200,160,80,.15);}
+
+/* ── Hint-gate（序章鎖住頁：黑屏 + 下方輸入框） ── */
+#stage-hint-gate{position:absolute;inset:0;display:none;z-index:65;background:#000;}
+#stage-hint-gate.on{display:block;}
+#hg-input{position:absolute;left:14%;right:14%;bottom:calc(var(--inv-bar-h) + 14%);height:52px;
+  background:rgba(14,10,6,.92);border:1px solid var(--gold-dim);border-radius:2px;
+  color:var(--text);font-size:1.05em;letter-spacing:.15em;padding:0 18px;
+  font-family:'Shippori Mincho','Noto Serif TC',serif;outline:none;transition:border-color .2s;}
+#hg-input:focus{border-color:var(--gold);}
+#hg-input::placeholder{color:transparent;}
+
+/* ── Hint shop landing（提示商城主頁：顯示後台編輯的提示字詞 + 按鈕進入照片支付） ── */
+#stage-hint-shop{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
+  justify-content:center;gap:24px;z-index:72;background:#080604;padding:6%;}
+#stage-hint-shop.on{display:flex;}
+#hs-title{font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--gold);font-size:1.25em;
+  letter-spacing:.5em;padding-bottom:14px;border-bottom:1px solid var(--gold-dim);}
+#hs-text{font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--text);font-size:1.05em;
+  line-height:1.95;letter-spacing:.15em;max-width:80%;text-align:center;white-space:pre-wrap;}
+#hs-btn{padding:12px 36px;background:none;border:1px solid var(--gold);color:var(--gold);
+  font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:.95em;letter-spacing:.4em;
+  cursor:pointer;border-radius:2px;transition:all .2s;}
+#hs-btn:hover{background:rgba(200,160,80,.15);}
+#hs-back{position:absolute;top:3%;left:3%;padding:6px 16px;background:none;border:1px solid var(--gold-dim);
+  color:var(--text-dim);font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:.75em;letter-spacing:.3em;
+  cursor:pointer;border-radius:2px;}
+#hs-back:hover{color:var(--gold);border-color:var(--gold);}
+
+/* ── Stage 2 (拍照，純支付用，不顯示任何提示/答案) ── */
+#stage-photo{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:18px;z-index:73;background:#000;padding:24px;}
+#stage-photo.on{display:flex;}
+#photo-hint{
+  font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--text-dim);font-size:.9em;
+  letter-spacing:.2em;text-align:center;max-width:80%;line-height:1.9;}
+
+/* ── Hint reveal（拍照成功後顯示「線索照片」的取得動畫） ── */
+#hint-reveal{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;z-index:97;background:#000;padding:4%;}
+#hint-reveal.on{display:flex;}
+#hr-prefix{font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--gold-dim);font-size:.9em;letter-spacing:.5em;}
+#hr-img{max-width:82%;max-height:50%;object-fit:contain;border:1px solid var(--gold-dim);display:none;}
+#hr-answer{font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--gold);font-size:1.9em;letter-spacing:.4em;text-align:center;line-height:1.6;}
+#hr-hint{font-family:'Shippori Mincho','Noto Serif TC',serif;color:var(--text-dim);font-size:.8em;letter-spacing:.3em;margin-top:-4px;}
+#hr-ok{padding:10px 30px;background:none;border:1px solid var(--gold-dim);color:var(--gold);
+  font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:.9em;letter-spacing:.35em;
+  cursor:pointer;border-radius:2px;margin-top:8px;}
+#hr-ok:hover{background:rgba(200,160,80,.15);border-color:var(--gold);}
+
+/* Hint-gate 輸入框 shake 動畫 */
+#hg-input.shake{animation:hg-shake .35s;}
+@keyframes hg-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#photo-input-label{
+  padding:12px 30px;border:1px solid var(--gold);color:var(--gold);cursor:pointer;
+  font-family:'Shippori Mincho','Noto Serif TC',serif;letter-spacing:.35em;font-size:.9em;
+  transition:background .2s;}
+#photo-input-label:hover{background:rgba(200,160,80,.15);}
+#photo-result{font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:.95em;color:var(--text);letter-spacing:.2em;text-align:center;}
+
+/* ── Loading ── */
+#loading{
+  position:fixed;inset:0;background:#000;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:14px;z-index:9999;transition:opacity .5s;}
+#loading p{color:var(--gold-dim);font-family:'Shippori Mincho','Noto Serif TC',serif;font-size:12px;letter-spacing:.5em;}
+.spinner{width:28px;height:28px;border:2px solid var(--gold-dim);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><p>載入中…</p></div>
+
+<div id="game">
+  <div id="bg">
+    <div id="phonebooth-scene">
+      <div id="phonebooth-exterior"></div>
+      <div id="phone-interior" style="opacity:0;"></div>
+    </div>
+    <div id="exchange-scene" style="display:none;"><img id="exchange-img" src="" alt=""></div>
+    <div id="custom-bg" style="display:none;"></div>
+  </div>
+
+  <div id="rain"></div>
+  <div id="phone-glow"></div>
+  <div id="lightning"></div>
+  <div id="sprites"></div>
+
+  <div id="curtain"></div>
+  <div id="blackout"><div id="blackout-text"></div></div>
+
+  <div id="ch-card">
+    <div id="ch-jp"></div>
+    <div id="ch-line"></div>
+    <div id="ch-main"></div>
+    <div id="ch-sub"></div>
+    <div id="ch-hint">[ 點擊繼續 ]</div>
+  </div>
+
+  <div id="stage-phone-ring">
+    <div id="ring-prompt">電話響起……</div>
+    <button id="ring-btn" onclick="onPickUp()">接起電話</button>
+  </div>
+
+  <div id="stage-switchboard">
+    <div class="sb-header">
+      <span>　手動交換臺　</span>
+      <span class="sb-progress" id="sb-progress"></span>
+    </div>
+    <div id="call-banner" class="call-banner">
+      <div class="cb-row">
+        <div class="cb-from">
+          <div class="cb-label">發話</div>
+          <div class="cb-number" id="cb-from-num">——</div>
+        </div>
+        <div class="cb-arrow">→</div>
+        <div class="cb-to">
+          <div class="cb-label">受話</div>
+          <div class="cb-number" id="cb-to-num">——</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-panel-wrap">
+      <div class="sb-panel-label">　交換機面板　</div>
+      <div class="sb-jacks" id="sb-jacks"></div>
+      <div class="sb-cords" id="sb-cords"></div>
+      <button class="sb-talk-btn" id="sb-talk-btn" onclick="pressTalk()">開始通話</button>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-dialog-box" id="sb-dialog-box"></div>
+      <button class="sb-finish-btn" id="sb-finish-btn" onclick="nextCall()">結束通話</button>
+    </div>
+  </div>
+
+  <div id="stage-map">
+    <div id="map-text"></div>
+    <img id="map-img" src="" alt="地圖">
+    <button id="map-btn" onclick="stageMapDone()">繼續前往</button>
+  </div>
+
+  <div id="stage-photo">
+    <div id="photo-hint"></div>
+    <label id="photo-input-label" for="photo-input">拍照 ／ 上傳照片</label>
+    <input type="file" id="photo-input" accept="image/*" capture="environment"
+      style="display:none" onchange="onPhotoUpload(this)">
+    <div id="photo-result"></div>
+  </div>
+
+  <div id="dialog-area">
+    <div id="speaker-wrap"><div id="speaker"></div></div>
+    <div id="dialog-main">
+      <div id="dialog-text"></div>
+      <div id="next-arrow">[ 繼續 ]</div>
+    </div>
+  </div>
+
+  <!-- Hint-gate：黑屏+輸入框 -->
+  <div id="stage-hint-gate">
+    <input id="hg-input" type="text" autocomplete="off" spellcheck="false" onkeydown="hgKey(event)">
+  </div>
+
+  <!-- 拍照成功後的「線索照片」取得頁（只給照片，不洩答案） -->
+  <div id="hint-reveal">
+    <div id="hr-prefix"></div>
+    <img id="hr-img" src="" alt="">
+    <div id="hr-hint">線索照片已存入道具欄，可隨時查看</div>
+    <button id="hr-ok" onclick="closeHintReveal()">記下了</button>
+  </div>
+
+  <!-- Hint shop 主頁 -->
+  <div id="stage-hint-shop">
+    <button id="hs-back" onclick="closeHintShop()">← 返回</button>
+    <div id="hs-title">提示商城</div>
+    <div id="hs-text"></div>
+    <button id="hs-btn" onclick="onHintShopProceed()">以照片購買</button>
+  </div>
+
+  <!-- 道具欄（底部收起式） -->
+  <div id="inv-panel"><div id="inv-list"></div></div>
+  <div id="inv-bar" onclick="toggleInventory()">
+    <span id="inv-bar-label">道具</span>
+    <span style="display:flex;align-items:center;">
+      <span id="inv-bar-count">0</span>
+      <span id="inv-bar-arrow">▲</span>
+    </span>
+  </div>
+  <div id="inv-viewer" onclick="closeInvViewer(event)">
+    <img id="inv-viewer-img" src="" alt="">
+    <div id="inv-viewer-name"></div>
+    <button id="inv-viewer-close" onclick="closeInvViewer(event)">關閉</button>
+  </div>
+
+  <!-- 提示燈泡 + 商城確認 -->
+  <div id="hint-bulb" onclick="openHintConfirm()" title="提示">💡</div>
+  <div id="hint-confirm">
+    <div id="hint-confirm-box">
+      <div id="hint-confirm-q">是否進入提示商城？</div>
+      <button class="hint-btn" onclick="hintYes()">是</button>
+      <button class="hint-btn" onclick="hintNo()">否</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══ Constants ══ */
+var LS_KEY='tcgame_data', IDB_NAME='tcgame_assets', IDB_VER=1, IDB_STORE='assets', BC_NAME='tcgame-sync';
+var DIALOG_MIN_MS = 2000; // 2 秒：點擊後至少等 2 秒才顯示「繼續」按鈕 / 允許前進
+
+/* ══ 內建預設資料（admin 未設定時的保底）══ */
+var _DEF_JACKS=[
+  {id:'j01',name:'三井物産',num:'二三番'},{id:'j02',name:'臺中驛',num:'四番'},
+  {id:'j03',name:'臺灣銀行',num:'五番'},{id:'j04',name:'醉月樓',num:'六番'},
+  {id:'j05',name:'郵便局',num:'七番'},{id:'j06',name:'彰化銀行',num:'八番'},
+  {id:'j07',name:'帝國製糖',num:'九番'},{id:'j08',name:'長谷川醫院',num:'十番'},
+  {id:'j09',name:'臺中廳',num:'十一番'},{id:'j10',name:'臺灣倉庫',num:'十二番'},
+  {id:'j11',name:'臺中座',num:'十三番'},{id:'j12',name:'大和料理店',num:'十四番'},
+  {id:'j13',name:'青果組合',num:'十五番'},{id:'j14',name:'臺中公園',num:'十六番'},
+  {id:'j15',name:'警察署',num:'十七番'},{id:'j16',name:'臺中學校',num:'十八番'}
+];
+var _DEF_CALLS=[
+  {fromId:'j01',toId:'j02',fromName:'三井物産',fromNum:'二三番',toName:'臺中驛',toNum:'四番',
+   dialogs:[{who:'三井物産 用戶',text:'喂，是電話局嗎？請幫我接到臺中驛。'},
+            {who:'語嫣',text:'好的，請稍候。'},
+            {who:'臺中驛 站長',text:'喂，臺中驛，請說。'}]},
+  {fromId:'j06',toId:'j03',fromName:'彰化銀行',fromNum:'八番',toName:'臺灣銀行',toNum:'五番',
+   dialogs:[{who:'彰化銀行 行員',text:'麻煩幫我接臺灣銀行臺中支店。'},
+            {who:'語嫣',text:'好的，請稍候。'},
+            {who:'臺灣銀行 行員',text:'您好，臺灣銀行，請說。'}]},
+  {fromId:'j09',toId:'j05',fromName:'臺中廳',fromNum:'十一番',toName:'郵便局',toNum:'七番',
+   dialogs:[{who:'臺中廳 官員',text:'我是臺中廳，請接郵便局，有急件。'},
+            {who:'語嫣',text:'是，馬上為您接通。'},
+            {who:'郵便局 局員',text:'您好，郵便局，請說。'}]},
+  {fromId:'j13',toId:'j08',fromName:'青果組合',fromNum:'十五番',toName:'長谷川醫院',toNum:'十番',
+   dialogs:[{who:'青果組合 職員',text:'快！幫我接長谷川醫院！有人受傷！'},
+            {who:'語嫣',text:'馬上接通！'},
+            {who:'長谷川醫院 護士',text:'長谷川醫院，請說。'}]}
+];
+
+/* ══ IndexedDB（序列化開啟，避免競態） ══ */
+var _idb=null,_idbQ=[],_idbBusy=false;
+function openIDB(cb){
+  if(_idb){cb(_idb);return;}
+  _idbQ.push(cb);
+  if(_idbBusy)return;
+  _idbBusy=true;
+  var r=indexedDB.open(IDB_NAME,IDB_VER);
+  r.onupgradeneeded=function(e){
+    try{e.target.result.createObjectStore(IDB_STORE);}catch(ex){}
+  };
+  r.onsuccess=function(e){
+    _idb=e.target.result;_idbBusy=false;
+    var q=_idbQ.splice(0);q.forEach(function(fn){fn(_idb);});
+  };
+  r.onerror=function(){
+    _idbBusy=false;
+    var q=_idbQ.splice(0);q.forEach(function(fn){fn(null);});
+  };
+}
+function loadAsset(key,cb){
+  openIDB(function(db){
+    if(!db){cb(null);return;}
+    var tx=db.transaction(IDB_STORE,'readonly');
+    var r=tx.objectStore(IDB_STORE).get(key);
+    r.onsuccess=function(){cb(r.result||null);};
+    r.onerror=function(){cb(null);};
+  });
+}
+function assetURL(key,cb){loadAsset(key,function(b){cb(b?URL.createObjectURL(b):null);});}
+function saveAsset(key,blob,cb){
+  openIDB(function(db){
+    if(!db){if(cb)cb(false);return;}
+    var tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(blob,key);
+    tx.oncomplete=function(){if(cb)cb(true);};
+    tx.onerror=function(){if(cb)cb(false);};
+  });
+}
+
+/* ══ 首次載入：從 assets/ 資料夾自動匯入（若 IDB 尚無資料） ══ */
+var BOOTSTRAP=[
+  {key:'phonebooth-exterior',path:'assets/images/phonebooth-exterior.jpg'},
+  {key:'phone-interior',     path:'assets/images/phone-interior.jpg'},
+  {key:'exchange-scene',     path:'assets/images/exchange-scene.jpg'},
+  {key:'sp-yuyan',           path:'assets/images/sp-yuyan.png'},
+  {key:'sp-yuyan-1908',      path:'assets/images/sp-yuyan-1908.png'},
+  {key:'stage2-ref',         path:'assets/images/stage2-ref.jpg'},
+  {key:'hint-photo',         path:'assets/images/hint-photo.jpg'},
+  {key:'music',              path:'assets/audio/music.mp3'},
+  {key:'ring',               path:'assets/audio/ring.mp3'}
+];
+function bootstrapAssets(cb){
+  var n=BOOTSTRAP.length,done=0;
+  if(!n){cb();return;}
+  BOOTSTRAP.forEach(function(b){
+    loadAsset(b.key,function(existing){
+      if(existing){if(++done===n)cb();return;}
+      fetch(b.path).then(function(r){return r.ok?r.blob():null;})
+        .then(function(blob){
+          if(blob)saveAsset(b.key,blob,function(){if(++done===n)cb();});
+          else if(++done===n)cb();
+        }).catch(function(){if(++done===n)cb();});
+    });
+  });
+}
+
+/* ══ Game Data ══ */
+var G={ch1:[],ch2:[],ch3:[],ch4:[],ch5:[],extraChapters:{},jacks:[],calls:[],
+  customAudio:[],spriteLayout:{},
+  map:{promptText:'',buttonText:'繼續前往'},
+  stage2:{hint:'',successText:'',threshold:70},
+  appear:{dialogFont:20,speakerFont:19,dialogHeight:140,dialogPad:18,dialogBottom:10,
+          chMainFont:44,chJpFont:20,chSubFont:12}};
+
+function loadGameData(){
+  try{var r=localStorage.getItem(LS_KEY);if(r)G=JSON.parse(r);}catch(e){}
+  /* 舊版資料可能缺少某些欄位 → 補預設值 */
+  if(!G.map)       G.map={promptText:'',buttonText:'繼續前往'};
+  if(!G.hintShop)  G.hintShop={hintText:'',payBtnText:'以照片購買'};
+  if(!Array.isArray(G.customAudio)) G.customAudio=[];
+  if(!G.spriteLayout) G.spriteLayout={};
+  if(!G.appear)    G.appear={dialogFont:20,speakerFont:19,dialogHeight:140,
+                              dialogPad:18,dialogBottom:10,chMainFont:44,chJpFont:20,chSubFont:12};
+  if(!G.stage2)    G.stage2={hint:'',successText:'',threshold:70};
+  if(G.stage2.hintAnswer==null) G.stage2.hintAnswer='';
+  if(G.stage2.hintPrefix==null) G.stage2.hintPrefix='您購得的線索';
+  if(!G.stages)    G.stages={};
+  if(!G.stages.phoneRing)   G.stages.phoneRing={prompt:'電話響起……',btn:'接起電話'};
+  if(!G.stages.switchboard) G.stages.switchboard={title:'手動交換臺',cordPrefix:'跳線 ',fromLabel:'發話',toLabel:'受話',nextBtn:'下一通',doneBtn:'結束作業',dialogDelay:2400};
+  if(!G.stages.hintGate)    G.stages.hintGate={bulbDelay:10};
+  /* jacks / calls：空或不存在時用內建預設，確保交換機一定有內容 */
+  if(!Array.isArray(G.jacks)||!G.jacks.length) G.jacks=_DEF_JACKS.slice();
+  if(!Array.isArray(G.calls)||!G.calls.length) G.calls=_DEF_CALLS.slice();
+  migrateGameData();
+}
+
+/* 自動遷移（v2 + v3） */
+function migrateGameData(){
+  var changed=false;
+  if(!G._migV2){
+    ['ch1','ch2','ch3','ch4','ch5'].forEach(function(key){
+      if(!Array.isArray(G[key]))return;
+      for(var i=0;i<G[key].length;i++){
+        var ev=G[key][i];
+        if(ev&&ev.t==='stage'&&ev.id==='map'){
+          G[key].splice(i,1,
+            {t:'item',id:'map',name:'地圖',icon:'🗺',asset:'map'},
+            {t:'stage',id:'hint-gate'}
+          );
+          changed=true;i++;
+        }
+      }
+    });
+    G._migV2=true;changed=true;
+  }
+  if(!G._migV3){
+    if(!G.hintShop)G.hintShop={hintText:'',payBtnText:'以照片購買'};
+    if(!G.hintShop.hintText||G.hintShop.hintText.indexOf('拍下你認為的正確位置')>=0){
+      G.hintShop.hintText='驛站正中，百萬行蹤。\n莫看遠方雲，且聽腳下風。\n十字交織處，星芒指長空，\n歸途之標，盡在方寸圓融。\n尋正確物，換前路通。\n用照片換取下一段線索。';
+    }
+    G._migV3=true;changed=true;
+  }
+  if(changed){try{localStorage.setItem(LS_KEY,JSON.stringify(G));}catch(e){}}
+}
+function applyAppear(){
+  var a=G.appear||{},s=document.documentElement.style;
+  s.setProperty('--dlg-font',(a.dialogFont||20)+'px');
+  s.setProperty('--spk-font',(a.speakerFont||19)+'px');
+  s.setProperty('--dlg-h',(a.dialogHeight||140)+'px');
+  s.setProperty('--dlg-pad',(a.dialogPad||18)+'px');
+  s.setProperty('--dlg-bot',(a.dialogBottom||10)+'px');
+  s.setProperty('--ch-main',(a.chMainFont||44)+'px');
+  s.setProperty('--ch-jp',(a.chJpFont||20)+'px');
+  s.setProperty('--ch-sub',(a.chSubFont||12)+'px');
+}
+
+/* ══ Audio System（HTML5 <audio>，無 AudioContext，無 PCM 記憶體問題）══ */
+var _audioEls={};        // key → HTMLAudioElement
+var _audioBlobURLs={};   // key → Object URL（供清除用）
+var _audioUnlocked=false;// 使用者已互動過
+var _musicPending=false; // 音樂在解鎖前就被要求播放
+var _pendingAudio={};    // key→{loop:bool} 所有解鎖前要求播放的音訊
+
+function loadAllAudio(cb){
+  var keys=['music','ring'];
+  if(G.customAudio)G.customAudio.forEach(function(a){if(a.key)keys.push(a.key);});
+  var n=keys.length,done=0;
+  if(!n){if(cb)cb();return;}
+  keys.forEach(function(key){
+    loadAsset(key,function(blob){
+      if(blob){
+        if(_audioBlobURLs[key])URL.revokeObjectURL(_audioBlobURLs[key]);
+        var url=URL.createObjectURL(blob);
+        _audioBlobURLs[key]=url;
+        var el=document.createElement('audio');
+        el.preload='none';
+        el.src=url;
+        _audioEls[key]=el;
+        /* 背景音樂資產載入後自動標記待播，等使用者第一次互動即播 */
+        if(key==='music'){
+          _musicPending=true;
+          _pendingAudio['music']={loop:true};
+          if(_audioUnlocked){_musicPending=false;delete _pendingAudio['music'];_doPlay('music',true);}
+        }
+      }
+      if(++done===n&&cb)cb();
+    });
+  });
+}
+function _doPlay(key,loop){
+  var el=_audioEls[key];if(!el)return;
+  el.loop=!!loop;
+  try{el.currentTime=0;}catch(e){}
+  var p=el.play();
+  if(p&&p.catch)p.catch(function(e){console.warn('play blocked:',key,e);});
+}
+function _unlockAudio(){
+  if(_audioUnlocked)return;
+  _audioUnlocked=true;
+  /* 播放所有在解鎖前就排隊的音訊（音樂、雨聲、自訂…） */
+  var pending=_pendingAudio;_pendingAudio={};_musicPending=false;
+  Object.keys(pending).forEach(function(k){if(_audioEls[k])_doPlay(k,pending[k].loop);});
+}
+function playAudio(key,loop){
+  if(!_audioUnlocked){
+    /* 將所有未解鎖的請求排隊，不只是 music */
+    _pendingAudio[key]={loop:!!loop};
+    if(key==='music')_musicPending=true;
+    return;
+  }
+  if(!_audioEls[key])return;
+  _doPlay(key,!!loop);
+}
+function stopAudio(key){
+  delete _pendingAudio[key];
+  if(key==='music')_musicPending=false;
+  var el=_audioEls[key];if(!el)return;
+  el.pause();try{el.currentTime=0;}catch(e){}
+}
+function stopAllAudio(){
+  _pendingAudio={};_musicPending=false;
+  Object.keys(_audioEls).forEach(function(k){
+    var el=_audioEls[k];if(!el)return;
+    el.pause();try{el.currentTime=0;}catch(e){}
+  });
+}
+function startMusic(){
+  if(!_audioEls['music']){_musicPending=true;_pendingAudio['music']={loop:true};return;}
+  if(!_audioUnlocked){_musicPending=true;_pendingAudio['music']={loop:true};return;}
+  _doPlay('music',true);
+}
+function playRing(){if(_audioUnlocked&&_audioEls['ring'])_doPlay('ring',true);}
+function stopRing(){stopAudio('ring');}
+
+/* ══ Sprites ══ */
+var _sprites={};
+function getSpriteLayout(id){
+  return (G.spriteLayout&&G.spriteLayout[id])||{x:50,yBottom:0,w:35};
+}
+function applyLayout(el,id){
+  var l=getSpriteLayout(id);
+  el.style.left=l.x+'%';
+  el.style.bottom=(l.yBottom||0)+'%';
+  el.style.width=(l.w||35)+'%';
+  el.style.transform='none';
+}
+function showSprite(id){
+  if(_sprites[id]){
+    _sprites[id].style.opacity='1';
+    applyLayout(_sprites[id],id);
+    return;
+  }
+  assetURL(id,function(url){
+    if(!url)return;
+    var d=document.createElement('div');
+    d.className='sprite';d.id='spr-'+id;d.style.opacity='0';
+    applyLayout(d,id);
+    var img=document.createElement('img');img.src=url;
+    img.onload=function(){d.style.opacity='1';};
+    d.appendChild(img);
+    document.getElementById('sprites').appendChild(d);
+    _sprites[id]=d;
+  });
+}
+function hideSprite(id){if(_sprites[id])_sprites[id].style.opacity='0';}
+
+/* ══ Scenes ══ */
+function setSceneDirect(scene){
+  document.getElementById('phonebooth-scene').style.display='none';
+  document.getElementById('exchange-scene').style.display='none';
+  document.getElementById('custom-bg').style.display='none';
+  if(scene==='phonebooth'||scene==='phonebooth-exterior'){
+    document.getElementById('phonebooth-scene').style.display='block';
+  }else if(scene==='1908'){
+    document.getElementById('exchange-scene').style.display='block';
+  }else{
+    assetURL(scene,function(url){
+      var el=document.getElementById('custom-bg');
+      if(url){el.style.backgroundImage='url('+url+')';el.style.display='block';}
+    });
+  }
+}
+/* 完整黑屏切換：瞬間轉黑→換場→瞬間解除，不經過半透明 */
+function setScene(scene,cb){
+  var c=document.getElementById('curtain');
+  c.classList.add('on');
+  setTimeout(function(){
+    setSceneDirect(scene);
+    setTimeout(function(){
+      c.classList.remove('on');
+      if(cb)cb();
+    },80);
+  },120);
+}
+function setPhoneInterior(show){
+  document.getElementById('phonebooth-exterior').style.opacity=show?'0':'1';
+  document.getElementById('phone-interior').style.opacity=show?'1':'0';
+}
+function applyImageAssets(cb){
+  var n=3,done=function(){if(--n===0&&cb)cb();};
+  assetURL('phonebooth-exterior',function(u){
+    if(u)document.getElementById('phonebooth-exterior').style.backgroundImage='url('+u+')';done();});
+  assetURL('phone-interior',function(u){
+    if(u)document.getElementById('phone-interior').style.backgroundImage='url('+u+')';done();});
+  assetURL('exchange-scene',function(u){
+    if(u)document.getElementById('exchange-img').src=u;done();});
+}
+
+/* ══ Effects ══ */
+function runFx(fn){
+  if(fn==='phoneGlow'){document.getElementById('phone-glow').classList.add('on');}
+  else if(fn==='phoneGlowOff'){document.getElementById('phone-glow').classList.remove('on');}
+  else if(fn==='lightning'||fn==='lightning2'){
+    var el=document.getElementById('lightning');
+    el.style.opacity='.8';
+    setTimeout(function(){el.style.opacity='0';},90);
+    setTimeout(function(){el.style.opacity='.5';},180);
+    setTimeout(function(){el.style.opacity='0';},260);
+  }
+  else if(fn==='rainFade'||fn==='rainOff'){
+    document.getElementById('rain').classList.remove('on');
+    stopAudio('rain');
+  }
+  else if(fn==='rainOn'){
+    document.getElementById('rain').classList.add('on');
+    /* 若有上傳雨聲，順帶播放（custom audio key='rain'） */
+    playAudio('rain',true);
+  }
+}
+
+/* ══ Script Engine ══ */
+var SCRIPT=[],_ptr=0,_waiting=false,_dlgTime=0;
+
+function buildScript(){
+  SCRIPT=[];
+  ['ch1','ch2','ch3','ch4','ch5'].forEach(function(k){if(G[k]&&G[k].length)SCRIPT=SCRIPT.concat(G[k]);});
+  for(var k in G.extraChapters){
+    if(G.extraChapters.hasOwnProperty(k))SCRIPT=SCRIPT.concat(G.extraChapters[k]);
+  }
+}
+
+function run(){
+  if(_ptr>=SCRIPT.length){
+    showDialog('','……（故事進行中，敬請期待）',true);
+    return;
+  }
+  var ev=SCRIPT[_ptr++];
+  processEv(ev);
+}
+
+function processEv(ev){
+  var t=ev.t;
+  if(t==='narr'){
+    showDialog('',ev.text||'',true);
+  }else if(t==='line'){
+    showDialog(ev.who||'',ev.text||'',false);
+  }else if(t==='chapter'){
+    showChCard(ev.jp,ev.main,ev.sub);
+  }else if(t==='show'){
+    showSprite(ev.id);run();
+  }else if(t==='hide'){
+    hideSprite(ev.id);run();
+  }else if(t==='bg'){
+    setScene(ev.scene,function(){run();});
+  }else if(t==='fx'){
+    runFx(ev.fn);run();
+  }else if(t==='blackout'){
+    doBlackout(ev.text,ev.duration||2500,function(){run();});
+  }else if(t==='audio'){
+    handleAudioEv(ev);run();
+  }else if(t==='item'){
+    addInventory(ev.id,ev.name,ev.icon,ev.asset);run();
+  }else if(t==='stage'){
+    hideDialog();launchStage(ev.id);
+  }else{
+    run();
+  }
+}
+
+/* ── Dialog ── */
+function showDialog(who,text,isNarr){
+  var da=document.getElementById('dialog-area');
+  document.getElementById('speaker').textContent=who||'';
+  var dt=document.getElementById('dialog-text');
+  dt.textContent=text||'';dt.className=isNarr?'narr':'';
+  da.classList.add('on','locked'); // locked until 3s passes
+  _waiting=true;
+  _dlgTime=Date.now();
+  setTimeout(function(){da.classList.remove('locked');},DIALOG_MIN_MS);
+}
+function hideDialog(){document.getElementById('dialog-area').classList.remove('on','locked');}
+
+function advance(){
+  if(!_waiting)return;
+  if(Date.now()-_dlgTime<DIALOG_MIN_MS)return; // enforce 3s
+  _waiting=false;
+  hideDialog();
+  setTimeout(run,80);
+}
+document.getElementById('dialog-area').addEventListener('click',advance);
+
+/* ── Chapter card ── */
+function showChCard(jp,main,sub){
+  document.getElementById('ch-jp').textContent=jp||'';
+  document.getElementById('ch-main').textContent=main||'';
+  document.getElementById('ch-sub').textContent=sub||'';
+  var card=document.getElementById('ch-card');
+  card.classList.add('on');
+  card.onclick=function(){
+    card.classList.remove('on');
+    card.onclick=null;
+    run();
+  };
+}
+
+/* ── Blackout ── */
+function doBlackout(text,dur,cb){
+  var bo=document.getElementById('blackout'),bt=document.getElementById('blackout-text');
+  bt.textContent=text||'';
+  bo.classList.add('on');
+  setTimeout(function(){bt.classList.add('on');},500);
+  setTimeout(function(){bt.classList.remove('on');},dur-600);
+  setTimeout(function(){bo.classList.remove('on');if(cb)cb();},dur);
+}
+
+/* ── Audio event ── */
+function handleAudioEv(ev){
+  if(ev.action==='play')       playAudio(ev.key,ev.loop===true||ev.loop==='true');
+  else if(ev.action==='stop')  stopAudio(ev.key);
+  else if(ev.action==='stopAll') stopAllAudio();
+}
+
+/* ══ Stages ══ */
+function launchStage(id){
+  if(id==='phone-ring')       stagePhoneRing();
+  else if(id==='switchboard') stageSwitchboard();
+  else if(id==='map')         stageMap();
+  else if(id==='stage2'||id==='photo') stagePhoto();
+  else if(id==='hint-gate')   stageHintGate();
+  else run();
+}
+
+/* ══ Inventory ══ */
+var _inv=[];
+function addInventory(id,name,icon,assetKey,caption){
+  if(!id)return;
+  var existing=_inv.find(function(i){return i.id===id;});
+  if(existing){
+    if(caption!=null)existing.caption=caption;
+    renderInventory();return;
+  }
+  _inv.push({id:id,name:name||id,icon:icon||'📦',asset:assetKey||id,caption:caption||''});
+  renderInventory();
+  /* 取得新道具時底部欄閃一下提示 */
+  var bar=document.getElementById('inv-bar');
+  if(bar&&bar.animate)bar.animate(
+    [{background:'#0a0704'},{background:'rgba(200,160,80,.35)'},{background:'#0a0704'}],
+    {duration:900});
+}
+function renderInventory(){
+  var list=document.getElementById('inv-list');
+  var h='';
+  _inv.forEach(function(it){
+    h+='<div class="inv-item" onclick="openInvItem(\''+it.id+'\')">';
+    h+='<div class="inv-item-icon" id="invi-'+it.id+'">'+(it.icon||'📦')+'</div>';
+    h+='<div class="inv-item-name">'+(it.name||it.id)+'</div>';
+    h+='</div>';
+    assetURL(it.asset||it.id,function(url){
+      if(!url)return;
+      var el=document.getElementById('invi-'+it.id);if(!el)return;
+      el.innerHTML='<img src="'+url+'" alt="">';
+    });
+  });
+  list.innerHTML=h||'<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:14px;width:100%;">（無道具）</div>';
+  var c=document.getElementById('inv-bar-count');
+  if(c)c.textContent=_inv.length;
+}
+function toggleInventory(){
+  var p=document.getElementById('inv-panel');
+  p.classList.toggle('on');
+  document.getElementById('inv-bar').classList.toggle('open',p.classList.contains('on'));
+}
+function openInvItem(id){
+  var it=_inv.find(function(i){return i.id===id;});if(!it)return;
+  document.getElementById('inv-panel').classList.remove('on');
+  var v=document.getElementById('inv-viewer');
+  var nm=document.getElementById('inv-viewer-name');
+  nm.innerHTML='';
+  var title=document.createElement('div');title.textContent=it.name||it.id;
+  title.style.cssText='color:var(--gold);font-size:14px;letter-spacing:.3em;';
+  nm.appendChild(title);
+  if(it.caption){
+    var cap=document.createElement('div');cap.textContent=it.caption;
+    cap.style.cssText='color:var(--gold);font-size:22px;letter-spacing:.3em;margin-top:10px;font-family:\'Shippori Mincho\',\'Noto Serif TC\',serif;';
+    nm.appendChild(cap);
+  }
+  assetURL(it.asset||it.id,function(url){
+    var img=document.getElementById('inv-viewer-img');
+    if(url){img.src=url;img.style.display='block';}
+    else{img.removeAttribute('src');img.style.display='none';}
+  });
+  v.classList.add('on');
+}
+function closeInvViewer(e){
+  if(e&&e.target&&e.target.id!=='inv-viewer'&&e.target.id!=='inv-viewer-close')return;
+  document.getElementById('inv-viewer').classList.remove('on');
+}
+
+/* ══ Hint-gate（第二章鎖住頁：黑屏 + 輸入框 + 皮箱 + 10 秒後燈泡） ══ */
+var _hintTimer=null,_inHintFlow=false;
+function stageHintGate(){
+  _inHintFlow=true;
+  hideDialog();
+  /* 黑色鎖住頁 */
+  document.getElementById('stage-hint-gate').classList.add('on');
+  /* 輸入框清空、無 placeholder */
+  var inp=document.getElementById('hg-input');
+  inp.value='';inp.removeAttribute('placeholder');
+  /* 重置燈泡與計時（延遲秒數後台可調） */
+  var bulb=document.getElementById('hint-bulb');bulb.classList.remove('on');
+  if(_hintTimer)clearTimeout(_hintTimer);
+  var delay=((G.stages&&G.stages.hintGate&&G.stages.hintGate.bulbDelay)||10)*1000;
+  _hintTimer=setTimeout(function(){bulb.classList.add('on');},delay);
+}
+function closeHintGate(){
+  document.getElementById('stage-hint-gate').classList.remove('on');
+  document.getElementById('hint-bulb').classList.remove('on');
+  if(_hintTimer){clearTimeout(_hintTimer);_hintTimer=null;}
+  _inHintFlow=false;
+}
+function openHintConfirm(){document.getElementById('hint-confirm').classList.add('on');}
+function hintNo(){document.getElementById('hint-confirm').classList.remove('on');}
+function hintYes(){
+  document.getElementById('hint-confirm').classList.remove('on');
+  stageHintShop();
+}
+
+/* ══ Hint shop 主頁（顯示後台編輯的提示字詞 → 按鈕進入拍照支付） ══ */
+function stageHintShop(){
+  var txt=(G.hintShop&&G.hintShop.hintText)||'';
+  var btn=(G.hintShop&&G.hintShop.payBtnText)||'以照片購買';
+  document.getElementById('hs-text').textContent=txt;
+  document.getElementById('hs-btn').textContent=btn;
+  document.getElementById('stage-hint-shop').classList.add('on');
+}
+function closeHintShop(){document.getElementById('stage-hint-shop').classList.remove('on');}
+function onHintShopProceed(){
+  closeHintShop();
+  stagePhoto();
+}
+
+/* phone-ring: loop until pickup */
+function stagePhoneRing(){
+  playRing();
+  var pr=(G.stages&&G.stages.phoneRing)||{};
+  document.getElementById('ring-prompt').textContent=pr.prompt||'電話響起……';
+  document.getElementById('ring-btn').textContent=pr.btn||'接起電話';
+  document.getElementById('stage-phone-ring').classList.add('on');
+}
+function onPickUp(){
+  stopRing();
+  stopAudio('rain');
+  document.getElementById('rain').classList.remove('on');
+  document.getElementById('stage-phone-ring').classList.remove('on');
+  setPhoneInterior(true);
+  runFx('phoneGlow');
+  run();
+}
+
+/* ══ Switchboard（跳線版：先選跳線 → 插發話孔 → 選另一跳線 → 插受話孔 → 開始通話） ══ */
+var sbState={callIdx:0,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
+
+function stageSwitchboard(){
+  if(!G.calls||!G.calls.length){run();return;}
+  var sb=(G.stages&&G.stages.switchboard)||{};
+  /* 標題 */
+  var hdr=document.querySelector('#stage-switchboard .sb-header span');
+  if(hdr)hdr.textContent='　'+(sb.title||'手動交換臺')+'　';
+  /* 發話/受話 標籤 */
+  var lbls=document.querySelectorAll('#call-banner .cb-label');
+  if(lbls[0])lbls[0].textContent=sb.fromLabel||'發話';
+  if(lbls[1])lbls[1].textContent=sb.toLabel||'受話';
+  /* 開始通話按鈕文字 */
+  document.getElementById('sb-talk-btn').textContent='開始通話';
+  document.getElementById('stage-switchboard').classList.add('on');
+  loadCall(0);
+}
+function loadCall(idx){
+  sbState={callIdx:idx,step:0,selectedCord:null,pluggedFrom:false,pluggedTo:false};
+  var call=G.calls[idx];if(!call){finishSwitchboard();return;}
+  var caller=(G.jacks||[]).find(function(j){return j.id===call.fromId;})
+            ||{name:call.fromName||'',num:call.fromNum||''};
+  var target=(G.jacks||[]).find(function(j){return j.id===call.toId;})
+            ||{name:call.toName||'',num:call.toNum||''};
+  document.getElementById('call-banner').className='call-banner';
+  document.getElementById('cb-from-num').textContent=(caller.num||'')+' '+(caller.name||'');
+  document.getElementById('cb-to-num').textContent=(target.num||'')+' '+(target.name||'');
+  document.getElementById('sb-progress').textContent='第 '+(idx+1)+' ／ '+G.calls.length+' 通';
+  buildJacks(call);buildCords();
+  var tb=document.getElementById('sb-talk-btn');tb.disabled=false;tb.classList.remove('active');
+  document.getElementById('sb-dialog-box').innerHTML='';
+  document.getElementById('sb-finish-btn').style.display='none';
+}
+function buildJacks(call){
+  var grid=document.getElementById('sb-jacks');grid.innerHTML='';
+  (G.jacks||[]).forEach(function(j){
+    var div=document.createElement('div');
+    div.className='sb-jack'+(j.id===call.fromId?' ringing':'');
+    div.id='sbj-'+j.id;
+    div.innerHTML='<div class="sb-jack-hole"></div><div class="sb-jack-name">'+(j.name||'')+'<br>'+(j.num||'')+'</div>';
+    div.onclick=(function(jid){return function(){jackClicked(jid);};})(j.id);
+    grid.appendChild(div);
+  });
+}
+function buildCords(){
+  var sb=(G.stages&&G.stages.switchboard)||{};
+  var pre=sb.cordPrefix!=null?sb.cordPrefix:'跳線 ';
+  document.getElementById('sb-cords').innerHTML=['A','B'].map(function(l){
+    return '<div class="sb-cord" id="cord-'+l+'" onclick="cordClicked(\''+l+'\')">'
+      +'<div class="sb-cord-plug"></div><div class="sb-cord-wire"></div>'
+      +'<div class="sb-cord-name">'+pre+l+'</div></div>';
+  }).join('');
+}
+function cordClicked(id){
+  if(sbState.step!==0&&sbState.step!==2){return;}
+  if(document.getElementById('cord-'+id).classList.contains('used'))return;
+  sbState.selectedCord=id;
+  document.querySelectorAll('.sb-cord').forEach(function(c){c.classList.remove('selected');});
+  document.getElementById('cord-'+id).classList.add('selected');
+  sbState.step=sbState.step===0?1:3;
+}
+function jackClicked(jid){
+  var call=G.calls[sbState.callIdx];
+  if(sbState.step===1){
+    if(jid===call.fromId){
+      sbState.pluggedFrom=true;
+      document.getElementById('sbj-'+jid).className='sb-jack plugged';
+      var c=document.getElementById('cord-'+sbState.selectedCord);c.classList.add('used');c.classList.remove('selected');
+      sbState.selectedCord=null;sbState.step=2;
+    }else flashWrong(jid);
+  }else if(sbState.step===3){
+    if(jid===call.toId){
+      sbState.pluggedTo=true;
+      document.getElementById('sbj-'+jid).className='sb-jack plugged';
+      var c=document.getElementById('cord-'+sbState.selectedCord);c.classList.add('used');c.classList.remove('selected');
+      sbState.step=4;
+      document.getElementById('call-banner').className='call-banner connected';
+    }else flashWrong(jid);
+  }
+}
+function flashWrong(jid){
+  var el=document.getElementById('sbj-'+jid);if(!el)return;
+  el.classList.add('wrong-flash');
+  setTimeout(function(){el.classList.remove('wrong-flash');},600);
+}
+function pressTalk(){
+  if(sbState.step!==4)return;
+  sbState.step=5;
+  var tb=document.getElementById('sb-talk-btn');tb.classList.add('active');tb.disabled=true;
+  var call=G.calls[sbState.callIdx],di=0;
+  var delay=((G.stages&&G.stages.switchboard&&G.stages.switchboard.dialogDelay)||2400);
+  function next(){
+    if(di>=(call.dialogs||[]).length){callDone();return;}
+    var d=call.dialogs[di++];
+    addSbMsg(d.who||'',d.text||'');
+    setTimeout(next,delay);
+  }
+  next();
+}
+function callDone(){
+  var call=G.calls[sbState.callIdx];
+  document.getElementById('sbj-'+call.fromId).className='sb-jack correct';
+  document.getElementById('sbj-'+call.toId).className='sb-jack correct';
+  document.getElementById('call-banner').className='call-banner done';
+  var btn=document.getElementById('sb-finish-btn');btn.style.display='block';
+  var sb=(G.stages&&G.stages.switchboard)||{};
+  btn.textContent=(sbState.callIdx===G.calls.length-1)?(sb.doneBtn||'結束作業'):(sb.nextBtn||'下一通');
+}
+function nextCall(){
+  var next=sbState.callIdx+1;
+  if(next>=G.calls.length){finishSwitchboard();}
+  else loadCall(next);
+}
+function finishSwitchboard(){
+  document.getElementById('stage-switchboard').classList.remove('on');
+  sbState.callIdx=0;
+  run();
+}
+function addSbMsg(who,text){
+  var box=document.getElementById('sb-dialog-box');if(!box)return;
+  var div=document.createElement('div');
+  div.innerHTML='<div class="sb-msg-who">'+(who||'')+'</div>'
+    +'<div class="sb-msg-text">'+String(text||'').replace(/\n/g,'<br>')+'</div>';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+
+/* map */
+function stageMap(){
+  var m=G.map||{};
+  document.getElementById('map-text').textContent=m.promptText||'';
+  document.getElementById('map-btn').textContent=m.buttonText||'繼續前往';
+  assetURL('map',function(url){
+    var img=document.getElementById('map-img');
+    if(url){img.src=url;img.style.display='block';}
+    else img.style.display='none';
+  });
+  document.getElementById('stage-map').classList.add('on');
+}
+function stageMapDone(){document.getElementById('stage-map').classList.remove('on');run();}
+
+/* stage 2 photo（純支付用，不顯示提示或答案） */
+function stagePhoto(){
+  document.getElementById('photo-hint').textContent='';
+  document.getElementById('photo-result').textContent='';
+  document.getElementById('stage-photo').classList.add('on');
+}
+function onPhotoUpload(input){
+  var file=input.files[0];if(!file)return;
+  document.getElementById('photo-result').textContent='比對中…';
+  loadAsset('stage2-ref',function(refBlob){
+    if(!refBlob){setTimeout(photoSuccess,800);return;}
+    compareImages(file,refBlob,function(score){
+      if(score>=(G.stage2&&G.stage2.threshold||70))photoSuccess();
+      else document.getElementById('photo-result').textContent='相似度不足（'+score+'%），請再試一次。';
+    });
+  });
+  input.value='';
+}
+function compareImages(a,b,cb){
+  function toData(blob,done){
+    var img=new Image(),c=document.createElement('canvas');c.width=c.height=64;
+    img.onload=function(){c.getContext('2d').drawImage(img,0,0,64,64);done(c.getContext('2d').getImageData(0,0,64,64).data);};
+    img.src=URL.createObjectURL(blob);
+  }
+  toData(a,function(da){toData(b,function(db){
+    var sum=0;
+    for(var i=0;i<da.length;i+=4){
+      var dr=da[i]-db[i],dg=da[i+1]-db[i+1],db2=da[i+2]-db[i+2];
+      sum+=Math.sqrt(dr*dr+dg*dg+db2*db2);
+    }
+    cb(Math.max(0,Math.round(100-sum/(da.length/4)/4.41)));
+  });});
+}
+function photoSuccess(){
+  /* 拍照頁只顯示「辨識完成」中性訊息，絕對不在此頁秀出答案 */
+  document.getElementById('photo-result').textContent='辨識完成';
+  setTimeout(function(){
+    document.getElementById('stage-photo').classList.remove('on');
+    if(_inHintFlow){
+      /* 進到答案揭露頁（分離於拍照頁） */
+      showHintReveal();
+    }else{
+      run();
+    }
+  },900);
+}
+
+/* 提示揭露頁：購得線索照片 → 入道具欄（絕不顯示密碼，只給照片讓玩家自己推） */
+function showHintReveal(){
+  var prefix=(G.stage2&&G.stage2.hintPrefix)||'您購得的線索';
+  document.getElementById('hr-prefix').textContent=prefix;
+  /* 載入 hint-photo asset */
+  var img=document.getElementById('hr-img');
+  assetURL('hint-photo',function(url){
+    if(url){img.src=url;img.style.display='block';}
+    else{img.removeAttribute('src');img.style.display='none';}
+  });
+  document.getElementById('hint-reveal').classList.add('on');
+  /* 「線索照片」放入道具欄（沒有 caption，不洩密碼） */
+  addInventory('hint-photo','線索照片','📷','hint-photo');
+}
+function closeHintReveal(){
+  document.getElementById('hint-reveal').classList.remove('on');
+  var inp=document.getElementById('hg-input');
+  if(inp){try{inp.focus();}catch(e){}}
+}
+
+/* 鎖住頁輸入：Enter 比對 hintAnswer */
+function hgKey(e){
+  if(e.key!=='Enter')return;
+  var inp=document.getElementById('hg-input');
+  var ans=((G.stage2&&G.stage2.hintAnswer)||'').trim();
+  var val=(inp.value||'').trim();
+  if(!ans){
+    /* 未設定答案 → 任意輸入皆可過關（避免卡死） */
+    if(val){unlockHintGate();return;}
+  }
+  if(val===ans){unlockHintGate();return;}
+  /* 答錯：shake 一下 */
+  inp.classList.remove('shake');void inp.offsetWidth;inp.classList.add('shake');
+}
+function unlockHintGate(){
+  closeHintGate();
+  run();
+}
+
+/* ══ BroadcastChannel ══ */
+try{
+  var _bc=new BroadcastChannel(BC_NAME);
+  _bc.onmessage=function(e){
+    var d=e.data;
+    if(d.type==='reload'){
+      loadGameData();applyAppear();buildScript();
+      applyImageAssets(function(){});
+      loadAllAudio(function(){});
+    }else if(d.type==='asset-update'){
+      var k=d.key;
+      if(k==='music'||k==='ring'||(G.customAudio&&G.customAudio.some(function(a){return a.key===k;}))){
+        loadAllAudio(function(){});
+      }else{
+        applyImageAssets(function(){});
+      }
+    }
+  };
+}catch(e){}
+
+/* ══ Init ══ */
+var _gameStarted=false;
+function _startGame(){
+  if(_gameStarted)return;
+  _gameStarted=true;
+  var ld=document.getElementById('loading');
+  if(ld){ld.style.opacity='0';setTimeout(function(){ld.style.display='none';},520);}
+  /* 掛載互動解鎖音訊（click + touchstart） */
+  function _unlock(){_unlockAudio();}
+  document.getElementById('game').addEventListener('click',    _unlock,{once:true,passive:true});
+  document.getElementById('game').addEventListener('touchstart',_unlock,{once:true,passive:true});
+  renderInventory();
+  buildScript();
+  run();
+}
+function init(){
+  loadGameData();
+  applyAppear();
+
+  /* 先嘗試從 assets/ 自動匯入資源（不阻塞畫面） */
+  bootstrapAssets(function(){
+    runFx('rainOn');
+    setSceneDirect('phonebooth');
+
+    /* 音訊在背景非同步載入，不阻塞遊戲啟動 */
+    loadAllAudio(function(){
+      if(_audioUnlocked&&_audioEls['music']&&_musicPending){
+        _musicPending=false;_doPlay('music',true);
+      }
+    });
+
+    /* 圖片載入完即啟動，最多等 2.5 秒 */
+    var _imgTimer=setTimeout(_startGame,2500);
+    applyImageAssets(function(){clearTimeout(_imgTimer);_startGame();});
+  });
+}
+init();
+</script>
+</body>
+</html>
